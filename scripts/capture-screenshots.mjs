@@ -1,6 +1,9 @@
-// Captures the raw README screenshots (docs/screenshots/raw/*.png, 1280x900) from the real
-// Svelte UI running against the demo backend in scripts/demo/mock-ipc.js. No Tauri, no
-// personal data. Then run `node scripts/frame-screenshots.mjs` (or `pnpm screenshots`).
+// Captures the raw README and website screenshots (docs/screenshots/raw/*.png, 1280x900)
+// from the real Svelte UI running against the demo backend in scripts/demo/mock-ipc.js. No
+// Tauri, no personal data. `pnpm screenshots` runs this and then frames the images.
+//
+// Scenes: overview (Projects by group), cards, palette, project (overview tab), run, logs,
+// git, ports, settings (local addresses).
 //
 //   node scripts/capture-screenshots.mjs
 
@@ -138,29 +141,69 @@ try {
   await cdp.send('Page.enable');
   await cdp.send('Runtime.enable');
   await cdp.send('Emulation.setDeviceMetricsOverride', { width: W, height: H, deviceScaleFactor: 1, mobile: false });
-  await cdp.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-color-scheme', value: 'dark' }] });
-  await cdp.send('Page.addScriptToEvaluateOnNewDocument', { source: mock });
+  // Reduced motion: no capture lands mid-animation.
+  await cdp.send('Emulation.setEmulatedMedia', {
+    features: [
+      { name: 'prefers-color-scheme', value: 'dark' },
+      { name: 'prefers-reduced-motion', value: 'reduce' },
+    ],
+  });
+  // Start on the Projects page split into the demo's groups.
+  const view = { layout: 'folders', grouping: 'groups', size: 'm', sort: 'recent' };
+  await cdp.send('Page.addScriptToEvaluateOnNewDocument', {
+    source: `try {
+      localStorage.setItem("devdock.view", ${JSON.stringify(JSON.stringify(view))});
+      localStorage.removeItem("devdock.collapsed");
+    } catch {}
+    ${mock}`,
+  });
   await cdp.send('Page.navigate', { url: appUrl });
   await waitFor(() => cdp.eval(`document.body.innerText.includes('storefront')`), 'app to render');
   await sleep(1500);
 
-  await cdp.click('storefront', 'main');
   await cdp.shot('overview');
+
+  // Every project as a card, no sections.
+  await cdp.click('Cards', 'main');
+  await cdp.eval(`import('/src/lib/viewPrefs.svelte.ts').then(({ view }) => view.set({ grouping: 'none' }))`);
+  await sleep(500);
+  await cdp.shot('cards');
+
+  await cdp.key('k', 'KeyK', 75, 2 /* ctrl */);
+  await sleep(500);
+  await cdp.send('Input.insertText', { text: 'api' });
+  await cdp.shot('palette');
+  await cdp.key('Escape', 'Escape', 27);
+  await sleep(300);
+
+  await cdp.click('storefront', 'main');
+  await cdp.shot('project');
 
   await cdp.click('Run', 'main');
   await sleep(800);
   await cdp.shot('run');
 
-  await cdp.key('k', 'KeyK', 75, 2 /* ctrl */);
-  await sleep(500);
-  await cdp.send('Input.insertText', { text: 'store' });
-  await cdp.shot('palette');
-  await cdp.key('Escape', 'Escape', 27);
+  await cdp.click('Logs', 'main');
+  await sleep(800);
+  await cdp.shot('logs');
+
+  // billing-api is behind its remote: open its Git tab and pull.
+  await cdp.eval(`import('/src/lib/app.svelte.ts').then(async ({ app }) => { app.tab = 'git'; await app.select('p2'); })`);
+  await sleep(1200);
+  await cdp.eval(`[...document.querySelectorAll('.sync button')].find((b) => b.textContent.includes('Pull'))?.click()`);
+  await sleep(800);
+  await cdp.shot('git');
 
   await cdp.click('Ports', 'nav.rail');
   await cdp.shot('ports');
 
   await cdp.click('Settings', 'nav.rail');
+  await cdp.eval(`(() => {
+    const title = [...document.querySelectorAll('.title')].find((t) => t.textContent.trim() === 'Local addresses');
+    title?.closest('section')?.scrollIntoView({ block: 'center' });
+    return true;
+  })()`);
+  await sleep(500);
   await cdp.shot('settings');
 
   cdp.ws.close();

@@ -1,460 +1,240 @@
-// Demo backend for README screenshots. Injected before the page loads (see
+// Demo backend for README and website screenshots. Injected before the page loads (see
 // scripts/capture-screenshots.mjs) so the real Svelte UI runs in a plain browser against
-// curated data: no personal paths, no real processes. Mirrors the DTOs in src/lib/types.ts.
+// curated data: no personal paths, no real processes. Every name, path and number is made
+// up. Mirrors the DTOs in src/lib/types.ts.
 (() => {
   const now = Date.now();
-  const min = 60_000;
-  const hour = 60 * min;
-  const day = 24 * hour;
-  const secs = (ms) => Math.floor(ms / 1000);
+  const min = 60e3;
+  const hr = 3600e3;
+  const day = 24 * hr;
+  const root = "D:\\dev";
 
-  const ROOT = "D:\\dev";
-  const p = (name) => `${ROOT}\\${name}`;
-
-  const git = (branch, extra = {}) => ({
+  const repo = (branch, changed = 0, ahead = 0, behind = 0) => ({
     state: "repo",
     refreshedAt: now,
-    data: {
-      oid: "a1b2c3d4e5f6",
-      branch,
-      upstream: `origin/${branch}`,
-      ahead: 0,
-      behind: 0,
-      staged: 0,
-      modified: 0,
-      untracked: 0,
-      conflicted: 0,
-      changedFiles: 0,
-      ...extra,
-    },
+    data: { oid: "a41c9e2", branch, upstream: `origin/${branch}`, ahead, behind, staged: 0, modified: changed, untracked: 0, conflicted: 0, changedFiles: changed },
+  });
+  const deps = (manager, state, lockfile) => ({ manager, state, command: `${manager} install`, lockfile });
+
+  const groups = [
+    { id: "g-client", name: "Client work", color: "blue" },
+    { id: "g-platform", name: "Platform", color: "violet" },
+    { id: "g-side", name: "Side projects", color: "green" },
+  ];
+
+  const P = (id, name, kind, group, extra = {}) => ({
+    id, name, path: `${root}\\${name}`, kind, isGit: true, favorite: false,
+    lastOpened: now - Number(id.slice(1)) * 5 * hr, addedAt: now - 40 * day, missing: false, isNew: false,
+    git: repo("main"), launches: [], activity: [], ports: {}, commands: [], runPrefs: {},
+    domain: null, hidePort: null, host: `${name}.localhost`, deps: deps("pnpm", "installed", "pnpm-lock.yaml"), group,
+    ...extra,
   });
 
   const projects = [
-    {
-      id: "a000000000000001",
-      name: "storefront",
-      path: p("storefront"),
-      kind: "nextJs",
-      isGit: true,
-      favorite: true,
-      lastOpened: now - 12 * min,
-      addedAt: now - 40 * day,
-      missing: false,
-      isNew: false,
-      git: git("main", { ahead: 2, modified: 3, untracked: 1, changedFiles: 4 }),
-      launches: [{ agent: "claude", terminal: "windowsTerminal", subdir: null, at: now - 25 * min }],
+    P("p1", "storefront", "nextJs", "g-client", {
+      favorite: true, lastOpened: now - 12 * min, git: repo("main", 3, 1),
       activity: [
-        { kind: "started", command: "dev", at: now - 14 * min },
-        { kind: "openedInEditor", editor: "VS Code", at: now - 12 * min },
+        { kind: "started", command: "pnpm run dev", at: now - 9 * min },
         { kind: "agentLaunched", agent: "claude", terminal: "windowsTerminal", at: now - 25 * min },
-        { kind: "ended", command: "build", outcome: "exited", code: 0, at: now - 2 * hour },
+        { kind: "openedInEditor", editor: "code", at: now - 31 * min },
+        { kind: "ended", command: "pnpm run build", outcome: "exited", code: 0, at: now - 2 * hr },
       ],
-      ports: { dev: 3000 },
-    },
-    {
-      id: "a000000000000002",
-      name: "api",
-      path: p("api"),
-      kind: "node",
-      isGit: true,
-      favorite: true,
-      lastOpened: now - 40 * min,
-      addedAt: now - 40 * day,
-      missing: false,
-      isNew: false,
-      git: git("feat/auth-tokens", { ahead: 1, staged: 2, changedFiles: 2 }),
-      launches: [],
-      activity: [{ kind: "started", command: "dev", at: now - 14 * min }],
-      ports: { dev: 4000 },
-    },
-    {
-      id: "a000000000000003",
-      name: "billing-service",
-      path: p("billing-service"),
-      kind: "rust",
-      isGit: true,
-      favorite: false,
-      lastOpened: now - 3 * hour,
-      addedAt: now - 30 * day,
-      missing: false,
-      isNew: false,
-      git: git("main"),
-      launches: [],
-      activity: [],
-      ports: {},
-    },
-    {
-      id: "a000000000000004",
-      name: "docs",
-      path: p("docs"),
-      kind: "nextJs",
-      isGit: true,
-      favorite: false,
-      lastOpened: now - 1 * day,
-      addedAt: now - 30 * day,
-      missing: false,
-      isNew: false,
-      git: git("main", { behind: 3 }),
-      launches: [],
-      activity: [],
-      ports: {},
-    },
-    {
-      id: "a000000000000005",
-      name: "infra",
-      path: p("infra"),
-      kind: "compose",
-      isGit: true,
-      favorite: false,
-      lastOpened: now - 2 * day,
-      addedAt: now - 30 * day,
-      missing: false,
-      isNew: false,
-      git: git("main", { modified: 1, changedFiles: 1 }),
-      launches: [],
-      activity: [],
-      ports: {},
-    },
-    {
-      id: "a000000000000006",
-      name: "legacy-portal",
-      path: p("legacy-portal"),
-      kind: "php",
-      isGit: true,
-      favorite: false,
-      lastOpened: now - 9 * day,
-      addedAt: now - 30 * day,
-      missing: false,
-      isNew: false,
-      git: git("release/2.4"),
-      launches: [],
-      activity: [],
-      ports: {},
-    },
-    {
-      id: "a000000000000007",
-      name: "design-notes",
-      path: p("design-notes"),
-      kind: "unknown",
-      isGit: false,
-      favorite: false,
-      lastOpened: null,
-      addedAt: now - 2 * day,
-      missing: false,
-      isNew: false,
-      git: { state: "noRepo", refreshedAt: now },
-      launches: [],
-      activity: [],
-      ports: {},
-    },
+      launches: [{ agent: "claude", terminal: "windowsTerminal", subdir: null, at: now - 25 * min }],
+    }),
+    P("p2", "billing-api", "node", "g-platform", { git: repo("feat/invoices", 4, 1, 3), lastOpened: now - 40 * min }),
+    P("p3", "admin-dashboard", "nextJs", "g-client", { deps: deps("pnpm", "outdated", "pnpm-lock.yaml"), git: repo("develop", 0, 0, 2) }),
+    P("p4", "marketing-site", "node", "g-client", { git: repo("main", 1) }),
+    P("p5", "auth-service", "rust", "g-platform", { deps: null, git: repo("main") }),
+    P("p6", "search-indexer", "rust", "g-platform", { deps: null, git: repo("perf/batching", 2, 3) }),
+    P("p7", "infra", "compose", "g-platform", { deps: null, git: repo("main") }),
+    P("p8", "recipe-app", "node", "g-side", { deps: deps("npm", "missing", "package-lock.json"), git: repo("main") }),
+    P("p9", "portfolio", "nextJs", "g-side", { favorite: true, git: repo("main") }),
+    P("p10", "cli-tools", "rust", "g-side", { deps: null, git: repo("main", 2) }),
+    P("p11", "legacy-portal", "php", null, { deps: null, git: repo("release/2.4") }),
   ];
-  const byId = Object.fromEntries(projects.map((x) => [x.id, x]));
-  const [storefront, api] = projects;
 
-  const run = (proj, commandId, commandLine, port, startedAgo, pid) => ({
-    projectId: proj.id,
-    commandId,
-    projectName: proj.name,
-    commandName: commandId,
-    commandLine,
-    cwd: proj.path,
-    state: "running",
-    pid,
-    processCount: 4,
-    startedAt: now - startedAgo,
-    endedAt: null,
-    portHint: port,
-    lastError: null,
+  const run = (projectId, projectName, commandId, commandLine, port, startedMinAgo) => ({
+    projectId, commandId, projectName, commandName: commandId.replace(/^\w+:/, ""), commandLine,
+    cwd: `${root}\\${projectName}`, state: "running", pid: 18000 + port, processCount: 4,
+    startedAt: now - startedMinAgo * min, endedAt: null, portHint: port, lastError: null,
   });
   const runs = [
-    run(storefront, "dev", "pnpm run dev", 3000, 14 * min, 18244),
-    run(api, "dev", "pnpm run dev", 4000, 14 * min, 18310),
+    run("p1", "storefront", "script:dev", "pnpm run dev", 3000, 9),
+    run("p2", "billing-api", "script:dev", "pnpm run dev -- --port 8080", 8080, 34),
   ];
 
-  const cmd = (proj, id, body, extra = {}) => ({
-    id,
-    name: id,
-    commandLine: `pnpm run ${id}`,
-    cwd: proj.path,
-    source: { kind: "script", body },
-    run: runs.find((r) => r.projectId === proj.id && r.commandId === id) ?? null,
-    knownPort: null,
-    ...extra,
+  const logs = [
+    "> storefront@2.3.0 dev D:\\dev\\storefront",
+    "> next dev",
+    "",
+    "   ▲ Next.js 15.1.0",
+    "   - Local:        http://localhost:3000",
+    "   - Environments: .env.local",
+    "",
+    " ✓ Starting...",
+    " ✓ Ready in 1.8s",
+    " ○ Compiling / ...",
+    " ✓ Compiled / in 2.1s (812 modules)",
+    " GET / 200 in 2304ms",
+    " ○ Compiling /products/[slug] ...",
+    " ✓ Compiled /products/[slug] in 640ms (846 modules)",
+    " GET /products/walnut-desk 200 in 712ms",
+    " GET /api/cart 200 in 38ms",
+    " ⚠ Image with src \"/hero.jpg\" has \"fill\" but is missing \"sizes\" prop.",
+    " GET /products/oak-shelf 200 in 96ms",
+    " GET /api/cart 200 in 21ms",
+    " ✓ Compiled /checkout in 410ms (903 modules)",
+    " GET /checkout 200 in 455ms",
+  ].map((text, seq) => ({ seq, ts: now - (21 - seq) * 20e3, stream: text.startsWith(" ⚠") ? "err" : "out", text }));
+
+  const command = (id, name, commandLine, body, extra = {}) => ({
+    id, name, commandLine, cwd: `${root}\\storefront`, source: body ? { kind: "script", body } : { kind: "detected" },
+    run: null, knownPort: null, portMode: "default", port: null, portArgs: null, detectedArgs: null, ...extra,
   });
-  const commands = {
-    [storefront.id]: [
-      cmd(storefront, "dev", "next dev --turbopack", { knownPort: 3000 }),
-      cmd(storefront, "build", "next build", {
-        run: {
-          ...run(storefront, "build", "pnpm run build", null, 2 * hour, 0),
-          state: "exited",
-          code: 0,
-          endedAt: now - 2 * hour + 48_000,
-          processCount: null,
-        },
-      }),
-      cmd(storefront, "start", "next start"),
-      cmd(storefront, "lint", "next lint"),
-      cmd(storefront, "test", "vitest run"),
-      {
-        id: "storybook",
-        name: "storybook",
-        commandLine: "pnpm dlx storybook dev -p 6006",
-        cwd: storefront.path,
-        source: { kind: "custom" },
-        run: null,
-        knownPort: 6006,
-      },
-    ],
-    [api.id]: [
-      cmd(api, "dev", "tsx watch src/server.ts", { knownPort: 4000 }),
-      cmd(api, "build", "tsc -p ."),
-      cmd(api, "test", "vitest run"),
-    ],
+
+  const settings = {
+    editor: "code", terminal: "windowsTerminal", agent: "claude", checkPorts: true, autoPort: true,
+    proxy: true, proxyPort: 80, https: true, httpsPort: 443,
   };
 
-  const t0 = now - 14 * min;
-  const logText = [
-    ["system", "> pnpm run dev  (D:\\dev\\storefront)"],
-    ["out", ""],
-    ["out", "> storefront@0.9.0 dev D:\\dev\\storefront"],
-    ["out", "> next dev --turbopack"],
-    ["out", ""],
-    ["out", "   \u25b2 Next.js 15.4.2 (Turbopack)"],
-    ["out", "   - Local:        http://localhost:3000"],
-    ["out", "   - Network:      http://192.168.1.24:3000"],
-    ["out", "   - Environments: .env.local"],
-    ["out", ""],
-    ["out", " \u2713 Starting..."],
-    ["out", " \u2713 Ready in 1184ms"],
-    ["out", " \u25cb Compiling / ..."],
-    ["out", " \u2713 Compiled / in 2.3s"],
-    ["out", " GET / 200 in 2514ms"],
-    ["out", " \u25cb Compiling /products/[slug] ..."],
-    ["out", " \u2713 Compiled /products/[slug] in 612ms"],
-    ["out", " GET /products/linen-shirt 200 in 702ms"],
-    ["err", " \u26a0 Image with src \"/hero.jpg\" has \"fill\" but is missing \"sizes\" prop."],
-    ["out", " GET /cart 200 in 88ms"],
-    ["out", " GET /api/cart 200 in 41ms"],
-    ["out", " \u2713 Compiled /checkout in 431ms"],
-    ["out", " GET /checkout 200 in 486ms"],
-  ];
-  const logs = logText.map(([stream, text], i) => ({
-    seq: i + 1,
-    ts: t0 + i * 1700 + (i > 12 ? 60_000 * (i - 12) : 0),
-    stream,
-    text,
-  }));
-
-  const proc = (pid, name, exe, cmdLine, cwd, startAgo, parent = 4) => ({
-    pid,
-    parent,
-    name,
-    exe,
-    cmd: cmdLine,
-    cwd,
-    startTime: secs(now - startAgo),
-    session: 1,
-  });
-  const sys = (port, pid, name, addresses = ["0.0.0.0", "::"]) => ({
-    port,
-    addresses,
-    pid,
-    owner: "system",
-    process: proc(pid, name, `C:\\Windows\\System32\\${name}`, null, null, 3 * day),
-    children: [],
-    project: null,
-    run: null,
-  });
-  const ext = (port, pid, name, exe, cmdLine, project = null) => ({
-    port,
-    addresses: ["127.0.0.1"],
-    pid,
-    owner: "external",
-    process: proc(pid, name, exe, cmdLine, null, 5 * hour, 2200),
-    children: [],
-    project,
-    run: null,
-  });
-  const own = (port, r) => ({
-    port,
-    addresses: ["0.0.0.0", "::"],
-    pid: r.pid + 12,
-    owner: "devDock",
-    process: proc(r.pid + 12, "node.exe", "C:\\Program Files\\nodejs\\node.exe", r.commandLine, r.cwd, 14 * min, r.pid),
-    children: [],
-    project: { id: r.projectId, name: r.projectName },
-    run: { projectId: r.projectId, commandId: r.commandId },
-  });
+  const proc = (pid, name, cmd, cwd) => ({ pid, parent: 4200, name, exe: null, cmd, cwd, startTime: Math.floor((now - 3 * hr) / 1000), session: 1 });
   const portRows = [
-    sys(135, 1180, "svchost.exe"),
-    sys(445, 4, "System"),
-    own(3000, runs[0]),
-    own(4000, runs[1]),
-    ext(5432, 6120, "com.docker.backend.exe", "C:\\Program Files\\Docker\\Docker\\resources\\com.docker.backend.exe", "com.docker.backend.exe run", { id: "a000000000000005", name: "infra" }),
-    sys(5040, 7316, "svchost.exe"),
-    ext(5173, 22408, "node.exe", "C:\\Program Files\\nodejs\\node.exe", "node vite --port 5173"),
-    ext(6379, 6120, "com.docker.backend.exe", "C:\\Program Files\\Docker\\Docker\\resources\\com.docker.backend.exe", "com.docker.backend.exe run", { id: "a000000000000005", name: "infra" }),
-    sys(7680, 6344, "svchost.exe"),
-    ext(8080, 14872, "php.exe", "C:\\tools\\php\\php.exe", "php -S localhost:8080 -t public", { id: "a000000000000006", name: "legacy-portal" }),
-    ext(9229, 22408, "node.exe", "C:\\Program Files\\nodejs\\node.exe", "node --inspect vite --port 5173"),
-    sys(49664, 968, "lsass.exe"),
+    { port: 3000, addresses: ["::1"], pid: 21000, owner: "devDock", process: proc(21000, "node.exe", "node next dev", `${root}\\storefront`), children: [{ pid: 21004, name: "node.exe" }], project: { id: "p1", name: "storefront" }, run: { projectId: "p1", commandId: "script:dev" } },
+    { port: 5432, addresses: ["0.0.0.0"], pid: 5120, owner: "external", process: proc(5120, "postgres.exe", "postgres -D C:\\pgdata", "C:\\Program Files\\PostgreSQL\\16\\bin"), children: [], project: null, run: null },
+    { port: 5173, addresses: ["127.0.0.1"], pid: 17644, owner: "external", process: proc(17644, "node.exe", "node vite", `${root}\\marketing-site`), children: [], project: { id: "p4", name: "marketing-site" }, run: null },
+    { port: 6379, addresses: ["127.0.0.1"], pid: 6020, owner: "external", process: proc(6020, "redis-server.exe", "redis-server", null), children: [], project: null, run: null },
+    { port: 8080, addresses: ["0.0.0.0"], pid: 26080, owner: "devDock", process: proc(26080, "node.exe", "node dist/server.js", `${root}\\billing-api`), children: [], project: { id: "p2", name: "billing-api" }, run: { projectId: "p2", commandId: "script:dev" } },
+    { port: 135, addresses: ["0.0.0.0"], pid: 1104, owner: "system", process: proc(1104, "svchost.exe", null, null), children: [], project: null, run: null },
+    { port: 445, addresses: ["0.0.0.0"], pid: 4, owner: "system", process: proc(4, "System", null, null), children: [], project: null, run: null },
   ];
 
-  const tools = {
-    tools: [
-      ["explorer", "Explorer", "C:\\Windows\\explorer.exe"],
-      ["git", "Git", "C:\\Program Files\\Git\\cmd\\git.exe"],
-      ["code", "VS Code", "C:\\Program Files\\Microsoft VS Code\\bin\\code.cmd"],
-      ["cursor", "Cursor", "C:\\Program Files\\Cursor\\resources\\app\\bin\\cursor.cmd"],
-      ["code-insiders", "VS Code Insiders", null],
-      ["windsurf", "Windsurf", null],
-      ["zed", "Zed", "C:\\Program Files\\Zed\\bin\\zed.exe"],
-      ["wt", "Windows Terminal", "C:\\Program Files\\WindowsApps\\Microsoft.WindowsTerminal\\wt.exe"],
-      ["pwsh", "PowerShell 7", "C:\\Program Files\\PowerShell\\7\\pwsh.exe"],
-      ["powershell", "Windows PowerShell", "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"],
-      ["cmd", "Command Prompt", "C:\\Windows\\System32\\cmd.exe"],
-      ["docker", "Docker", "C:\\Program Files\\Docker\\Docker\\resources\\bin\\docker.exe"],
-      ["claude", "Claude Code", "C:\\Program Files\\nodejs\\claude.cmd"],
-      ["codex", "Codex", "C:\\Program Files\\nodejs\\codex.cmd"],
-      ["opencode", "OpenCode", "C:\\Program Files\\nodejs\\opencode.cmd"],
-    ].map(([id, name, path]) => ({ id, name, path })),
-    gitBash: "C:\\Program Files\\Git\\bin\\bash.exe",
-    checkedAt: now - 3 * min,
-  };
-  const toolPath = (id) => tools.tools.find((t) => t.id === id)?.path ?? null;
-  const settings = { editor: "code", terminal: "windowsTerminal", agent: "claude", checkPorts: true };
-  const agentsOverview = {
-    agents: [
-      { id: "claude", name: "Claude Code", command: "claude", path: toolPath("claude"), installHint: "npm install -g @anthropic-ai/claude-code" },
-      { id: "codex", name: "Codex", command: "codex", path: toolPath("codex"), installHint: "npm install -g @openai/codex" },
-      { id: "opencode", name: "OpenCode", command: "opencode", path: toolPath("opencode"), installHint: "npm install -g opencode-ai" },
+  const branches = {
+    local: [
+      { name: "feat/invoices", current: true, upstream: "origin/feat/invoices", ahead: 1, behind: 3, gone: false, updated: "2 hours ago" },
+      { name: "main", current: false, upstream: "origin/main", ahead: 0, behind: 0, gone: false, updated: "yesterday" },
+      { name: "fix/rounding", current: false, upstream: "origin/fix/rounding", ahead: 0, behind: 0, gone: false, updated: "3 days ago" },
+      { name: "spike/webhooks", current: false, upstream: null, ahead: 0, behind: 0, gone: false, updated: "2 weeks ago" },
     ],
-    terminals: [
-      { kind: "windowsTerminal", name: "Windows Terminal", available: true },
-      { kind: "powerShell", name: "PowerShell", available: true },
-      { kind: "gitBash", name: "Git Bash", available: true },
-      { kind: "cmd", name: "Command Prompt", available: true },
-    ],
-    editors: [
-      ["code", "VS Code"],
-      ["cursor", "Cursor"],
-      ["code-insiders", "VS Code Insiders"],
-      ["windsurf", "Windsurf"],
-      ["zed", "Zed"],
-    ].map(([command, name]) => ({ command, name, path: toolPath(command) })),
-    settings,
-    shortcuts: [
-      { slot: 1, projectId: storefront.id, agent: "claude", terminal: "windowsTerminal", subdir: null, projectName: "storefront" },
-      { slot: 2, projectId: api.id, agent: "codex", terminal: "windowsTerminal", subdir: null, projectName: "api" },
-    ],
-    tools,
+    remoteOnly: ["origin/feat/refunds", "origin/chore/deps"],
   };
 
-  const workspaces = [
-    {
-      id: "w1",
-      name: "Storefront stack",
-      services: [],
-      restart: { enabled: true, max: 3, windowSecs: 300 },
-      afterStart: { projectId: storefront.id, openEditor: true, agent: null, terminal: "windowsTerminal" },
-      live: null,
-      extra: {},
-    },
+  const hit = (group, label, hint, action, positions = []) => ({ group, label, hint, action, positions });
+  // What typing "api" finds (positions = the matched letters).
+  const paletteGroups = [
+    { group: "projects", title: "Projects", hits: [
+      hit("projects", "billing-api", "D:\\dev\\billing-api", { kind: "openProject", projectId: "p2" }, [8, 9, 10]),
+    ] },
+    { group: "commands", title: "Commands", hits: [
+      hit("commands", "run dev in billing-api", "pnpm run dev", { kind: "runCommand", projectId: "p2", commandId: "script:dev" }, [19, 20, 21]),
+      hit("commands", "run test in billing-api", "pnpm run test", { kind: "runCommand", projectId: "p2", commandId: "script:test" }, [20, 21, 22]),
+    ] },
+    { group: "agents", title: "Agents", hits: [
+      hit("agents", "Claude Code in billing-api", "Windows Terminal", { kind: "launchAgent", projectId: "p2", agent: "claude" }, []),
+    ] },
+    { group: "ports", title: "Ports", hits: [
+      hit("ports", "8080 · node.exe", "billing-api · DevDock", { kind: "showPort", port: 8080, pid: 26080 }, []),
+    ] },
   ];
 
-  function library(query) {
-    const sorted = [...projects].sort((a, b) => (b.lastOpened ?? 0) - (a.lastOpened ?? 0));
+  const lib = (q) => {
+    let list = projects.slice();
+    if (q.group === "-") list = list.filter((p) => !p.group);
+    else if (q.group) list = list.filter((p) => p.group === q.group);
+    if (q.search) list = list.filter((p) => p.name.includes(q.search.toLowerCase()));
+    if (q.sort === "name") list.sort((a, b) => a.name.localeCompare(b.name));
+    if (q.sort === "recent") list.sort((a, b) => b.lastOpened - a.lastOpened);
+    const g = {};
+    for (const p of projects) if (p.group) g[p.group] = (g[p.group] || 0) + 1;
     const kinds = {};
-    for (const x of projects) kinds[x.kind] = (kinds[x.kind] ?? 0) + 1;
-    let list = sorted;
-    if (query?.library === "favorites") list = list.filter((x) => x.favorite);
-    if (query?.kind) list = list.filter((x) => x.kind === query.kind);
-    if (query?.search) list = list.filter((x) => x.name.includes(query.search.toLowerCase()));
-    return {
+    for (const p of list) kinds[p.kind] = (kinds[p.kind] || 0) + 1;
+    return JSON.parse(JSON.stringify({
       projects: list,
-      counts: { all: projects.length, favorites: 2, recent: 6, missing: 0, new: 0, kinds },
-      scanRoots: [{ path: ROOT, depth: 2 }],
-      scanning: false,
-      savedTo: "%APPDATA%\\DevDock\\devdock.json",
-    };
-  }
+      counts: { all: projects.length, favorites: 2, recent: projects.length, missing: 0, new: 0, kinds, groups: g, ungrouped: 1 },
+      groups, scanRoots: [{ path: root, depth: 2 }], scanning: false, savedTo: "%APPDATA%\\DevDock\\devdock.json",
+    }));
+  };
 
-  // Greedy subsequence match, like the real palette.
-  function match(label, q) {
-    const positions = [];
-    const l = label.toLowerCase();
-    const at = l.indexOf(q.toLowerCase());
-    if (q && at >= 0) return [...q].map((_, i) => at + i);
-    let from = 0;
-    for (const ch of q.toLowerCase()) {
-      if (ch === " ") continue;
-      const i = l.indexOf(ch, from);
-      if (i < 0) return null;
-      positions.push(i);
-      from = i + 1;
-    }
-    return positions;
-  }
-  function palette(query) {
-    const groups = [
-      ["projects", "Projects", projects.map((x) => ({ label: x.name, hint: x.kind === "unknown" ? "FOLDER" : x.kind === "nextJs" ? "NEXT.JS" : x.kind.toUpperCase(), action: { kind: "openProject", projectId: x.id } }))],
-      ["commands", "Commands", Object.entries(commands).flatMap(([pid, cs]) => cs.map((c) => ({ label: `Run ${c.name} in ${byId[pid].name}`, hint: c.commandLine, action: { kind: "runCommand", projectId: pid, commandId: c.id } })))],
-      ["agents", "Agents", projects.slice(0, 3).flatMap((x) => agentsOverview.agents.map((a) => ({ label: `${a.name} in ${x.name}`, hint: a.command, action: { kind: "launchAgent", projectId: x.id, agent: a.id } })))],
-      ["workspaces", "Workspaces", workspaces.map((w) => ({ label: `Start ${w.name}`, hint: "workspace", action: { kind: "startWorkspace", workspaceId: w.id } }))],
-      ["ports", "Ports", portRows.filter((r) => r.owner !== "system").map((r) => ({ label: `Port ${r.port} \u00b7 ${r.process.name}`, hint: `PID ${r.pid}`, action: { kind: "showPort", port: r.port, pid: r.pid } }))],
-    ];
-    return groups
-      .map(([group, title, hits]) => ({
-        group,
-        title,
-        hits: hits
-          .map((h) => {
-            const positions = query ? match(h.label, query) : [];
-            return positions ? { ...h, group, positions } : null;
-          })
-          .filter(Boolean)
-          .slice(0, 3),
-      }))
-      .filter((g) => g.hits.length);
-  }
-
-  const repoInfo = (proj) => ({
-    root: proj.path,
-    isWorktree: false,
-    inSubfolder: false,
-    status: proj.git.data,
-    lastCommit: { hash: "4f9c2e1", subject: "feat(cart): persist cart across sessions", author: "Sam Rivera", relative: "2 hours ago" },
-    remotes: [{ name: "origin", url: `https://github.com/acme/${proj.name}.git` }],
-    worktrees: [{ path: proj.path, branch: proj.git.data.branch, detached: false, bare: false, isCurrent: true }],
-  });
+  // Sends an app event (e.g. "git:updated") to whoever listens, like Tauri does.
+  const emit = (event, payload) => {
+    for (const id of listeners.get(event) || []) callbacks.get(id)?.({ event, id, payload });
+  };
 
   const handlers = {
-    startup_notice: () => null,
-    library: ({ query }) => library(query),
     refresh_projects: () => null,
-    tools_scan: () => tools,
-    tools_recheck: () => tools,
-    agents_overview: () => agentsOverview,
-    project_folders: () => ["src", "src\\app", "public", "tests"],
-    git_refresh: () => null,
-    git_details: ({ id }) => (byId[id]?.git?.state === "repo" ? { state: "repo", data: repoInfo(byId[id]), refreshedAt: now } : { state: "noRepo", refreshedAt: now }),
-    mark_seen: () => false,
-    run_commands: ({ projectId }) => ({ commands: commands[projectId] ?? [], warning: null }),
+    git_refresh: (a) => {
+      const ids = a.ids && a.ids.length ? a.ids : projects.map((p) => p.id);
+      setTimeout(() => ids.forEach((id) => emit("git:updated", { id, details: !!a.details })), 150);
+      return null;
+    },
+    startup_notice: () => null,
+    tools_scan: () => ({ tools: [{ id: "explorer", name: "Explorer", path: "C:\\Windows\\explorer.exe" }, { id: "code", name: "VS Code", path: "C:\\Users\\you\\AppData\\Local\\Programs\\Microsoft VS Code\\bin\\code.cmd" }, { id: "git", name: "Git", path: "C:\\Program Files\\Git\\cmd\\git.exe" }], gitBash: "C:\\Program Files\\Git\\git-bash.exe", checkedAt: now }),
+    library: (a) => lib(a.query || {}),
     runs_list: () => runs,
-    run_logs: ({ since }) => ({ lines: since ? logs.filter((l) => l.seq >= since) : logs, nextSeq: logs.length + 1, truncated: false }),
+    workspaces_list: () => [],
+    git_details: (a) => {
+      const p = projects.find((x) => x.id === a.id);
+      if (!p) return null;
+      return { state: "repo", refreshedAt: now, data: {
+        root: p.path, isWorktree: false, inSubfolder: false, status: p.git.data,
+        lastCommit: { hash: "a41c9e2", subject: "Add invoice PDF export", author: "you", relative: "2 hours ago" },
+        remotes: [{ name: "origin", url: `git@github.com:example/${p.name}.git` }],
+        worktrees: [{ path: p.path, branch: p.git.data.branch, detached: false, bare: false, isCurrent: true }],
+      } };
+    },
+    git_branches: () => branches,
+    git_op: () => ({ ok: true, summary: "Pulled 3 commits", output: "Updating 7d1e0b4..a41c9e2\nFast-forward\n src/invoices/pdf.ts | 48 +++++++++++++\n 3 files changed, 61 insertions(+), 4 deletions(-)" }),
+    run_commands: (a) => {
+      if (a.projectId !== "p1") return { commands: [], warning: null, host: "billing-api.localhost", hostsMissing: false, proxy: { http: 80, https: 443 }, portless: true, proxyError: null, proxyNote: null };
+      return {
+        commands: [
+          command("script:dev", "dev", "pnpm run dev", "next dev", { run: runs[0], knownPort: 3000, portMode: "auto", port: 3000, detectedArgs: "--port {port}" }),
+          command("script:build", "build", "pnpm run build", "next build"),
+          command("script:start", "start", "pnpm run start", "next start"),
+          command("script:lint", "lint", "pnpm run lint", "next lint"),
+          command("script:test", "test", "pnpm run test", "vitest"),
+          command("deps:install", "install packages", "pnpm install", null),
+        ],
+        warning: null, host: "storefront.localhost", hostsMissing: false, proxy: { http: 80, https: 443 },
+        portless: true, proxyError: null, proxyNote: null,
+      };
+    },
+    run_logs: (a) => ({ lines: logs.filter((l) => l.seq >= a.since), nextSeq: logs.length, truncated: false }),
     ports_snapshot: () => ({ rows: portRows, refreshedAt: now }),
-    workspaces_list: () => workspaces,
-    workspace_logs: () => ({ lines: [], cursors: {} }),
-    palette_open: () => palette(""),
-    palette_search: ({ query }) => palette(query),
+    agents_overview: () => ({
+      agents: [
+        { id: "claude", name: "Claude Code", command: "claude", path: "C:\\Users\\you\\AppData\\Roaming\\npm\\claude.cmd", installHint: "npm install -g @anthropic-ai/claude-code" },
+        { id: "codex", name: "Codex", command: "codex", path: "C:\\Users\\you\\AppData\\Roaming\\npm\\codex.cmd", installHint: "npm install -g @openai/codex" },
+        { id: "opencode", name: "OpenCode", command: "opencode", path: null, installHint: "npm install -g opencode-ai" },
+      ],
+      terminals: [
+        { kind: "windowsTerminal", name: "Windows Terminal", available: true },
+        { kind: "powerShell", name: "PowerShell", available: true },
+        { kind: "gitBash", name: "Git Bash", available: true },
+        { kind: "cmd", name: "Command Prompt", available: true },
+      ],
+      editors: [
+        { command: "code", name: "VS Code", path: "C:\\Users\\you\\AppData\\Local\\Programs\\Microsoft VS Code\\bin\\code.cmd" },
+        { command: "cursor", name: "Cursor", path: null },
+        { command: "code-insiders", name: "VS Code Insiders", path: null },
+        { command: "windsurf", name: "Windsurf", path: null },
+        { command: "zed", name: "Zed", path: null },
+      ],
+      settings, shortcuts: [{ slot: 1, projectId: "p1", agent: "claude", terminal: "windowsTerminal", subdir: null, projectName: "storefront" }],
+      tools: handlers.tools_scan(),
+    }),
+    proxy_status: () => ({ http: 80, https: 443, httpError: null, httpsError: null, httpNote: null, httpsNote: null, ca: { path: "%APPDATA%\\DevDock\\devdock-ca.pem", trusted: true }, hosts: { path: "C:\\Windows\\System32\\drivers\\etc\\hosts", needed: [], missing: [], stale: false, error: null } }),
+    palette_open: () => paletteGroups,
+    palette_search: () => paletteGroups,
+    project_folders: () => ["apps/web", "packages/ui"],
     project_worktrees: () => [],
-    "plugin:app|version": () => "0.3.0",
+    tools_recheck: () => handlers.tools_scan(),
+    mark_seen: () => false,
+    workspace_logs: () => ({ lines: [], cursors: {} }),
+    "plugin:app|version": () => "1.1.0",
     "plugin:app|name": () => "DevDock",
     "plugin:updater|check": () => null,
   };
 
-  // --- IPC plumbing (same shape as @tauri-apps/api/mocks) ---
   const callbacks = new Map();
   const listeners = new Map();
   let nextId = 1;

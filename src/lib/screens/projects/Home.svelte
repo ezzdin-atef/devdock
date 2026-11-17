@@ -495,7 +495,11 @@
     display: flex;
     align-items: center;
     gap: var(--space-4);
-    width: 260px;
+    /* Starts small and grows into spare room, so the toolbar stays on one line
+       (a wrapping row wraps before it shrinks anything). */
+    flex: 1 1 180px;
+    min-width: 140px;
+    max-width: 300px;
     height: 34px;
     padding: 0 var(--space-5);
     background: var(--bg-panel);

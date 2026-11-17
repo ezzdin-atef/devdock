@@ -19,11 +19,27 @@ const outDir = join(root, 'docs', 'screenshots');
 const SHOTS = {
   overview: {
     eyebrow: 'Projects',
-    title: 'Every local project, its Git state and dev server in one window',
+    title: 'Every local project in one place, organized into your own groups',
+  },
+  cards: {
+    eyebrow: 'Your view',
+    title: 'Folders, cards or rows - size, details, sort and grouping are yours',
+  },
+  project: {
+    eyebrow: 'Overview',
+    title: 'Git, dev server, packages and a portless address for each project',
+  },
+  git: {
+    eyebrow: 'Git',
+    title: 'Switch branches, fetch, pull and push - pull only fast-forwards',
   },
   run: {
     eyebrow: 'Run',
-    title: 'Dev servers with live logs - stop ends the whole process tree',
+    title: 'Dev servers on saved ports - stop ends the whole process tree',
+  },
+  logs: {
+    eyebrow: 'Logs',
+    title: 'Full-height logs with search, filters and one-click clear',
   },
   ports: {
     eyebrow: 'Ports',
@@ -35,7 +51,7 @@ const SHOTS = {
   },
   settings: {
     eyebrow: 'Settings',
-    title: 'Editor, terminal and agents - picked from what is already installed',
+    title: 'Hidden ports, local HTTPS and your tools - all in one place',
   },
 };
 

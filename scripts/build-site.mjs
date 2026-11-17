@@ -2,7 +2,7 @@
 // site/* plus the app screenshots and brand assets that already live in docs/.
 // Uses the raw 1280x900 captures (docs/screenshots/raw/) when present, since the page
 // draws its own window frames; falls back to docs/screenshots/.
-import { cpSync, existsSync, mkdirSync, readdirSync, rmSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
@@ -19,4 +19,9 @@ for (const f of readdirSync(shots).filter((f) => f.endsWith(".png"))) {
 }
 cpSync(join(root, "docs", "brand"), join(out, "brand"), { recursive: true });
 
-console.log(`Site built in ${out} (screenshots from ${shots})`);
+// The version the page shows before (or without) asking GitHub for the latest one.
+const { version } = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
+const page = join(out, "index.html");
+writeFileSync(page, readFileSync(page, "utf8").replaceAll("__VERSION__", version));
+
+console.log(`Site built in ${out} for v${version} (screenshots from ${shots})`);

@@ -156,7 +156,7 @@
         </span>
       {:else}
         <span class="help block"
-          >Name a project <span class="mono">shop.test</span> (Run tab, Port) to use .test. Those need a hosts-file entry;
+          >Name a project <span class="mono">shop.test</span> (its Overview, under Address) to use .test. Those need a hosts-file entry;
           .localhost names work without one.</span
         >
       {/if}
