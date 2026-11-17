@@ -34,6 +34,7 @@ const pairs = [
   ["success", "bg-panel"], ["success", "success-pill"], ["success", "success-panel"],
   ["error-text", "error-panel"], ["error-text", "error-pill"], ["error-text", "bg-console"],
   ["info", "bg-panel"],
+  ["icon", "bg-app"], ["icon", "bg-chrome"], ["icon", "bg-panel"], ["icon", "bg-hover"],
 ];
 
 let failed = 0;

@@ -189,13 +189,13 @@
     color: var(--text-soft);
   }
   .small {
-    font-size: 11.5px;
+    font-size: 12.5px;
   }
   .depth {
     display: flex;
     align-items: center;
     gap: var(--space-3);
-    font-size: 12px;
+    font-size: 12.5px;
     color: var(--text-muted);
   }
   select {
@@ -234,7 +234,7 @@
     cursor: default;
   }
   .help {
-    font-size: 12px;
+    font-size: 12.5px;
     color: var(--text-muted);
   }
   .block {

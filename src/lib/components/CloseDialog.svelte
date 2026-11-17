@@ -91,11 +91,11 @@
     display: flex;
     gap: var(--space-5);
     padding: var(--space-3) 0;
-    font-size: 12.5px;
+    font-size: 13px;
   }
   .details .mono {
     color: var(--text-muted);
-    font-size: 11px;
+    font-size: 12px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

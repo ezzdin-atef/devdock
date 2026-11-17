@@ -224,7 +224,7 @@
     border-color: var(--success-border);
   }
   .value {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
     max-width: 100%;
     overflow: hidden;
@@ -232,7 +232,7 @@
     white-space: nowrap;
   }
   .detail {
-    font-size: 12.5px;
+    font-size: 13px;
     color: var(--text-muted);
     max-width: 100%;
     overflow: hidden;
@@ -240,7 +240,7 @@
     white-space: nowrap;
   }
   .detail.mono {
-    font-size: 11px;
+    font-size: 12px;
   }
   .ok {
     color: var(--success);
@@ -253,7 +253,7 @@
   }
   .human {
     font-family: var(--font-sans);
-    font-size: 13px;
+    font-size: 14px;
   }
   .panel {
     background: var(--bg-panel);
@@ -282,7 +282,7 @@
     color: var(--text-muted);
   }
   .facts dd.mono {
-    font-size: 11.5px;
+    font-size: 12.5px;
   }
   .link {
     border: 0;
@@ -305,13 +305,13 @@
     gap: var(--space-5);
     padding: var(--space-4) var(--space-8);
     border-top: 1px solid var(--line);
-    font-size: 13px;
+    font-size: 14px;
   }
   .act:first-of-type {
     border-top: 0;
   }
   .act :global(svg) {
-    color: var(--text-muted);
+    color: var(--icon);
     flex-shrink: 0;
   }
   .act.bad,
@@ -329,7 +329,7 @@
     white-space: nowrap;
   }
   .when {
-    font-size: 10.5px;
+    font-size: 11.5px;
     color: var(--text-faint);
   }
   .none {

@@ -46,7 +46,7 @@
     border-radius: var(--radius-button-sm);
     color: var(--text);
     font: inherit;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
     outline: none;
     user-select: text;

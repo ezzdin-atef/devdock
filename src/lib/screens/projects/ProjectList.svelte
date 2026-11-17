@@ -206,6 +206,7 @@
     background: var(--bg-sidebar);
     border-right: 1px solid var(--line);
     overflow-y: auto;
+    overflow-x: hidden;
   }
   .top {
     display: flex;
@@ -213,6 +214,7 @@
   }
   .search {
     flex: 1;
+    min-width: 0;
     display: flex;
     align-items: center;
     gap: var(--space-4);
@@ -221,7 +223,7 @@
     background: var(--bg-panel);
     border: 1px solid var(--line-strong);
     border-radius: var(--radius-button);
-    color: var(--text-muted);
+    color: var(--icon);
   }
   .search:focus-within {
     border-color: var(--accent-fg);
@@ -237,7 +239,7 @@
     user-select: text;
   }
   .search input::placeholder {
-    color: var(--text-muted);
+    color: var(--icon);
   }
   .segmented {
     display: inline-flex;
@@ -253,7 +255,7 @@
     border-radius: var(--radius-button-sm);
     background: transparent;
     color: var(--text-muted);
-    font-size: 12px;
+    font-size: 12.5px;
     cursor: pointer;
   }
   .segmented button.on {
@@ -273,7 +275,7 @@
     border-radius: var(--radius-pill);
     background: transparent;
     color: var(--text-muted);
-    font-size: 10px;
+    font-size: 11px;
     letter-spacing: 0.05em;
     cursor: pointer;
   }
@@ -294,7 +296,7 @@
     background: var(--bg-panel);
     border: 1px solid var(--line);
     border-radius: var(--radius-row);
-    font-size: 12.5px;
+    font-size: 13px;
   }
   .scan-text {
     flex: 1;
@@ -318,7 +320,7 @@
     border: 0;
     border-radius: var(--radius-button-sm);
     background: transparent;
-    color: var(--text-muted);
+    color: var(--icon);
     cursor: pointer;
   }
   .x:hover {
@@ -427,7 +429,7 @@
     min-width: 0;
   }
   .name {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -441,18 +443,18 @@
     display: inline-flex;
   }
   .tag-new {
-    font-size: 10px;
+    font-size: 11px;
     color: var(--accent-fg);
   }
   .kind {
     margin-left: auto;
     padding-left: var(--space-4);
-    font-size: 10px;
+    font-size: 11px;
     color: var(--text-muted);
     white-space: nowrap;
   }
   .sub {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--text-muted);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -481,7 +483,7 @@
     border: 0;
     border-radius: var(--radius-button-sm);
     background: transparent;
-    color: var(--text-muted);
+    color: var(--icon);
     cursor: pointer;
     opacity: 0;
   }

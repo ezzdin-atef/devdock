@@ -115,7 +115,7 @@
     border-radius: var(--radius-pill);
     background: transparent;
     color: var(--c);
-    font-size: 10.5px;
+    font-size: 11.5px;
     cursor: pointer;
   }
   .chip.on {
@@ -126,7 +126,7 @@
     display: flex;
     align-items: center;
     gap: var(--space-3);
-    font-size: 12px;
+    font-size: 12.5px;
     color: var(--text-muted);
   }
   .follow input {
@@ -137,7 +137,7 @@
     overflow: auto;
     padding: var(--space-5) 0;
     background: var(--bg-console);
-    font-size: 11.5px;
+    font-size: 12.5px;
     line-height: 1.9;
   }
   .line {

@@ -215,11 +215,11 @@
     align-items: baseline;
   }
   .name {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
   }
   .phase {
-    font-size: 9.5px;
+    font-size: 10.5px;
     color: var(--text-muted);
   }
   /* DESIGN.md: one 18 x 5 bar per service. */
@@ -243,7 +243,7 @@
     background: var(--error);
   }
   .none {
-    font-size: 10px;
+    font-size: 11px;
     color: var(--text-faint);
   }
   .new {
@@ -305,7 +305,7 @@
   }
   h1 {
     margin: var(--space-1) 0 0;
-    font-size: 27px;
+    font-size: 28px;
     font-weight: 700;
     letter-spacing: -0.02em;
     cursor: text;
@@ -334,7 +334,7 @@
   .phase-pill {
     padding: 4px 9px;
     border-radius: var(--radius-pill);
-    font-size: 10px;
+    font-size: 11px;
     letter-spacing: 0.06em;
     background: var(--bg-raised);
     color: var(--text-muted);

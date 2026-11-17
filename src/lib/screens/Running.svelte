@@ -117,12 +117,12 @@
   }
   h1 {
     margin: var(--space-1) 0 0;
-    font-size: 27px;
+    font-size: 28px;
     font-weight: 700;
     letter-spacing: -0.02em;
   }
   .count {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 400;
     color: var(--success);
   }
@@ -156,7 +156,7 @@
   table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 13px;
+    font-size: 14px;
   }
   th {
     text-align: left;
@@ -182,7 +182,7 @@
     font-weight: 600;
   }
   .cmd {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--text-muted);
     max-width: 360px;
     overflow: hidden;
@@ -218,7 +218,7 @@
   }
   .note {
     margin: 0;
-    font-size: 12px;
+    font-size: 12.5px;
     color: var(--text-muted);
   }
 </style>

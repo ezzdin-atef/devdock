@@ -87,14 +87,14 @@
     border: 1px solid var(--warning-border);
     border-radius: var(--radius-button);
     color: var(--accent-fg);
-    font-size: 15px;
+    font-size: 16px;
   }
   .body {
     flex: 1;
     min-width: 0;
   }
   .title {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 600;
   }
   p {
@@ -122,7 +122,7 @@
     background: var(--error-pill);
   }
   .hint {
-    font-size: 12px;
+    font-size: 12.5px;
     color: var(--text-muted);
   }
 </style>

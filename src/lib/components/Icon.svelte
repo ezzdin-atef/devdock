@@ -1,5 +1,6 @@
 <script lang="ts" module>
-  // Line icons on a 16x16 grid, 1.5 px stroke, round caps (DESIGN.md section 7).
+  // Line icons on a 16x16 grid, round caps (DESIGN.md section 7). Stroke is 1.75 at
+  // 13-14 px and 1.6 above, so small icons keep their contrast.
   const PATHS = {
     folder:
       "M2 4.5A1.5 1.5 0 0 1 3.5 3h3l1.5 1.5h4.5A1.5 1.5 0 0 1 14 6v5.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 11.5z",
@@ -20,6 +21,8 @@
     sun: "M8 10.7a2.7 2.7 0 1 0 0-5.4 2.7 2.7 0 0 0 0 5.4zM8 1.8v1.3M8 12.9v1.3M1.8 8h1.3M12.9 8h1.3M3.6 3.6l.9.9M11.5 11.5l.9.9M3.6 12.4l.9-.9M11.5 4.5l.9-.9",
     moon: "M13.3 9.7A5.6 5.6 0 0 1 6.3 2.7a5.6 5.6 0 1 0 7 7z",
     monitor: "M2.5 3.5h11v7.5h-11zM6 14h4M8 11v3",
+    stop: "M4.5 4.5h7v7h-7z",
+    chevron: "M4.5 6.2 8 9.7l3.5-3.5",
     download: "M8 2.5v8M4.5 7 8 10.5 11.5 7M3 13.5h10",
     copy: "M5.5 5.5h7v7h-7zM10.5 5.5v-2h-7v7h2",
   } as const;
@@ -40,10 +43,10 @@
   viewBox="0 0 16 16"
   fill="none"
   stroke="currentColor"
-  stroke-width={name === "kebab" ? 2.4 : 1.5}
+  stroke-width={name === "kebab" ? 2.6 : size <= 14 ? 1.75 : 1.6}
   stroke-linecap="round"
   stroke-linejoin="round"
   aria-hidden="true"
 >
-  <path d={PATHS[name]} fill={filled || name === "play" ? "currentColor" : "none"} />
+  <path d={PATHS[name]} fill={filled || name === "play" || name === "stop" ? "currentColor" : "none"} />
 </svg>

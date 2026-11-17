@@ -72,7 +72,7 @@
   <footer>
     <div class="eyebrow">Saved to</div>
     {#if app.lib?.savedTo}
-      <PathLine path={app.lib.savedTo} tail={2} size={10} wrap />
+      <PathLine path={app.lib.savedTo} tail={2} size={11} wrap />
     {/if}
   </footer>
 </aside>
@@ -125,7 +125,7 @@
     font-weight: 600;
   }
   .count {
-    font-size: 10.5px;
+    font-size: 11.5px;
   }
   .lib.alert .count {
     color: var(--error-text);
@@ -138,7 +138,7 @@
     border: 0;
     border-radius: var(--radius-button-sm);
     background: transparent;
-    color: var(--text-muted);
+    color: var(--icon);
     cursor: pointer;
   }
   .icon-btn:hover:not(:disabled) {
@@ -168,13 +168,13 @@
   .root-path {
     flex: 1;
     min-width: 0;
-    font-size: 11px;
+    font-size: 12px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
   .depth {
-    font-size: 10px;
+    font-size: 11px;
     color: var(--text-faint);
   }
   .remove {

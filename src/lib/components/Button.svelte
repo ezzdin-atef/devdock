@@ -31,7 +31,7 @@
     padding: 0 var(--space-8);
     border-radius: var(--radius-button);
     border: 1px solid transparent;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     cursor: pointer;
     white-space: nowrap;

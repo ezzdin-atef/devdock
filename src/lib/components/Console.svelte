@@ -152,7 +152,7 @@
     border-radius: var(--radius-button-sm);
     background: transparent;
     color: var(--text-muted);
-    font-size: 12px;
+    font-size: 12.5px;
     cursor: pointer;
   }
   .segmented button.on {
@@ -164,7 +164,7 @@
     display: flex;
     align-items: center;
     gap: var(--space-3);
-    font-size: 12px;
+    font-size: 12.5px;
     color: var(--text-muted);
     cursor: pointer;
   }
@@ -178,7 +178,7 @@
     overflow: auto;
     padding: var(--space-5) 0;
     background: var(--bg-console);
-    font-size: 11.5px;
+    font-size: 12.5px;
     line-height: 1.9;
   }
   .line {
@@ -198,7 +198,7 @@
   }
   .tag {
     flex-shrink: 0;
-    font-size: 9.5px;
+    font-size: 10.5px;
     padding: 0 5px;
     align-self: center;
     line-height: 16px;

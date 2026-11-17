@@ -90,7 +90,7 @@
   }
   .note {
     margin: var(--space-1) var(--space-5) var(--space-2);
-    font-size: 11.5px;
+    font-size: 12.5px;
     color: var(--text-muted);
   }
 </style>

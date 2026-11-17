@@ -44,7 +44,7 @@
     padding: 0 var(--space-8);
     background: var(--bg-chrome);
     border-top: 1px solid var(--line);
-    font-size: 11px;
+    font-size: 12px;
     color: var(--text-muted);
   }
   .spacer {

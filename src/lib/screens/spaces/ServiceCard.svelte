@@ -95,10 +95,10 @@
     border: 1px solid var(--warning-border);
     border-radius: var(--radius-button-sm);
     color: var(--accent-fg);
-    font-size: 12px;
+    font-size: 12.5px;
   }
   .label {
-    font-size: 10px;
+    font-size: 11px;
     letter-spacing: 0.06em;
     color: var(--text-muted);
   }
@@ -128,12 +128,12 @@
     color: var(--text);
   }
   .name {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 600;
   }
   .src,
   .cmd {
-    font-size: 10.5px;
+    font-size: 11.5px;
     color: var(--text-muted);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -147,10 +147,10 @@
     grid-template-columns: 1fr 1fr;
     gap: var(--space-3) var(--space-5);
     margin: var(--space-3) 0 0;
-    font-size: 11.5px;
+    font-size: 12.5px;
   }
   dt {
-    font-size: 9.5px;
+    font-size: 10.5px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--text-muted);
@@ -165,7 +165,7 @@
     white-space: nowrap;
   }
   .msg {
-    font-size: 11.5px;
+    font-size: 12.5px;
     color: var(--text-soft);
     overflow-wrap: anywhere;
   }

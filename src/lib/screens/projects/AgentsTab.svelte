@@ -179,7 +179,7 @@
     margin: 0;
   }
   .small {
-    font-size: 12px;
+    font-size: 12.5px;
   }
   .warn {
     margin: 0;
@@ -209,7 +209,7 @@
   }
   select.mono {
     font-family: var(--font-mono);
-    font-size: 12px;
+    font-size: 12.5px;
   }
   select:focus {
     outline: none;
@@ -248,10 +248,10 @@
     border: 1px solid var(--line-strong);
     border-radius: var(--radius-button);
     color: var(--accent-fg);
-    font-size: 13px;
+    font-size: 14px;
   }
   .state {
-    font-size: 10px;
+    font-size: 11px;
     color: var(--text-muted);
   }
   .state.ok {
@@ -263,19 +263,19 @@
   }
   .default {
     margin-left: var(--space-3);
-    font-size: 9.5px;
+    font-size: 10.5px;
     font-weight: 400;
     color: var(--accent-fg);
   }
   .path {
-    font-size: 10.5px;
+    font-size: 11.5px;
     color: var(--text-muted);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
   .guide {
-    font-size: 12px;
+    font-size: 12.5px;
     color: var(--text-muted);
   }
   .guide code {
@@ -285,7 +285,7 @@
     background: var(--bg-app);
     border-radius: var(--radius-badge);
     color: var(--text-soft);
-    font-size: 11px;
+    font-size: 12px;
     overflow-wrap: anywhere;
   }
   .launch {
@@ -314,7 +314,7 @@
   }
   .history {
     margin: 0;
-    font-size: 12.5px;
+    font-size: 13px;
     color: var(--text-muted);
   }
   .history strong {
@@ -336,13 +336,13 @@
     flex-wrap: wrap;
     align-items: center;
     gap: var(--space-5);
-    font-size: 13px;
+    font-size: 14px;
   }
   .keys {
     padding: 2px 7px;
     border: 1px solid var(--line-strong);
     border-radius: var(--radius-badge);
-    font-size: 10.5px;
+    font-size: 11.5px;
   }
   .x {
     display: grid;
@@ -353,7 +353,7 @@
     border: 0;
     border-radius: var(--radius-button-sm);
     background: transparent;
-    color: var(--text-muted);
+    color: var(--icon);
     cursor: pointer;
   }
   .x:hover {

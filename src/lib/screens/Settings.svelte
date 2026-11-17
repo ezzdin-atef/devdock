@@ -186,7 +186,7 @@
   }
   h1 {
     margin: var(--space-1) 0 0;
-    font-size: 27px;
+    font-size: 28px;
     font-weight: 700;
     letter-spacing: -0.02em;
   }
@@ -211,12 +211,12 @@
   }
   .version {
     margin-left: var(--space-2);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 400;
     color: var(--text-muted);
   }
   .help {
-    font-size: 12px;
+    font-size: 12.5px;
     color: var(--text-muted);
   }
   select {
@@ -250,7 +250,7 @@
     border-radius: var(--radius-button-sm);
     background: transparent;
     color: var(--text-muted);
-    font-size: 12.5px;
+    font-size: 13px;
     cursor: pointer;
     transition:
       background var(--t-fast) var(--ease),
@@ -280,7 +280,7 @@
   table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 13px;
+    font-size: 14px;
     table-layout: fixed;
   }
   td {
@@ -294,7 +294,7 @@
     width: 170px;
   }
   .small {
-    font-size: 11px;
+    font-size: 12px;
   }
   .path {
     overflow: hidden;

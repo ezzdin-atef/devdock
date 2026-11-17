@@ -182,7 +182,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
-    font-size: 12px;
+    font-size: 12.5px;
     color: var(--text-muted);
   }
   input,
@@ -194,12 +194,12 @@
     border-radius: var(--radius-button-sm);
     color: var(--text);
     font: inherit;
-    font-size: 13px;
+    font-size: 14px;
     user-select: text;
   }
   .mono {
     font-family: var(--font-mono);
-    font-size: 12px;
+    font-size: 12.5px;
   }
   input:focus,
   select:focus {
@@ -230,7 +230,7 @@
   }
   .hint {
     margin: 0;
-    font-size: 12px;
+    font-size: 12.5px;
     color: var(--error-text);
   }
   .actions {

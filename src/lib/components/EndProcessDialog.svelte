@@ -146,7 +146,7 @@
     padding: var(--space-6) var(--space-7);
     background: var(--bg-app);
     border-radius: var(--radius-button);
-    font-size: 12.5px;
+    font-size: 13px;
   }
   dt {
     color: var(--text-muted);
@@ -157,7 +157,7 @@
     overflow-wrap: anywhere;
   }
   dd.mono {
-    font-size: 11.5px;
+    font-size: 12.5px;
   }
   .muted {
     color: var(--text-muted);

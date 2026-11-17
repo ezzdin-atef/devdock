@@ -17,7 +17,7 @@
   }
   h1 {
     margin: var(--space-1) 0 var(--space-8);
-    font-size: 27px;
+    font-size: 28px;
     font-weight: 700;
     letter-spacing: -0.02em;
   }

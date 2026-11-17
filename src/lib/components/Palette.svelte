@@ -153,7 +153,7 @@
     background: transparent;
     color: var(--text);
     font: inherit;
-    font-size: 15px;
+    font-size: 16px;
     user-select: text;
   }
   input::placeholder {
@@ -163,7 +163,7 @@
     padding: 2px 6px;
     border: 1px solid var(--line-strong);
     border-radius: var(--radius-badge);
-    font-size: 10px;
+    font-size: 11px;
   }
   .results {
     max-height: min(440px, 60vh);
@@ -203,7 +203,7 @@
   }
   .hint {
     max-width: 45%;
-    font-size: 11px;
+    font-size: 12px;
     color: var(--text-muted);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -217,7 +217,7 @@
   .foot {
     padding: var(--space-4) var(--space-8);
     border-top: 1px solid var(--line);
-    font-size: 10.5px;
+    font-size: 11.5px;
     color: var(--text-faint);
   }
 </style>

@@ -137,7 +137,7 @@
   }
   .help {
     margin: 0;
-    font-size: 12px;
+    font-size: 12.5px;
     color: var(--text-muted);
   }
   .sub {

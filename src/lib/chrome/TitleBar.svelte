@@ -172,7 +172,7 @@
     transition: opacity 160ms var(--ease);
   }
   .wordmark {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 700;
     letter-spacing: -0.01em;
   }
@@ -181,7 +181,7 @@
     align-items: center;
     gap: var(--space-3);
     min-width: 0;
-    font-size: 13px;
+    font-size: 14px;
     color: var(--text-muted);
     transition: opacity 160ms var(--ease);
   }
@@ -211,7 +211,7 @@
     border-radius: var(--radius-button);
     background: var(--bg-panel);
     color: var(--text-muted);
-    font-size: 12.5px;
+    font-size: 13px;
     cursor: pointer;
     transition:
       border-color var(--t-fast) var(--ease),
@@ -221,6 +221,9 @@
   .trigger:hover {
     border-color: var(--text-faint);
     color: var(--text-soft);
+  }
+  .trigger :global(svg) {
+    color: var(--icon);
   }
   .hint {
     flex: 1;
@@ -234,7 +237,7 @@
     border: 1px solid var(--line-strong);
     border-bottom-width: 2px;
     border-radius: var(--radius-badge);
-    font-size: 10px;
+    font-size: 11px;
   }
 
   .running {
@@ -246,7 +249,7 @@
     border: 1px solid var(--line);
     border-radius: var(--radius-pill);
     background: transparent;
-    font-size: 11px;
+    font-size: 12px;
     color: var(--text-muted);
     white-space: nowrap;
     cursor: pointer;
@@ -267,7 +270,7 @@
     border-radius: var(--radius-pill);
     background: var(--accent);
     color: var(--accent-ink);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     white-space: nowrap;
     cursor: pointer;
@@ -300,7 +303,7 @@
     border: 0;
     border-radius: var(--radius-button);
     background: transparent;
-    color: var(--text-muted);
+    color: var(--icon);
     cursor: pointer;
     transition:
       background var(--t-fast) var(--ease),

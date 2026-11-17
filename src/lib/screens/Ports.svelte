@@ -169,12 +169,12 @@
   }
   h1 {
     margin: var(--space-1) 0 0;
-    font-size: 27px;
+    font-size: 28px;
     font-weight: 700;
     letter-spacing: -0.02em;
   }
   .count {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 400;
     color: var(--text-muted);
   }
@@ -184,7 +184,7 @@
     gap: var(--space-6);
   }
   .stamp {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--text-muted);
   }
   .segmented {
@@ -202,7 +202,7 @@
     border-radius: var(--radius-button-sm);
     background: transparent;
     color: var(--text-muted);
-    font-size: 12.5px;
+    font-size: 13px;
     cursor: pointer;
   }
   .segmented button.on {
@@ -211,7 +211,7 @@
     font-weight: 600;
   }
   .n {
-    font-size: 10px;
+    font-size: 11px;
     margin-left: var(--space-2);
     opacity: 0.8;
   }
@@ -239,7 +239,7 @@
     border: 0;
     border-radius: var(--radius-button-sm);
     background: transparent;
-    color: var(--text-muted);
+    color: var(--icon);
     cursor: pointer;
   }
   .table-wrap {
@@ -253,7 +253,7 @@
   table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 13px;
+    font-size: 14px;
   }
   th {
     text-align: left;
@@ -273,7 +273,7 @@
     background: var(--accent-tint);
   }
   .port {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 600;
   }
   .name {
@@ -281,13 +281,13 @@
   }
   .pid {
     margin-left: var(--space-4);
-    font-size: 11px;
+    font-size: 12px;
     color: var(--text-muted);
   }
   .cmd {
     max-width: 380px;
     margin-top: var(--space-1);
-    font-size: 11px;
+    font-size: 12px;
     color: var(--text-muted);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -297,13 +297,13 @@
     color: var(--text-muted);
   }
   .small {
-    font-size: 11px;
+    font-size: 12px;
   }
   .badge {
     display: inline-block;
     padding: 3px 7px;
     border-radius: var(--radius-badge);
-    font-size: 10px;
+    font-size: 11px;
     letter-spacing: 0.06em;
   }
   .badge.devDock {
@@ -335,7 +335,7 @@
     opacity: 0.5;
   }
   .protected {
-    font-size: 10.5px;
+    font-size: 11.5px;
     color: var(--text-muted);
   }
   .info {
@@ -361,7 +361,7 @@
   }
   .note {
     margin: 0;
-    font-size: 12px;
+    font-size: 12.5px;
     color: var(--text-muted);
   }
 </style>

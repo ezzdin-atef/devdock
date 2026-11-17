@@ -15,7 +15,7 @@
   const total = $derived(app.lib?.counts.all ?? 0);
 </script>
 
-<section class="detail">
+<section class="detail" class:fill={app.selected && app.tab === "run" && !app.selected.missing}>
   {#if app.selected}
     {@const project = app.selected}
     <header>
@@ -179,7 +179,7 @@
   }
   h1 {
     margin: 0;
-    font-size: 27px;
+    font-size: 28px;
     font-weight: 700;
     letter-spacing: -0.02em;
     overflow-wrap: anywhere;
@@ -194,7 +194,7 @@
     border: 0;
     border-radius: var(--radius-button);
     background: transparent;
-    color: var(--text-muted);
+    color: var(--icon);
     cursor: pointer;
   }
   .star:hover {
@@ -206,6 +206,16 @@
   }
   header {
     min-width: 0;
+  }
+  /* Run tab: the page stops scrolling; the command list and the log split the
+     remaining height and scroll on their own. */
+  .detail.fill {
+    flex: 1;
+    min-height: 560px;
+  }
+  .detail.fill .tab-body {
+    flex: 1;
+    min-height: 0;
   }
   .tab-body {
     display: flex;
@@ -230,7 +240,7 @@
     margin-bottom: -1px;
     background: transparent;
     color: var(--text-muted);
-    font-size: 13.5px;
+    font-size: 14.5px;
     cursor: pointer;
   }
   .tabs button {
@@ -251,7 +261,7 @@
     color: var(--success);
   }
   .tab-count {
-    font-size: 10px;
+    font-size: 11px;
     padding: 1px 6px;
     border-radius: var(--radius-pill);
     background: var(--accent-tint);
@@ -277,7 +287,7 @@
     align-items: center;
     gap: var(--space-4);
     color: var(--error-text);
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 600;
   }
   .missing-panel p {
@@ -286,7 +296,7 @@
   }
   .missing-panel .note {
     color: var(--text-muted);
-    font-size: 12px;
+    font-size: 12.5px;
   }
   .destructive {
     height: 36px;
@@ -318,7 +328,7 @@
   }
   .lead {
     margin: 0;
-    font-size: 14px;
+    font-size: 15px;
     line-height: 1.6;
     color: var(--text-soft);
     text-wrap: pretty;
@@ -345,7 +355,7 @@
     content: counter(step);
     grid-row: span 2;
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 12px;
     line-height: 20px;
     color: var(--accent-fg);
   }
@@ -353,12 +363,12 @@
     font-weight: 600;
   }
   .step-text {
-    font-size: 12.5px;
+    font-size: 13px;
     color: var(--text-muted);
     line-height: 1.55;
   }
   .step-text .mono {
-    font-size: 11.5px;
+    font-size: 12.5px;
     color: var(--text-soft);
   }
   .kbd {
@@ -368,7 +378,7 @@
     border-bottom-width: 2px;
     border-radius: var(--radius-badge);
     background: var(--bg-panel);
-    font-size: 10.5px;
+    font-size: 11.5px;
     font-weight: 400;
     color: var(--text-soft);
   }
@@ -385,7 +395,7 @@
     align-items: center;
     gap: var(--space-3);
     margin-top: var(--space-6);
-    font-size: 12px;
+    font-size: 12.5px;
   }
   .sep {
     width: var(--space-6);

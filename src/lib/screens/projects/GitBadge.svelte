@@ -32,7 +32,7 @@
     gap: var(--space-3);
     flex-shrink: 0;
     max-width: 55%;
-    font-size: 11px;
+    font-size: 12px;
     color: var(--text-soft);
   }
   .branch {

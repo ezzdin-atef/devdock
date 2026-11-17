@@ -149,7 +149,7 @@
     gap: var(--space-6);
   }
   .stamp {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--text-muted);
   }
   .panel {
@@ -168,7 +168,7 @@
     color: var(--text-muted);
   }
   .small {
-    font-size: 11.5px;
+    font-size: 12.5px;
   }
   .accent {
     color: var(--accent-fg);
@@ -192,12 +192,12 @@
     display: flex;
     align-items: center;
     gap: var(--space-6);
-    font-size: 12px;
+    font-size: 12.5px;
   }
   .ab {
     display: inline-flex;
     gap: var(--space-4);
-    font-size: 13px;
+    font-size: 14px;
   }
   .notes {
     display: grid;
@@ -206,7 +206,7 @@
     align-items: baseline;
   }
   .note {
-    font-size: 10px;
+    font-size: 11px;
     padding: 2px 7px;
     border: 1px solid var(--line-badge);
     border-radius: var(--radius-badge);
@@ -254,14 +254,14 @@
     color: var(--text-muted);
   }
   .facts dd.mono {
-    font-size: 11.5px;
+    font-size: 12.5px;
   }
   .readonly {
     display: flex;
     align-items: center;
     gap: var(--space-3);
     margin: 0;
-    font-size: 12px;
+    font-size: 12.5px;
     color: var(--text-muted);
   }
 </style>

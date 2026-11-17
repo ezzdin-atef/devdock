@@ -11,6 +11,9 @@
   let { project }: { project: Project } = $props();
 
   let adding = $state(false);
+  let filter = $state("");
+  /** Collapsed: only the selected command shows, so the log gets the whole height. */
+  let collapsed = $state(false);
   let form = $state({ name: "", line: "", subdir: "" });
 
   // Keyed on the id, not the object: the project object is replaced on every list
@@ -26,6 +29,16 @@
   // The global list updates first on events; prefer it over the per-project copy.
   const run = $derived<RunInfo | null>(
     selected ? (runs.runOf(project.id, selected.id) ?? selected.run) : null,
+  );
+  const shown = $derived.by(() => {
+    const all = list?.commands ?? [];
+    const q = filter.trim().toLowerCase();
+    if (collapsed) return all.filter((c) => c.id === selectedId);
+    if (!q) return all;
+    return all.filter((c) => c.name.toLowerCase().includes(q) || c.commandLine.toLowerCase().includes(q));
+  });
+  const runningCount = $derived(
+    (list?.commands ?? []).filter((c) => isActive((runs.runOf(project.id, c.id) ?? c.run)?.state)).length,
   );
   const busy = $derived(selected ? runKey(project.id, selected.id) in runs.busy : false);
 
@@ -53,6 +66,13 @@
     }
   }
 
+  let rowsEl = $state<HTMLUListElement>();
+  $effect(() => {
+    void selectedId;
+    void shown.length;
+    rowsEl?.querySelector('[aria-current="true"]')?.closest("li")?.scrollIntoView({ block: "nearest" });
+  });
+
   async function save() {
     if (await runs.addCommand(project.id, form.name, form.line, form.subdir)) {
       adding = false;
@@ -71,56 +91,108 @@
       <p class="warning">{list.warning}</p>
     {/if}
 
-    <div class="cards">
-      {#each list.commands as c (c.id)}
-        {@const r = runs.runOf(project.id, c.id) ?? c.run}
-        {@const active = isActive(r?.state)}
-        {@const result = lastResult(c)}
-        <div class="card" class:selected={c.id === selectedId} class:running={active}>
-          <button
-            class="card-hit"
-            aria-label="Show output of {c.name}"
-            onclick={() => (runs.selectedCommand[project.id] = c.id)}
-          ></button>
-          <div class="card-main">
-            <div class="card-name mono">
+    <section class="commands">
+      <div class="cmd-head">
+        <button
+          class="collapse"
+          aria-expanded={!collapsed}
+          title={collapsed ? "Show all commands" : "Show only the selected command"}
+          onclick={() => (collapsed = !collapsed)}
+        >
+          <span class="chev" class:closed={collapsed}><Icon name="chevron" size={13} /></span>
+          <span class="cmd-title">Commands</span>
+          <span class="cmd-count mono">{list.commands.length}</span>
+          {#if runningCount}<span class="cmd-running mono">{runningCount} running</span>{/if}
+        </button>
+        <span class="spacer"></span>
+        {#if list.commands.length > 5 && !collapsed}
+          <label class="filter">
+            <Icon name="search" size={13} />
+            <input
+              placeholder="Filter commands"
+              bind:value={filter}
+              spellcheck="false"
+              onkeydown={(e) => {
+                if (e.key === "Escape") filter = "";
+              }}
+            />
+          </label>
+        {/if}
+        {#if !collapsed && !adding}
+          <button class="add-btn" onclick={() => (adding = true)} title="Add a custom command">
+            <Icon name="plus" size={13} /> Add
+          </button>
+        {/if}
+      </div>
+
+      <ul class="rows" class:collapsed bind:this={rowsEl}>
+        {#each shown as c (c.id)}
+          {@const r = runs.runOf(project.id, c.id) ?? c.run}
+          {@const active = isActive(r?.state)}
+          {@const result = lastResult(c)}
+          <li class="row" class:selected={c.id === selectedId} class:running={active}>
+            <button
+              class="row-hit"
+              aria-label="Show output of {c.name}"
+              aria-current={c.id === selectedId ? "true" : undefined}
+              onclick={() => (runs.selectedCommand[project.id] = c.id)}
+            ></button>
+            <span class="state-dot" class:on={active} class:bad={result.tone === "bad"}></span>
+            <span class="row-name mono">
               {c.name}
               {#if c.source.kind !== "script"}<span class="src">{c.source.kind}</span>{/if}
-            </div>
-            <div class="card-line mono" title={c.commandLine}>
+            </span>
+            <span class="row-line mono" title={c.commandLine}>
               {c.commandLine}{#if c.knownPort}<span class="known" title="Port learned from an earlier run; checked before starting"> :{c.knownPort}</span>{/if}
-            </div>
-            <div class="card-result mono {result.tone}">{result.text}</div>
-          </div>
-          {#if active}
-            <span class="running-label mono">RUNNING</span>
-          {:else}
-            <button
-              class="play"
-              title="Run {c.commandLine}"
-              aria-label="Run {c.name}"
-              disabled={runKey(project.id, c.id) in runs.busy}
-              onclick={() => runs.start(project.id, c.id)}
-            >
-              <Icon name="play" size={14} />
-            </button>
+            </span>
+            <span class="row-result mono {result.tone}">{result.text}</span>
+            <span class="row-actions">
+              {#if c.source.kind === "custom" && !active}
+                <button
+                  class="remove"
+                  title="Remove this command"
+                  aria-label="Remove {c.name}"
+                  onclick={() => runs.removeCommand(project.id, c.id)}
+                >
+                  <Icon name="x" size={12} />
+                </button>
+              {/if}
+              {#if active}
+                <button
+                  class="play stop-mini"
+                  title="Stop {c.commandLine}"
+                  aria-label="Stop {c.name}"
+                  disabled={runKey(project.id, c.id) in runs.busy || r?.state === "stopping"}
+                  onclick={() => runs.stop(project.id, c.id)}
+                >
+                  <Icon name="stop" size={12} />
+                </button>
+              {:else}
+                <button
+                  class="play"
+                  title="Run {c.commandLine}"
+                  aria-label="Run {c.name}"
+                  disabled={runKey(project.id, c.id) in runs.busy}
+                  onclick={() => runs.start(project.id, c.id)}
+                >
+                  <Icon name="play" size={12} />
+                </button>
+              {/if}
+            </span>
+          </li>
+        {:else}
+          {#if filter}
+            <li class="none">
+              No command matches "{filter}".
+              <button class="link" onclick={() => (filter = "")}>Clear filter</button>
+            </li>
           {/if}
-          {#if c.source.kind === "custom" && !active}
-            <button
-              class="remove"
-              title="Remove this command"
-              aria-label="Remove {c.name}"
-              onclick={() => runs.removeCommand(project.id, c.id)}
-            >
-              <Icon name="x" size={11} />
-            </button>
-          {/if}
-        </div>
-      {/each}
+        {/each}
+      </ul>
 
       {#if adding}
         <form
-          class="card form"
+          class="form"
           onsubmit={(e) => {
             e.preventDefault();
             save();
@@ -134,12 +206,8 @@
             <button class="save" type="submit">Save</button>
           </div>
         </form>
-      {:else}
-        <button class="card add" onclick={() => (adding = true)}>
-          <Icon name="plus" size={14} /> Add command
-        </button>
       {/if}
-    </div>
+    </section>
 
     {#if list.commands.length === 0 && !adding}
       <p class="muted">
@@ -227,9 +295,11 @@
 
 <style>
   .run {
+    flex: 1;
+    min-height: 0;
     display: flex;
     flex-direction: column;
-    gap: var(--space-8);
+    gap: var(--space-7);
   }
   .muted {
     color: var(--text-muted);
@@ -242,31 +312,150 @@
     background: var(--warning-panel);
     border-radius: var(--radius-row);
   }
-  .cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-    gap: var(--space-5);
-  }
-  .card {
-    position: relative;
+  /* Commands: a dense, height-capped list so the log below stays in view,
+     however many scripts a project has. */
+  .commands {
+    flex: 0 1 auto;
+    max-height: 42%;
+    min-height: 104px;
     display: flex;
-    align-items: center;
-    gap: var(--space-5);
-    padding: var(--space-6) var(--space-6) var(--space-6) var(--space-7);
+    flex-direction: column;
     background: var(--bg-panel);
     border: 1px solid var(--line);
-    border-radius: var(--radius-row);
+    border-radius: var(--radius-panel);
+    overflow: hidden;
+  }
+  .cmd-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-3) var(--space-4) var(--space-3) var(--space-3);
+    border-bottom: 1px solid var(--line);
+  }
+  .collapse {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    height: 30px;
+    padding: 0 var(--space-4);
+    border: 0;
+    border-radius: var(--radius-button-sm);
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+  }
+  .collapse:hover {
+    background: var(--bg-hover);
+  }
+  .chev {
+    display: grid;
+    color: var(--icon);
+    transition: transform var(--t-fast) var(--ease);
+  }
+  .chev.closed {
+    transform: rotate(-90deg);
+  }
+  .cmd-title {
+    font-weight: 600;
+  }
+  .cmd-count {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .cmd-running {
+    font-size: 12px;
+    padding: 1px 7px;
+    border-radius: var(--radius-pill);
+    background: var(--success-pill);
+    color: var(--success);
+  }
+  .spacer {
+    flex: 1;
+  }
+  .filter {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    width: 190px;
+    height: 30px;
+    padding: 0 var(--space-4);
+    background: var(--bg-app);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-button-sm);
+    color: var(--icon);
+  }
+  .filter:focus-within {
+    border-color: var(--accent-fg);
+  }
+  .filter input {
+    flex: 1;
     min-width: 0;
+    border: 0;
+    outline: none;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    font-size: 14px;
+    user-select: text;
   }
-  .card.selected {
-    border-color: var(--accent-panel-border);
+  .filter input::placeholder {
+    color: var(--icon);
+  }
+  .add-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    height: 30px;
+    padding: 0 var(--space-5);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-button-sm);
+    background: var(--bg-raised);
+    color: var(--text);
+    font-size: 13.5px;
+    cursor: pointer;
+  }
+  .add-btn:hover {
+    border-color: var(--line-strong);
+  }
+  /* One grid for all rows (rows use subgrid), so names and commands line up in
+     columns however long each name is. */
+  .rows {
+    flex: 1;
+    min-height: 0;
+    list-style: none;
+    margin: 0;
+    padding: var(--space-2);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    display: grid;
+    grid-template-columns: 8px minmax(80px, max-content) minmax(0, 1fr) auto auto;
+    align-content: start;
+    column-gap: var(--space-6);
+    row-gap: 1px;
+  }
+  .row {
+    position: relative;
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 var(--space-3) 0 var(--space-6);
+    border: 1px solid transparent;
+    border-radius: var(--radius-button);
+    transition: background var(--t-fast) var(--ease);
+  }
+  .row:hover {
+    background: var(--bg-hover);
+  }
+  .row.selected {
     background: var(--accent-panel);
+    border-color: var(--accent-panel-border);
   }
-  .card.running {
+  .row.running:not(.selected) {
     background: var(--success-panel);
-    border-color: var(--success-border);
   }
-  .card-hit {
+  .row-hit {
     position: absolute;
     inset: 0;
     border: 0;
@@ -274,37 +463,55 @@
     background: transparent;
     cursor: pointer;
   }
-  .card-main {
-    flex: 1;
-    min-width: 0;
+  .state-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: 1.5px solid var(--idle);
     pointer-events: none;
   }
-  .card-name {
-    font-size: 12.5px;
+  .state-dot.on {
+    border: 0;
+    background: var(--success);
+    box-shadow: 0 0 0 3px var(--success-pill);
+  }
+  .state-dot.bad {
+    border-color: var(--error);
+    background: var(--error);
+  }
+  .row-name {
+    font-size: 13.5px;
     font-weight: 600;
+    white-space: nowrap;
+    pointer-events: none;
   }
   .src {
     margin-left: var(--space-3);
-    font-size: 9.5px;
-    font-weight: 400;
-    color: var(--text-faint);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
     text-transform: uppercase;
+    letter-spacing: 0.04em;
   }
-  .card-line {
-    font-size: 10.5px;
+  .row-line {
+    font-size: 12.5px;
     color: var(--text-muted);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    margin-top: var(--space-1);
+    pointer-events: none;
   }
   .known {
     margin-left: var(--space-2);
     color: var(--text-faint);
   }
-  .card-result {
-    font-size: 10.5px;
-    margin-top: var(--space-2);
+  .row-result {
+    font-size: 12px;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .row-result.muted {
+    color: var(--text-muted);
   }
   .ok {
     color: var(--success);
@@ -315,81 +522,95 @@
   .warn {
     color: var(--accent-fg);
   }
-  .running-label {
+  .row-actions {
     position: relative;
-    font-size: 10px;
-    color: var(--success);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
   }
   .play {
-    position: relative;
     display: grid;
     place-items: center;
-    width: 34px;
-    height: 34px;
+    width: 30px;
+    height: 30px;
     flex-shrink: 0;
     border: 1px solid var(--line-strong);
-    border-radius: var(--radius-button);
+    border-radius: var(--radius-button-sm);
     background: var(--bg-raised);
     color: var(--text);
     cursor: pointer;
+    transition:
+      background var(--t-fast) var(--ease),
+      border-color var(--t-fast) var(--ease),
+      color var(--t-fast) var(--ease);
   }
   .play:hover:not(:disabled) {
     background: var(--accent);
     border-color: var(--accent);
     color: var(--accent-ink);
   }
+  .stop-mini {
+    color: var(--error-text);
+    border-color: var(--error-border);
+    background: var(--error-pill);
+  }
+  .stop-mini:hover:not(:disabled) {
+    background: var(--error);
+    border-color: var(--error);
+    color: var(--error-ink);
+  }
   .play:disabled {
     opacity: 0.5;
   }
   .remove {
-    position: absolute;
-    top: 4px;
-    right: 4px;
     display: grid;
     place-items: center;
-    width: 20px;
-    height: 20px;
+    width: 26px;
+    height: 26px;
     border: 0;
     border-radius: var(--radius-badge);
     background: transparent;
-    color: var(--text-faint);
+    color: var(--icon);
     cursor: pointer;
     opacity: 0;
   }
-  .card:hover .remove,
+  .row:hover .remove,
   .remove:focus-visible {
     opacity: 1;
   }
   .remove:hover {
     color: var(--error-text);
+    background: var(--error-pill);
   }
-  .add {
-    justify-content: center;
-    gap: var(--space-3);
-    border-style: dashed;
-    border-color: var(--line-strong);
-    background: transparent;
+  .none {
+    grid-column: 1 / -1;
+    padding: var(--space-6);
     color: var(--text-muted);
-    cursor: pointer;
-    min-height: 74px;
   }
-  .add:hover {
-    color: var(--text);
+  .link {
+    border: 0;
+    padding: 0;
+    margin-left: var(--space-3);
+    background: transparent;
+    color: var(--accent-fg);
+    font-weight: 600;
+    cursor: pointer;
   }
   .form {
+    display: flex;
     flex-direction: column;
-    align-items: stretch;
     gap: var(--space-4);
-    grid-column: span 2;
+    padding: var(--space-6);
+    border-top: 1px solid var(--line);
   }
   .form input {
-    height: 32px;
+    height: 34px;
     padding: 0 var(--space-5);
     background: var(--bg-app);
     border: 1px solid var(--line-strong);
     border-radius: var(--radius-button-sm);
     color: var(--text);
-    font-size: 12px;
+    font-size: 13.5px;
     user-select: text;
   }
   .form input:focus {
@@ -412,9 +633,21 @@
     cursor: pointer;
   }
   .process {
+    flex: 1 1 0;
+    min-height: 260px;
     display: flex;
     flex-direction: column;
-    gap: var(--space-6);
+    gap: var(--space-5);
+  }
+  /* The log takes whatever height is left. */
+  .process :global(.console-wrap) {
+    flex: 1;
+    min-height: 0;
+  }
+  .process :global(.console) {
+    flex: 1;
+    height: auto;
+    min-height: 140px;
   }
   .proc-head {
     display: flex;
@@ -429,7 +662,7 @@
     min-width: 0;
   }
   .proc-cmd {
-    font-size: 12px;
+    font-size: 12.5px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -469,16 +702,16 @@
     border-left: 0;
   }
   .stats dt {
-    font-size: 10px;
+    font-size: 11px;
     letter-spacing: 0.08em;
     color: var(--text-muted);
   }
   .stats dd {
     margin: var(--space-1) 0 0;
-    font-size: 13px;
+    font-size: 14px;
   }
   .hint {
-    font-size: 10px;
+    font-size: 11px;
     color: var(--text-faint);
   }
   .last-error {
@@ -487,7 +720,7 @@
     border: 1px solid var(--error-border);
     border-radius: var(--radius-row);
     color: var(--error-text);
-    font-size: 11.5px;
+    font-size: 12.5px;
     overflow-wrap: anywhere;
   }
 </style>

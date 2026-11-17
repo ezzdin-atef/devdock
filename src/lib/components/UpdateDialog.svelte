@@ -142,7 +142,7 @@
     color: var(--text-muted);
   }
   .small {
-    font-size: 11px;
+    font-size: 12px;
   }
   .notes {
     max-height: 220px;
@@ -150,7 +150,7 @@
     padding: var(--space-5) var(--space-6);
     background: var(--bg-app);
     border-radius: var(--radius-button);
-    font-size: 12.5px;
+    font-size: 13px;
   }
   .group {
     margin: var(--space-4) 0 var(--space-2);
@@ -178,7 +178,7 @@
     display: flex;
     align-items: center;
     gap: var(--space-3);
-    font-size: 12.5px;
+    font-size: 13px;
     color: var(--accent-fg);
   }
   .progress {

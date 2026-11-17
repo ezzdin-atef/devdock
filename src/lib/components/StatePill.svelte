@@ -38,7 +38,7 @@
     height: 22px;
     padding: 0 var(--space-5);
     border-radius: var(--radius-pill);
-    font-size: 10px;
+    font-size: 11px;
     letter-spacing: 0.06em;
     white-space: nowrap;
   }

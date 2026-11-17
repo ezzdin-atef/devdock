@@ -22,8 +22,11 @@
   /* Text */
   --text: #ece9e2;
   --text-soft: #d4cfc6;
-  --text-muted: #9a988f;
-  --text-faint: #6e6d67;
+  --text-muted: #a3a197;
+  --text-faint: #75746d;
+  /* Icons sit between muted and soft: line glyphs are thinner than text, so they
+     need a step more contrast than the labels beside them to read as equal. */
+  --icon: #bcb9b0;
 
   /* Accent. --accent fills (buttons, badges); --accent-fg is accent used as text,
      icon, border or focus ring, which needs more contrast on light surfaces. */
@@ -86,7 +89,7 @@
 
   /* Type */
   --font-sans: "Schibsted Grotesk Variable", system-ui, sans-serif;
-  --font-mono: "Martian Mono Variable", ui-monospace, monospace;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, "Cascadia Mono", monospace;
 
   /* Chrome sizes */
   --title-bar-h: 48px;
@@ -100,61 +103,64 @@
 }
 
 
-/* Light theme: the same harbor, in daylight. Warm paper surfaces, graphite ink,
-   and a deeper mustard wherever the accent has to be read rather than filled. */
+/* Light theme: the same harbor, in daylight. Near-white work surfaces on a soft
+   stone frame: chrome and list columns step down in tone so the three regions read
+   apart without borders doing all the work. Ink is near-black graphite; the accent
+   turns to deep mustard wherever it has to be read rather than filled. */
 :root[data-theme="light"] {
   color-scheme: light;
 
-  --bg-chrome: #ebe8e1;
-  --bg-sidebar: #f0eee8;
-  --bg-app: #f7f5f0;
-  --bg-panel: #fdfcf9;
-  --bg-raised: #f1eee7;
-  --bg-hover: #e6e2d9;
-  --bg-overlay: #fdfcf9;
-  --bg-console: #f2efe8;
-  --scrim: rgba(40, 36, 28, 0.3);
+  --bg-chrome: #e9e7e1;
+  --bg-sidebar: #f1efea;
+  --bg-app: #f9f8f5;
+  --bg-panel: #ffffff;
+  --bg-raised: #f2f0eb;
+  --bg-hover: #e8e5de;
+  --bg-overlay: #ffffff;
+  --bg-console: #f5f4f0;
+  --scrim: rgba(30, 27, 20, 0.34);
 
-  --line: #dcd7cc;
-  --line-strong: #c9c3b6;
-  --line-overlay: #bfb8aa;
-  --line-badge: #aaa396;
+  --line: #dedad1;
+  --line-strong: #c7c1b4;
+  --line-overlay: #c2bcaf;
+  --line-badge: #a29c8f;
 
-  --text: #1d1c19;
-  --text-soft: #3a3832;
-  --text-muted: #5e5b53;
-  --text-faint: #8b877c;
+  --text: #16150f;
+  --text-soft: #34322b;
+  --text-muted: #57544b;
+  --text-faint: #858174;
+  --icon: #45423a;
 
-  --accent: #e8c547;
-  --accent-fg: #7f5f00;
-  --accent-ink: #1d1c19;
-  --accent-tint: #f5eac0;
-  --accent-panel: #faf4dd;
-  --accent-panel-border: #e3d08a;
-  --accent-active: #f3ead0;
+  --accent: #ecc94b;
+  --accent-fg: #765700;
+  --accent-ink: #16150f;
+  --accent-tint: #f9ecbd;
+  --accent-panel: #fdf6dc;
+  --accent-panel-border: #e7cf7c;
+  --accent-active: #f8eecb;
 
-  --success: #1a7148;
-  --success-pill: #dcefe3;
-  --success-panel: #eef6f0;
-  --success-border: #b5d8c3;
-  --error: #c8492b;
+  --success: #13683f;
+  --success-pill: #d8eedf;
+  --success-panel: #effaf2;
+  --success-border: #a9d6b9;
+  --error: #c4421f;
   --error-ink: #fffaf7;
-  --error-text: #a33a1f;
-  --error-pill: #f9e3dc;
-  --error-panel: #fbefea;
-  --error-border: #e8b6a6;
-  --error-row: #fbefeb;
-  --error-log: #fae7e1;
-  --warning-panel: #fbf3d9;
-  --warning-border: #e0c977;
-  --info: #2c62c9;
-  --idle: #8f8b80;
+  --error-text: #9c3214;
+  --error-pill: #fbe2d9;
+  --error-panel: #fdf0eb;
+  --error-border: #eeb3a0;
+  --error-row: #fdf0ec;
+  --error-log: #fce6df;
+  --warning-panel: #fdf5da;
+  --warning-border: #e3c86a;
+  --info: #2459c2;
+  --idle: #8b877a;
 
-  --svc-orange: #b45a14;
-  --svc-violet: #7a4cc2;
+  --svc-orange: #a8510f;
+  --svc-violet: #6f43b8;
 
-  --shadow-menu: 0 12px 32px rgba(60, 50, 30, 0.14);
-  --shadow-dialog: 0 24px 64px rgba(60, 50, 30, 0.2);
+  --shadow-menu: 0 12px 32px rgba(48, 40, 20, 0.14), 0 2px 6px rgba(48, 40, 20, 0.06);
+  --shadow-dialog: 0 24px 64px rgba(48, 40, 20, 0.2), 0 4px 12px rgba(48, 40, 20, 0.08);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -177,8 +183,8 @@ body {
   background: var(--bg-app);
   color: var(--text);
   font-family: var(--font-sans);
-  font-size: 13px;
-  line-height: 1.45;
+  font-size: 14px;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   user-select: none;
 }
@@ -254,13 +260,16 @@ button:not(:disabled):active {
 
 .mono {
   font-family: var(--font-mono);
+  font-feature-settings: "zero" 0, "calt" 0;
+  font-variant-numeric: tabular-nums;
 }
 
 /* Mono label: section eyebrows, table headers, badges. */
 .eyebrow {
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.09em;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-muted);
 }

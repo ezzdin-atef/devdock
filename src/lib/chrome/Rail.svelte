@@ -59,7 +59,7 @@
     border: 0;
     border-radius: var(--radius-row);
     background: transparent;
-    color: var(--text-muted);
+    color: var(--icon);
     cursor: pointer;
     transition: background var(--t-fast) var(--ease);
   }
@@ -72,6 +72,6 @@
     font-weight: 600;
   }
   .label {
-    font-size: 10.5px;
+    font-size: 11.5px;
   }
 </style>

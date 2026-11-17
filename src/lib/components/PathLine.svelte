@@ -7,7 +7,7 @@
   let {
     path,
     tail = 4,
-    size = 12,
+    size = 12.5,
     wrap = false,
   }: { path: string; tail?: number; size?: number; wrap?: boolean } = $props();
 
@@ -69,7 +69,7 @@
     border: 0;
     border-radius: var(--radius-button-sm);
     background: transparent;
-    color: var(--text-faint);
+    color: var(--icon);
     cursor: pointer;
     opacity: 0.7;
     transition:
@@ -80,7 +80,7 @@
   .path-line:hover .copy,
   .copy:focus-visible {
     opacity: 1;
-    color: var(--text-muted);
+    color: var(--icon);
   }
   .copy:hover {
     background: var(--bg-hover);

@@ -56,7 +56,7 @@
   }
   .message {
     font-weight: 600;
-    font-size: 13.5px;
+    font-size: 14.5px;
   }
   .error .message {
     color: var(--error-text);

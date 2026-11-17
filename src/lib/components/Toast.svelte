@@ -25,7 +25,7 @@
     border: 1px solid var(--line-overlay);
     border-radius: var(--radius-row);
     box-shadow: var(--shadow-menu);
-    font-size: 13px;
+    font-size: 14px;
     animation: dd-enter 220ms var(--ease);
   }
   .ok :global(svg) {
