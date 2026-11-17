@@ -10,6 +10,7 @@ an agent CLI) opened in the right folder.
 
 ![Overview](docs/screenshots/overview.png)
 
+- **Website:** [ezzdin-atef.github.io/devdock](https://ezzdin-atef.github.io/devdock/)
 - **Version:** 0.3.0 ([changelog](CHANGELOG.md))
 - **Platform:** Windows 10/11 (x64)
 - **Stack:** Rust + Tauri 2, Svelte 5 UI
