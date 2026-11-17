@@ -4,8 +4,27 @@
     {
       "name": "site",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "4321", "-d", "_site"],
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "4321",
+        "-d",
+        "_site"
+      ],
       "port": 4321
+    },
+    {
+      "name": "web",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "exec",
+        "vite",
+        "dev",
+        "--port",
+        "1431",
+        "--strictPort"
+      ],
+      "port": 1431
     }
   ]
 }

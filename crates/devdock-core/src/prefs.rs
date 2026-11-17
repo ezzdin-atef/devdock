@@ -14,6 +14,15 @@ pub struct Settings {
     pub agent: AgentId,
     /// Check a command's known port before starting it (T5.5).
     pub check_ports: bool,
+    /// Commands without their own port setting get a saved auto-picked port.
+    pub auto_port: bool,
+    /// Serve `http://<name>.localhost` with no port, through DevDock's proxy. On by
+    /// default; each project can opt out.
+    pub proxy: bool,
+    pub proxy_port: u16,
+    /// Also serve `https://<name>.localhost` (needs DevDock's certificate trusted).
+    pub https: bool,
+    pub https_port: u16,
 }
 
 impl Default for Settings {
@@ -23,6 +32,11 @@ impl Default for Settings {
             terminal: TerminalKind::WindowsTerminal,
             agent: AgentId::Claude,
             check_ports: true,
+            auto_port: false,
+            proxy: true,
+            proxy_port: 80,
+            https: false,
+            https_port: 443,
         }
     }
 }

@@ -430,6 +430,60 @@ impl Runner {
     }
 
     /// Forgets finished runs of a project (when it is removed from DevDock).
+    /// Empties a run's log (and its FAILED message). The run itself stays.
+    /// Returns false when there is no such run.
+    pub fn clear_logs(&self, key: &RunKey) -> bool {
+        let Some(run) = self.get(key) else {
+            return false;
+        };
+        lock(&run.logs).clear();
+        {
+            let mut inner = lock(&run.inner);
+            if !inner.state.is_active() {
+                inner.last_error = None;
+            }
+        }
+        (self.notify)(key, Change::Logs);
+        (self.notify)(key, Change::State);
+        true
+    }
+
+    /// Forgets a finished run: its state, error and log go, as if it never ran
+    /// this session. A run still going is kept. Returns whether it was removed.
+    pub fn forget(&self, key: &RunKey) -> bool {
+        let removed = {
+            let mut runs = lock(&self.runs);
+            match runs.get(key) {
+                Some(r) if !lock(&r.inner).state.is_active() => runs.remove(key).is_some(),
+                _ => false,
+            }
+        };
+        if removed {
+            (self.notify)(key, Change::State);
+        }
+        removed
+    }
+
+    /// Forgets every finished run (the Running screen's history). Returns how many.
+    pub fn forget_finished(&self) -> usize {
+        let gone: Vec<RunKey> = {
+            let mut runs = lock(&self.runs);
+            let gone: Vec<RunKey> = runs
+                .iter()
+                .filter(|(_, r)| !lock(&r.inner).state.is_active())
+                .map(|(k, _)| k.clone())
+                .collect();
+            for k in &gone {
+                runs.remove(k);
+            }
+            gone
+        };
+        for k in &gone {
+            (self.notify)(k, Change::State);
+        }
+        gone.len()
+    }
+
     pub fn forget_project(&self, project: &ProjectId) {
         lock(&self.runs)
             .retain(|k, r| &k.project_id != project || lock(&r.inner).state.is_active());
@@ -581,6 +635,31 @@ mod tests {
         assert!(r.wait_ended(&k, Duration::from_secs(10)));
         assert_eq!(r.info(&k).unwrap().state, RunState::Stopped);
         assert_eq!(r.active_count(), 0);
+    }
+
+    #[test]
+    fn clearing_logs_and_forgetting_finished_runs() {
+        let (r, _) = runner();
+        let k = key("echo");
+        r.start(k.clone(), label(), spec("echo hello & exit 3"))
+            .unwrap();
+        assert!(r.wait_ended(&k, Duration::from_secs(10)));
+        assert!(r.info(&k).unwrap().last_error.is_some());
+        assert!(!texts(&r, &k).is_empty());
+
+        assert!(r.clear_logs(&k));
+        assert!(texts(&r, &k).is_empty());
+        assert!(r.info(&k).unwrap().last_error.is_none());
+
+        let long = key("long");
+        r.start(long.clone(), label(), spec("ping -n 30 127.0.0.1 >nul"))
+            .unwrap();
+        assert!(!r.forget(&long), "a running command is kept");
+        assert_eq!(r.forget_finished(), 1);
+        assert!(r.info(&k).is_none());
+        assert!(r.info(&long).is_some());
+        r.stop_all(Duration::from_secs(5));
+        assert!(r.forget(&long));
     }
 
     #[test]

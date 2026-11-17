@@ -10,10 +10,12 @@ use crate::agents::{AgentId, KEEP_LAUNCHES, LaunchRecord, LaunchSpec, TerminalKi
 use crate::detect::detect;
 use crate::error::ProjectError;
 use crate::git::{Depth, GitCache, GitStatus, Snapshot};
+use crate::groups::{self, Group, GroupId};
 use crate::library::{self, Counts, Flags, Query};
 use crate::paths;
 use crate::prefs::{SLOTS, Settings, Shortcut, valid_editor};
 use crate::project::{Project, ProjectId};
+use crate::run::serve::{self, PortMode, RunPrefs};
 use crate::run::{CommandId, CustomCommand, Discovered, discover, validate_custom};
 use crate::scan::Candidate;
 use crate::store::{Saved, ScanRoot, VERSION};
@@ -34,6 +36,14 @@ pub struct AppState {
     settings: Settings,
     shortcuts: Vec<Shortcut>,
     workspaces: Vec<Workspace>,
+    groups: Vec<Group>,
+}
+
+fn host_of(project: &Project) -> String {
+    project
+        .domain
+        .clone()
+        .unwrap_or_else(|| serve::default_domain(&project.name))
 }
 
 /// A poisoned lock only means another thread panicked mid-update; the data is still
@@ -53,6 +63,10 @@ pub struct ProjectView<'a> {
     pub is_new: bool,
     /// Last known git status; absent until the first refresh finishes.
     pub git: Option<&'a Snapshot<GitStatus>>,
+    /// The `*.localhost` name the project opens at (saved or derived).
+    pub host: String,
+    /// Whether its packages are installed; absent when there is nothing to install.
+    pub deps: Option<crate::deps::DepsStatus>,
 }
 
 #[derive(Debug, Serialize)]
@@ -60,6 +74,7 @@ pub struct ProjectView<'a> {
 pub struct LibraryView<'a> {
     pub projects: Vec<ProjectView<'a>>,
     pub counts: Counts,
+    pub groups: &'a [Group],
     pub scan_roots: &'a [ScanRoot],
     pub scanning: bool,
 }
@@ -71,6 +86,7 @@ impl AppState {
             settings: saved.settings,
             shortcuts: saved.shortcuts,
             workspaces: saved.workspaces,
+            groups: saved.groups,
             ..Self::default()
         };
         // Re-derive ids so a file edited by hand can't hold two copies of one folder.
@@ -92,6 +108,7 @@ impl AppState {
             settings: self.settings.clone(),
             shortcuts: self.shortcuts.clone(),
             workspaces: self.workspaces.clone(),
+            groups: self.groups.clone(),
         }
     }
 
@@ -106,6 +123,7 @@ impl AppState {
                 .map(|p| self.view_of(p))
                 .collect(),
             counts: library::counts(&self.projects, q, &flags),
+            groups: &self.groups,
             scan_roots: &self.scan_roots,
             scanning: self.scanning,
         }
@@ -116,6 +134,12 @@ impl AppState {
             missing: self.missing.contains(&project.id),
             is_new: self.new_ids.contains(&project.id),
             git: self.git.status(&project.id),
+            host: host_of(project),
+            deps: if self.missing.contains(&project.id) {
+                None
+            } else {
+                crate::deps::check(&project.path)
+            },
             project,
         }
     }
@@ -154,6 +178,16 @@ impl AppState {
                 settings.editor
             )));
         }
+        if settings.proxy_port == 0 || settings.https_port == 0 {
+            return Err(ProjectError::InvalidCommand(
+                "Pick a port between 1 and 65535 for the proxy.".into(),
+            ));
+        }
+        if settings.https && settings.proxy_port == settings.https_port {
+            return Err(ProjectError::InvalidCommand(
+                "HTTP and HTTPS need different ports.".into(),
+            ));
+        }
         self.settings = settings;
         Ok(())
     }
@@ -183,6 +217,36 @@ impl AppState {
     ) -> Result<(), ProjectError> {
         crate::activity::push(&mut self.get_mut(id)?.activity, entry);
         Ok(())
+    }
+
+    /// Clears a project's recent activity and launch history.
+    pub fn clear_history(&mut self, id: &ProjectId) -> Result<(), ProjectError> {
+        let project = self.get_mut(id)?;
+        project.activity.clear();
+        project.launches.clear();
+        Ok(())
+    }
+
+    /// Clears activity and launch history for every project. Returns how many
+    /// projects had any.
+    pub fn clear_all_history(&mut self) -> usize {
+        let mut n = 0;
+        for p in &mut self.projects {
+            if !p.activity.is_empty() || !p.launches.is_empty() {
+                n += 1;
+            }
+            p.activity.clear();
+            p.launches.clear();
+        }
+        n
+    }
+
+    /// Forgets every learned port (from earlier runs' output). Saved auto and
+    /// fixed ports stay.
+    pub fn clear_learned_ports(&mut self) {
+        for p in &mut self.projects {
+            p.ports.clear();
+        }
     }
 
     pub fn record_launch(
@@ -227,6 +291,170 @@ impl AppState {
 
     pub fn shortcut(&self, slot: u8) -> Option<&Shortcut> {
         self.shortcuts.iter().find(|s| s.slot == slot)
+    }
+
+    pub fn groups(&self) -> &[Group] {
+        &self.groups
+    }
+
+    /// A new group (folder) at the end of the list. Returns its id.
+    pub fn create_group(&mut self, name: &str, now: u64) -> Result<GroupId, ProjectError> {
+        let name = name.trim();
+        if name.is_empty() {
+            return Err(ProjectError::EmptyName);
+        }
+        if self
+            .groups
+            .iter()
+            .any(|g| g.name.eq_ignore_ascii_case(name))
+        {
+            return Err(ProjectError::InvalidCommand(format!(
+                "There's already a group called {name}."
+            )));
+        }
+        let id = GroupId(format!(
+            "g{:015x}",
+            paths::stable_hash(&format!("{name}{now}")) >> 4
+        ));
+        // Each new group takes the next colour, so neighbours differ.
+        let color = groups::COLORS[self.groups.len() % groups::COLORS.len()].to_owned();
+        self.groups.push(Group {
+            id: id.clone(),
+            name: name.to_owned(),
+            color,
+        });
+        Ok(id)
+    }
+
+    pub fn update_group(
+        &mut self,
+        id: &GroupId,
+        name: Option<&str>,
+        color: Option<&str>,
+    ) -> Result<(), ProjectError> {
+        if let Some(n) = name.map(str::trim) {
+            if n.is_empty() {
+                return Err(ProjectError::EmptyName);
+            }
+            if self
+                .groups
+                .iter()
+                .any(|g| &g.id != id && g.name.eq_ignore_ascii_case(n))
+            {
+                return Err(ProjectError::InvalidCommand(format!(
+                    "There's already a group called {n}."
+                )));
+            }
+        }
+        if let Some(c) = color
+            && !groups::valid_color(c)
+        {
+            return Err(ProjectError::InvalidCommand(format!(
+                "{c} isn't a group colour."
+            )));
+        }
+        let g = self
+            .groups
+            .iter_mut()
+            .find(|g| &g.id == id)
+            .ok_or_else(|| ProjectError::InvalidCommand("That group no longer exists.".into()))?;
+        if let Some(n) = name {
+            g.name = n.trim().to_owned();
+        }
+        if let Some(c) = color {
+            g.color = c.to_owned();
+        }
+        Ok(())
+    }
+
+    /// Moves a group up or down the list by `delta` places.
+    pub fn move_group(&mut self, id: &GroupId, delta: i32) {
+        let Some(i) = self.groups.iter().position(|g| &g.id == id) else {
+            return;
+        };
+        let last = self.groups.len().saturating_sub(1);
+        let j = i.saturating_add_signed(delta as isize).min(last);
+        let g = self.groups.remove(i);
+        self.groups.insert(j, g);
+    }
+
+    /// Moves a group to position `index` (dragging it in the list).
+    pub fn reorder_group(&mut self, id: &GroupId, index: usize) {
+        let Some(i) = self.groups.iter().position(|g| &g.id == id) else {
+            return;
+        };
+        let g = self.groups.remove(i);
+        let j = index.min(self.groups.len());
+        self.groups.insert(j, g);
+    }
+
+    /// Deletes a group. Its projects stay, ungrouped.
+    pub fn delete_group(&mut self, id: &GroupId) {
+        self.groups.retain(|g| &g.id != id);
+        for p in &mut self.projects {
+            if p.group.as_ref() == Some(id) {
+                p.group = None;
+            }
+        }
+    }
+
+    /// Drag and drop: puts `ids` next to `anchor` (before it, or after it with
+    /// `after`), keeping their own order. With `group`, they also join that group
+    /// (`Some(None)` = ungrouped). The saved order is the manual sort order.
+    pub fn place_projects(
+        &mut self,
+        ids: &[ProjectId],
+        anchor: &ProjectId,
+        after: bool,
+        group: Option<Option<&GroupId>>,
+    ) -> Result<(), ProjectError> {
+        if ids.contains(anchor) {
+            return Ok(());
+        }
+        self.get(anchor)?;
+        if let Some(Some(g)) = group
+            && !self.groups.iter().any(|x| &x.id == g)
+        {
+            return Err(ProjectError::InvalidCommand(
+                "That group no longer exists.".into(),
+            ));
+        }
+        let mut moved = Vec::new();
+        for id in ids {
+            let i = self
+                .find(id)
+                .ok_or_else(|| ProjectError::UnknownId(id.clone()))?;
+            moved.push(self.projects.remove(i));
+        }
+        if let Some(g) = group {
+            for p in &mut moved {
+                p.group = g.cloned();
+            }
+        }
+        let at = self
+            .find(anchor)
+            .map_or(self.projects.len(), |i| i + usize::from(after));
+        self.projects.splice(at..at, moved);
+        Ok(())
+    }
+
+    /// Puts projects in a group (`None` = take them out of any group).
+    pub fn set_group(
+        &mut self,
+        ids: &[ProjectId],
+        group: Option<&GroupId>,
+    ) -> Result<(), ProjectError> {
+        if let Some(g) = group
+            && !self.groups.iter().any(|x| &x.id == g)
+        {
+            return Err(ProjectError::InvalidCommand(
+                "That group no longer exists.".into(),
+            ));
+        }
+        for id in ids {
+            self.get_mut(id)?.group = group.cloned();
+        }
+        Ok(())
     }
 
     pub fn workspaces(&self) -> &[Workspace] {
@@ -402,6 +630,135 @@ impl AppState {
 
     pub fn known_port(&self, id: &ProjectId, command: &CommandId) -> Option<u16> {
         self.get(id).ok()?.ports.get(&command.0).copied()
+    }
+
+    /// A command's port settings; defaults when it has none.
+    pub fn run_prefs(&self, id: &ProjectId, command: &CommandId) -> RunPrefs {
+        self.get(id)
+            .ok()
+            .and_then(|p| p.run_prefs.get(&command.0).cloned())
+            .unwrap_or_default()
+    }
+
+    /// Saves a command's port settings (Run tab). Switching to auto keeps an
+    /// auto-picked port; a fixed mode needs a port.
+    pub fn set_run_prefs(
+        &mut self,
+        id: &ProjectId,
+        command: &CommandId,
+        mode: Option<PortMode>,
+        port: Option<u16>,
+        port_args: Option<&str>,
+    ) -> Result<(), ProjectError> {
+        let auto_default = self.settings.auto_port;
+        let project = self.get_mut(id)?;
+        let old = project
+            .run_prefs
+            .get(&command.0)
+            .cloned()
+            .unwrap_or_default();
+        let port_args = port_args
+            .map(serve::validate_port_args)
+            .transpose()
+            .map_err(ProjectError::InvalidCommand)?;
+        let port = match mode.unwrap_or(if auto_default {
+            PortMode::Auto
+        } else {
+            PortMode::Default
+        }) {
+            PortMode::Default => None,
+            PortMode::Fixed => Some(port.filter(|p| *p > 0).ok_or_else(|| {
+                ProjectError::InvalidCommand("Type the port this command should use.".into())
+            })?),
+            PortMode::Auto => (old.mode(auto_default) == PortMode::Auto)
+                .then_some(old.port)
+                .flatten(),
+        };
+        let prefs = RunPrefs {
+            port_mode: mode,
+            port,
+            port_args,
+        };
+        if prefs.is_empty() {
+            project.run_prefs.remove(&command.0);
+        } else {
+            project.run_prefs.insert(command.0.clone(), prefs);
+        }
+        Ok(())
+    }
+
+    /// Saves the port auto mode picked for a command.
+    pub fn assign_port(&mut self, id: &ProjectId, command: &CommandId, port: u16) {
+        if let Ok(project) = self.get_mut(id) {
+            project.run_prefs.entry(command.0.clone()).or_default().port = Some(port);
+        }
+    }
+
+    /// Ports saved for every command except `skip`; auto mode won't hand them out.
+    pub fn reserved_ports(&self, skip: (&ProjectId, &CommandId)) -> HashSet<u16> {
+        self.projects
+            .iter()
+            .flat_map(|p| {
+                p.run_prefs
+                    .iter()
+                    .filter(move |(c, _)| !(&p.id == skip.0 && **c == skip.1.0))
+                    .filter_map(|(_, r)| r.port)
+            })
+            .collect()
+    }
+
+    /// Sets the project's `*.localhost` name; empty resets it to the default.
+    pub fn set_domain(&mut self, id: &ProjectId, domain: &str) -> Result<String, ProjectError> {
+        let domain = if domain.trim().is_empty() {
+            None
+        } else {
+            Some(serve::normalize_domain(domain).map_err(ProjectError::InvalidCommand)?)
+        };
+        if let Some(d) = &domain
+            && let Some(other) = self
+                .projects
+                .iter()
+                .find(|p| &p.id != id && host_of(p) == *d)
+        {
+            return Err(ProjectError::InvalidCommand(format!(
+                "{d} is already used by {}.",
+                other.name
+            )));
+        }
+        let project = self.get_mut(id)?;
+        project.domain = domain;
+        Ok(host_of(project))
+    }
+
+    /// Sets the project's address and whether its port is hidden (`None` =
+    /// follow Settings). Returns the address now in use.
+    pub fn set_address(
+        &mut self,
+        id: &ProjectId,
+        domain: &str,
+        hide_port: Option<bool>,
+    ) -> Result<String, ProjectError> {
+        let host = self.set_domain(id, domain)?;
+        self.get_mut(id)?.hide_port = hide_port;
+        Ok(host)
+    }
+
+    /// Whether this project opens without a port (through the proxy).
+    pub fn hides_port(&self, id: &ProjectId) -> bool {
+        self.get(id)
+            .ok()
+            .and_then(|p| p.hide_port)
+            .unwrap_or(self.settings.proxy)
+    }
+
+    /// The proxy is needed when Settings turn it on for everyone, or any one
+    /// project asks for it.
+    pub fn wants_proxy(&self) -> bool {
+        self.settings.proxy || self.projects.iter().any(|p| p.hide_port == Some(true))
+    }
+
+    pub fn host(&self, id: &ProjectId) -> Result<String, ProjectError> {
+        Ok(host_of(self.get(id)?))
     }
 
     pub fn git(&self) -> &GitCache {
@@ -580,6 +937,7 @@ impl AppState {
         if project.commands.len() == before {
             return Err(ProjectError::UnknownCommand(command.0.clone()));
         }
+        project.run_prefs.remove(&command.0);
         Ok(())
     }
 
@@ -844,5 +1202,174 @@ mod tests {
             s.remove_command(&id, &cmd),
             Err(ProjectError::UnknownCommand(_))
         ));
+    }
+
+    #[test]
+    fn port_prefs_keep_auto_ports_and_need_a_fixed_port() {
+        let dir = tempfile::tempdir().unwrap();
+        let mut s = state_with(&[dir.path()]);
+        let id = s.projects[0].id.clone();
+        let cmd = CommandId("script:dev".into());
+
+        s.set_run_prefs(&id, &cmd, Some(PortMode::Auto), None, None)
+            .unwrap();
+        s.assign_port(&id, &cmd, 4500);
+        // Re-saving auto (e.g. a new flag) keeps the picked port.
+        s.set_run_prefs(&id, &cmd, Some(PortMode::Auto), None, Some("-p {port}"))
+            .unwrap();
+        assert_eq!(s.run_prefs(&id, &cmd).port, Some(4500));
+        assert!(s.reserved_ports((&id, &cmd)).is_empty());
+        assert!(
+            s.reserved_ports((&id, &CommandId("other".into())))
+                .contains(&4500)
+        );
+
+        assert!(
+            s.set_run_prefs(&id, &cmd, Some(PortMode::Fixed), None, None)
+                .is_err()
+        );
+        assert!(
+            s.set_run_prefs(&id, &cmd, None, None, Some("--port"))
+                .is_err()
+        );
+        s.set_run_prefs(&id, &cmd, Some(PortMode::Fixed), Some(3005), None)
+            .unwrap();
+        assert_eq!(s.run_prefs(&id, &cmd).port, Some(3005));
+
+        // Back to "follow settings" with no flag drops the entry.
+        s.set_run_prefs(&id, &cmd, None, None, None).unwrap();
+        assert!(s.projects[0].run_prefs.is_empty());
+    }
+
+    #[test]
+    fn hiding_the_port_follows_settings_unless_the_project_says() {
+        let a = tempfile::tempdir().unwrap();
+        let mut s = state_with(&[a.path()]);
+        let id = s.projects[0].id.clone();
+        // Hidden by default.
+        assert!(s.hides_port(&id) && s.wants_proxy());
+        let mut settings = s.settings().clone();
+        settings.proxy = false;
+        s.set_settings(settings).unwrap();
+        assert!(!s.hides_port(&id) && !s.wants_proxy());
+        s.set_address(&id, "shop.test", Some(true)).unwrap();
+        assert_eq!(s.host(&id).unwrap(), "shop.test");
+        assert!(s.hides_port(&id) && s.wants_proxy());
+        s.set_address(&id, "shop.test", None).unwrap();
+        assert!(!s.wants_proxy());
+        let mut settings = s.settings().clone();
+        settings.proxy = true;
+        s.set_settings(settings).unwrap();
+        assert!(s.hides_port(&id));
+        s.set_address(&id, "shop.test", Some(false)).unwrap();
+        assert!(!s.hides_port(&id) && s.wants_proxy());
+    }
+
+    #[test]
+    fn groups_hold_projects_like_folders() {
+        let a = tempfile::tempdir().unwrap();
+        let b = tempfile::tempdir().unwrap();
+        let mut s = state_with(&[a.path(), b.path()]);
+        let (ia, ib) = (s.projects[0].id.clone(), s.projects[1].id.clone());
+        let client = s.create_group("Client work", 1).unwrap();
+        let labs = s.create_group("Labs", 2).unwrap();
+        assert!(s.create_group("client WORK", 3).is_err());
+        assert_ne!(s.groups[0].color, s.groups[1].color);
+
+        s.set_group(&[ia.clone(), ib.clone()], Some(&client))
+            .unwrap();
+        let q = Query {
+            group: Some(client.0.clone()),
+            ..Query::default()
+        };
+        assert_eq!(s.view(&q).projects.len(), 2);
+        assert_eq!(s.view(&Query::default()).counts.groups[&client.0], 2);
+
+        s.set_group(std::slice::from_ref(&ib), None).unwrap();
+        let q = Query {
+            group: Some(crate::library::UNGROUPED.into()),
+            ..Query::default()
+        };
+        assert_eq!(s.view(&q).projects.len(), 1);
+
+        s.move_group(&labs, -1);
+        assert_eq!(s.groups[0].id, labs);
+        s.move_group(&labs, -5);
+        assert_eq!(s.groups[0].id, labs);
+        s.update_group(&labs, Some("Lab"), Some("teal")).unwrap();
+        s.update_group(&labs, None, Some("#ff8800")).unwrap();
+        let third = s.create_group("Third", 4).unwrap();
+        s.reorder_group(&third, 0);
+        assert_eq!(s.groups[0].id, third);
+        s.reorder_group(&third, 99);
+        assert_eq!(s.groups.last().unwrap().id, third);
+        assert!(s.update_group(&labs, None, Some("neon")).is_err());
+
+        s.delete_group(&client);
+        assert!(s.get(&ia).unwrap().group.is_none());
+        assert!(s.set_group(&[ia], Some(&client)).is_err());
+        // Saved and loaded back.
+        assert_eq!(AppState::from_saved(s.to_saved()).groups().len(), 2);
+    }
+
+    #[test]
+    fn placing_projects_sets_the_manual_order_and_group() {
+        let dirs: Vec<_> = (0..4).map(|_| tempfile::tempdir().unwrap()).collect();
+        let paths: Vec<&Path> = dirs.iter().map(|d| d.path()).collect();
+        let mut s = state_with(&paths);
+        let id = |i: usize| s.projects[i].id.clone();
+        let (a, b, c, d) = (id(0), id(1), id(2), id(3));
+        let manual = Query {
+            sort: crate::library::SortBy::Manual,
+            ..Query::default()
+        };
+        let order = |s: &AppState| -> Vec<ProjectId> {
+            s.view(&manual)
+                .projects
+                .iter()
+                .map(|v| v.project.id.clone())
+                .collect()
+        };
+        assert_eq!(order(&s), [a.clone(), b.clone(), c.clone(), d.clone()]);
+
+        s.place_projects(std::slice::from_ref(&d), &a, false, None)
+            .unwrap();
+        assert_eq!(order(&s), [d.clone(), a.clone(), b.clone(), c.clone()]);
+        s.place_projects(&[d.clone(), a.clone()], &c, true, None)
+            .unwrap();
+        assert_eq!(order(&s), [b.clone(), c.clone(), d.clone(), a.clone()]);
+        // Dropping on itself changes nothing.
+        s.place_projects(std::slice::from_ref(&b), &b, true, None)
+            .unwrap();
+        assert_eq!(order(&s)[0], b);
+
+        let g = s.create_group("Work", 1).unwrap();
+        s.place_projects(std::slice::from_ref(&a), &b, false, Some(Some(&g)))
+            .unwrap();
+        assert_eq!(order(&s)[0], a);
+        assert_eq!(s.get(&a).unwrap().group.as_ref(), Some(&g));
+        s.place_projects(std::slice::from_ref(&a), &d, true, Some(None))
+            .unwrap();
+        assert!(s.get(&a).unwrap().group.is_none());
+        // Survives saving.
+        let back = AppState::from_saved(s.to_saved());
+        assert_eq!(order(&back), order(&s));
+    }
+
+    #[test]
+    fn domains_default_from_the_name_and_must_be_unique() {
+        let a = tempfile::tempdir().unwrap();
+        let b = tempfile::tempdir().unwrap();
+        let mut s = state_with(&[a.path(), b.path()]);
+        let (ia, ib) = (s.projects[0].id.clone(), s.projects[1].id.clone());
+        s.rename(&ia, "My Shop").unwrap();
+        assert_eq!(s.host(&ia).unwrap(), "my-shop.localhost");
+        assert_eq!(s.set_domain(&ib, "store").unwrap(), "store.localhost");
+        assert!(s.set_domain(&ia, "store.localhost").is_err());
+        assert_eq!(s.set_domain(&ib, " ").unwrap(), default_name_host(&s, &ib));
+    }
+
+    fn default_name_host(s: &AppState, id: &ProjectId) -> String {
+        serve::default_domain(&s.get(id).unwrap().name)
     }
 }

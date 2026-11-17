@@ -37,6 +37,17 @@
   --accent-panel: #1e1e1b;
   --accent-panel-border: #3a3a33;
   --accent-active: #2a2a24;
+  /* Accent fill on hover / while pressed: lighter in dark mode. */
+  --accent-hover: #f0d26a;
+  --accent-press: #d8b53a;
+
+  /* Secondary buttons: rest, hover, pressed. Explicit colours, not a filter,
+     so hover reads the same in both themes. */
+  --btn-bg: #202125;
+  --btn-border: #34363c;
+  --btn-hover: #2b2d32;
+  --btn-hover-border: #4a4c52;
+  --btn-press: #1c1d20;
 
   /* Status */
   --success: #7bd3a8;
@@ -138,6 +149,16 @@
   --accent-panel: #fff9e3;
   --accent-panel-border: #ebd27f;
   --accent-active: #fbf2d2;
+  /* On a light page, hover darkens. */
+  --accent-hover: #e2bb2e;
+  --accent-press: #d1a91d;
+
+  /* White on the off-white page, with a visible edge, so buttons stand out. */
+  --btn-bg: #ffffff;
+  --btn-border: #c9cdd3;
+  --btn-hover: #eef0f3;
+  --btn-hover-border: #9ca2ab;
+  --btn-press: #e2e5e9;
 
   --success: #13683f;
   --success-pill: #d8efe1;
@@ -297,4 +318,35 @@ button:not(:disabled):active {
 }
 ::-webkit-scrollbar-button {
   display: none;
+}
+
+/* While dragging a project onto a group. */
+body.dragging,
+body.dragging * {
+  cursor: grabbing !important;
+  user-select: none !important;
+}
+
+/* Dragging projects: the groups they can go into get a faint outline. Not while
+   aiming between two projects (the insertion line says it all), and never around
+   whole sections, which would box in the page. */
+body.dragging-projects:not(.placing) [data-drop-group]:not(.drop):not(.cards-grid):not(.rows) {
+  outline: 1px dashed color-mix(in srgb, var(--accent-fg) 30%, transparent);
+  outline-offset: -1px;
+}
+/* Dragging a group: a line shows where it lands. */
+[data-group-slot][data-axis="y"][data-slot="before"] {
+  box-shadow: inset 0 2px 0 var(--accent-fg);
+}
+[data-group-slot][data-axis="y"][data-slot="after"] {
+  box-shadow: inset 0 -2px 0 var(--accent-fg);
+}
+[data-group-slot][data-axis="x"][data-slot="before"] {
+  box-shadow: inset 3px 0 0 var(--accent-fg);
+}
+[data-group-slot][data-axis="x"][data-slot="after"] {
+  box-shadow: inset -3px 0 0 var(--accent-fg);
+}
+body.dragging-group [data-group-slot] {
+  cursor: grabbing;
 }

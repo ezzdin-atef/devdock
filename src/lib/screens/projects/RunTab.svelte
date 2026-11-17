@@ -1,12 +1,15 @@
 <script lang="ts">
+  import Select from "$lib/components/Select.svelte";
+  import { app } from "$lib/app.svelte";
   import Button from "$lib/components/Button.svelte";
   import Console from "$lib/components/Console.svelte";
   import Icon from "$lib/components/Icon.svelte";
   import StatePill from "$lib/components/StatePill.svelte";
+  import AddressPanel from "./AddressPanel.svelte";
   import ConflictBanner from "./ConflictBanner.svelte";
   import { duration, relativeTime } from "$lib/format";
   import { runKey, runs } from "$lib/runs.svelte";
-  import { isActive, type Project, type RunCommand, type RunInfo } from "$lib/types";
+  import { isActive, type PortMode, type Project, type RunCommand, type RunInfo } from "$lib/types";
 
   let { project }: { project: Project } = $props();
 
@@ -72,6 +75,68 @@
     void shown.length;
     rowsEl?.querySelector('[aria-current="true"]')?.closest("li")?.scrollIntoView({ block: "nearest" });
   });
+
+  // Port settings panel for the selected command (and the project's address).
+  type FlagChoice = "auto" | "env" | "custom";
+  let portOpen = $state(false);
+  let addressOpen = $state(false);
+  let pform = $state({ mode: "default" as PortMode, port: "", flag: "auto" as FlagChoice, args: "" });
+  $effect(() => {
+    void selectedId;
+    portOpen = false;
+  });
+
+  function openPortForm(c: RunCommand) {
+    pform = {
+      mode: c.portMode,
+      port: c.portMode === "fixed" && c.port ? String(c.port) : "",
+      flag: c.portArgs == null ? "auto" : c.portArgs === "" ? "env" : "custom",
+      args: c.portArgs ?? "",
+    };
+    portOpen = true;
+  }
+
+  async function savePorts(c: RunCommand) {
+    const port = pform.mode === "fixed" ? Number(pform.port) || null : null;
+    const args = pform.flag === "auto" ? null : pform.flag === "env" ? "" : pform.args;
+    if (!(await runs.setPrefs(project.id, c.id, pform.mode, port, args))) return;
+    portOpen = false;
+  }
+
+  /** The port the selected command serves on: what the logs say, else the plan. */
+  const servePort = $derived.by(() => {
+    if (!selected) return null;
+    if (run?.portHint && isActive(run.state)) return run.portHint;
+    return selected.portMode === "default" ? selected.knownPort : selected.port;
+  });
+  /** Best address first: HTTPS proxy, then HTTP proxy, then the port itself. */
+  const address = $derived.by(() => {
+    if (!list || !servePort) return null;
+    const at = (scheme: string, port: number, std: number) =>
+      `${scheme}://${list.host}${port === std ? "" : `:${port}`}`;
+    if (list.proxy.https) return at("https", list.proxy.https, 443);
+    if (list.proxy.http) return at("http", list.proxy.http, 80);
+    return `http://${list.host}:${servePort}`;
+  });
+  /** The server's own port, shown next to a proxied address. */
+  const direct = $derived(
+    list && servePort && (list.proxy.http || list.proxy.https) ? `http://localhost:${servePort}` : null,
+  );
+  /** The server printed a different port than the one DevDock gave it. */
+  const ignoredPort = $derived(
+    !!selected &&
+      selected.portMode !== "default" &&
+      !!selected.port &&
+      !!run?.portHint &&
+      isActive(run.state) &&
+      run.portHint !== selected.port,
+  );
+
+  function portTitle(c: RunCommand): string {
+    if (c.portMode === "auto") return "Auto port: picked once by DevDock and reused";
+    if (c.portMode === "fixed") return "Fixed port";
+    return "Port learned from an earlier run; checked before starting";
+  }
 
   async function save() {
     if (await runs.addCommand(project.id, form.name, form.line, form.subdir)) {
@@ -143,7 +208,9 @@
               {#if c.source.kind !== "script"}<span class="src">{c.source.kind}</span>{/if}
             </span>
             <span class="row-line mono" title={c.commandLine}>
-              {c.commandLine}{#if c.knownPort}<span class="known" title="Port learned from an earlier run; checked before starting"> :{c.knownPort}</span>{/if}
+              {c.commandLine}{#if c.portMode !== "default" && c.port}<span class="known planned" title={portTitle(c)}> :{c.port} <span class="mode">{c.portMode}</span></span
+                >{:else if c.portMode === "auto"}<span class="known planned" title={portTitle(c)}> auto port</span
+                >{:else if c.knownPort}<span class="known" title={portTitle(c)}> :{c.knownPort}</span>{/if}
             </span>
             <span class="row-result mono {result.tone}">{result.text}</span>
             <span class="row-actions">
@@ -232,6 +299,13 @@
             <span class="mono proc-cmd" title={selected.cwd}>{selected.commandLine}</span>
           </div>
           <div class="proc-actions">
+            <Button
+              variant="ghost"
+              title="Port settings for this command"
+              onclick={() => (portOpen ? (portOpen = false) : openPortForm(selected))}
+            >
+              <Icon name="sliders" size={14} /> Port
+            </Button>
             {#if run && isActive(run.state)}
               <Button
                 variant="secondary"
@@ -248,6 +322,16 @@
                 ■ Stop
               </button>
             {:else}
+              {#if run}
+                <Button
+                  variant="ghost"
+                  title="Forget this run: its status, error and log"
+                  onclick={() => runs.forget(project.id, selected.id)}
+                  disabled={busy}
+                >
+                  Clear run
+                </Button>
+              {/if}
               <Button
                 variant={run?.state === "failed" ? "primary" : "secondary"}
                 onclick={() => runs.start(project.id, selected.id)}
@@ -259,6 +343,126 @@
             {/if}
           </div>
         </div>
+
+        {#if portOpen}
+          <form
+            class="port-form"
+            onsubmit={(e) => {
+              e.preventDefault();
+              savePorts(selected);
+            }}
+          >
+            <div class="pf-row">
+              <span class="pf-label">Port</span>
+              <div class="seg" role="radiogroup" aria-label="Port mode">
+                {#each [["default", "Server default"], ["auto", "Auto"], ["fixed", "Fixed"]] as [m, text] (m)}
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={pform.mode === m}
+                    class:on={pform.mode === m}
+                    onclick={() => (pform.mode = m as PortMode)}>{text}</button
+                  >
+                {/each}
+              </div>
+              {#if pform.mode === "fixed"}
+                <input
+                  class="mono pf-port"
+                  type="number"
+                  min="1"
+                  max="65535"
+                  placeholder="4000"
+                  bind:value={pform.port}
+                  aria-label="Fixed port"
+                />
+              {/if}
+            </div>
+            <p class="pf-help">
+              {#if pform.mode === "auto"}
+                DevDock picks a free port the first time
+                {#if selected.port && selected.portMode === "auto"}(now <span class="mono">{selected.port}</span>){/if}
+                and keeps it, so bookmarks and logins keep working.
+              {:else if pform.mode === "fixed"}
+                Always this port. DevDock warns before starting if something else holds it.
+              {:else}
+                DevDock doesn't set a port; the server uses its own (often 3000 or 5173).
+              {/if}
+            </p>
+            {#if pform.mode !== "default"}
+              <div class="pf-row">
+                <span class="pf-label">Passed as</span>
+                <Select
+                  bind:value={pform.flag}
+                  ariaLabel="How the port is passed"
+                  options={[
+                    {
+                      value: "auto",
+                      label: selected.detectedArgs ? `PORT and ${selected.detectedArgs}` : "PORT only",
+                      hint: selected.detectedArgs ? "detected" : "tool not recognised",
+                    },
+                    { value: "env", label: "PORT only" },
+                    { value: "custom", label: "PORT and my own flag" },
+                  ]}
+                />
+                {#if pform.flag === "custom"}
+                  <input
+                    class="mono pf-args"
+                    placeholder={"--port {port}"}
+                    bind:value={pform.args}
+                    aria-label="Port flag"
+                    spellcheck="false"
+                  />
+                {/if}
+              </div>
+            {/if}
+            <div class="form-actions">
+              {#if run && isActive(run.state)}<span class="pf-note">Applies the next time it starts.</span>{/if}
+              <Button variant="secondary" onclick={() => (portOpen = false)}>Cancel</Button>
+              <button class="save" type="submit">Save</button>
+            </div>
+          </form>
+        {/if}
+
+        {#if address}
+          <div class="address">
+            <span class="addr-label">Address</span>
+            <button
+              class="addr-link mono"
+              title="Open in the browser"
+              onclick={() => runs.openUrl(address)}
+              disabled={!isActive(run?.state)}>{address}</button
+            >
+            {#if direct}
+              <button
+                class="addr-link mono direct"
+                title="Open the server's own port"
+                onclick={() => runs.openUrl(direct)}
+                disabled={!isActive(run?.state)}>{direct}</button
+              >
+            {/if}
+            {#if !isActive(run?.state)}<span class="pf-note">opens once it's running</span>{/if}
+            {#if list.hostsMissing}
+              <span class="addr-warn">{list.host} isn't in the hosts file yet.</span>
+            {/if}
+            {#if ignoredPort}
+              <span class="addr-warn">
+                The server is on {run?.portHint}, not {selected.port}. It may ignore PORT; set its flag under Port.
+              </span>
+            {/if}
+            <button class="addr-edit" aria-expanded={addressOpen} onclick={() => (addressOpen = !addressOpen)}>
+              {addressOpen ? "Done" : "Change address"}
+            </button>
+          </div>
+        {:else}
+          <div class="address">
+            <span class="addr-label">Address</span>
+            <span class="mono pf-note">{list.host}, once this command reports a port</span>
+            <button class="addr-edit" aria-expanded={addressOpen} onclick={() => (addressOpen = !addressOpen)}>
+              {addressOpen ? "Done" : "Change address"}
+            </button>
+          </div>
+        {/if}
+        {#if addressOpen}<AddressPanel {project} />{/if}
 
         {#if run}
           <dl class="stats mono">
@@ -278,7 +482,8 @@
             <div>
               <dt>Port</dt>
               <dd title="Read from the output; M5 checks the real port table">
-                {#if run.portHint}{run.portHint} <span class="hint">from logs</span>{:else}—{/if}
+                {#if run.portHint}{run.portHint} <span class="hint">from logs</span>{:else if selected.portMode !== "default" && selected.port}{selected.port}
+                  <span class="hint">{selected.portMode}</span>{:else}—{/if}
               </dd>
             </div>
           </dl>
@@ -287,6 +492,12 @@
           {/if}
         {/if}
 
+        <div class="log-head">
+          <span class="addr-label">Output</span>
+          <button class="addr-edit" onclick={() => (app.tab = "logs")} title="Open this log in the Logs tab, full size">
+            Open in Logs tab ↗
+          </button>
+        </div>
         <Console projectId={project.id} commandId={selected.id} live={isActive(run?.state)} />
       </section>
     {/if}
@@ -506,6 +717,139 @@
   .known {
     margin-left: var(--space-2);
     color: var(--text-faint);
+  }
+  .known.planned {
+    color: var(--text-muted);
+  }
+  .mode {
+    font-size: 11px;
+    color: var(--text-faint);
+  }
+  .port-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    padding: var(--space-6) var(--space-7);
+    background: var(--bg-panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-panel);
+  }
+  .pf-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+    flex-wrap: wrap;
+  }
+  .pf-label {
+    width: 76px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .pf-help {
+    margin: 0 0 0 calc(76px + var(--space-5));
+    font-size: 12.5px;
+    color: var(--text-muted);
+  }
+  .pf-note {
+    font-size: 12px;
+    color: var(--text-faint);
+  }
+  .seg {
+    display: inline-flex;
+    padding: 2px;
+    gap: 2px;
+    background: var(--bg-app);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-button-sm);
+  }
+  .seg button {
+    height: 28px;
+    padding: 0 var(--space-5);
+    border: 0;
+    border-radius: var(--radius-badge);
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .seg button.on {
+    background: var(--bg-raised);
+    color: var(--text);
+    box-shadow: 0 0 0 1px var(--line);
+  }
+  .port-form input {
+    height: 32px;
+    padding: 0 var(--space-4);
+    background: var(--bg-app);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-button-sm);
+    color: var(--text);
+    font-size: 13px;
+    user-select: text;
+  }
+  .port-form input:focus {
+    outline: none;
+    border-color: var(--accent-fg);
+  }
+  .pf-port {
+    width: 96px;
+  }
+  .pf-args {
+    width: 200px;
+  }
+  .address {
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+    flex-wrap: wrap;
+  }
+  .addr-label {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .addr-link {
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: var(--accent-fg);
+    font-size: 13.5px;
+    cursor: pointer;
+    user-select: text;
+  }
+  .addr-link:hover:not(:disabled) {
+    text-decoration: underline;
+  }
+  .addr-link.direct {
+    font-size: 12.5px;
+    color: var(--text-muted);
+  }
+  .addr-link:disabled {
+    color: var(--text-muted);
+    cursor: default;
+  }
+  .log-head {
+    display: flex;
+    align-items: center;
+    margin-bottom: calc(var(--space-3) * -1);
+  }
+  .addr-edit {
+    margin-left: auto;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: var(--text-muted);
+    font: inherit;
+    font-size: 12.5px;
+    cursor: pointer;
+  }
+  .addr-edit:hover {
+    color: var(--accent-fg);
+  }
+  .addr-warn {
+    font-size: 12.5px;
+    color: var(--error-text);
   }
   .row-result {
     font-size: 12px;

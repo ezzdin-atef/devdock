@@ -16,9 +16,20 @@ import type {
   View,
 } from "./types";
 
+/** The sort chosen on the Projects page last time (see viewPrefs). */
+function savedSort(): Query["sort"] {
+  try {
+    return JSON.parse(localStorage.getItem("devdock.view") ?? "{}").sort ?? "recent";
+  } catch {
+    return "recent";
+  }
+}
+
 class AppUi {
   view = $state<View>("projects");
-  query = $state<Query>({ search: "", library: "all", kind: null, sort: "recent" });
+  query = $state<Query>({ search: "", library: "all", kind: null, sort: savedSort(), group: null });
+  /** A group whose name is being edited in place (just created, or "Rename"). */
+  renamingGroup = $state<string | null>(null);
   lib = $state<LibraryView | null>(null);
   selectedId = $state<ProjectId | null>(null);
   renamingId = $state<ProjectId | null>(null);
@@ -46,11 +57,16 @@ class AppUi {
   private reloadTimer: ReturnType<typeof setTimeout> | null = null;
 
   async init() {
-    await this.run(async () => {
-      await api.refreshProjects();
+    // The saved list first, so names show at once; re-checking every folder and
+    // finding tools can take seconds on a big library, so they follow.
+    await this.reload();
+    this.run(async () => {
       const [notice, tools] = await Promise.all([api.startupNotice(), api.toolsScan()]);
       this.notice = notice;
       this.tools = tools;
+    });
+    this.run(async () => {
+      await api.refreshProjects();
       await this.reload();
     });
     api.gitRefresh([], false).catch(() => {});
@@ -140,8 +156,86 @@ class AppUi {
   }
 
   clearFilters() {
-    this.setQuery({ search: "", library: "all", kind: null });
+    this.setQuery({ search: "", library: "all", kind: null, group: null });
   }
+
+  /** Makes a group and starts renaming it in place; moves `projectIds` into it. */
+  async createGroup(name = "New group", projectIds: ProjectId[] = []) {
+    let unique = name;
+    const taken = new Set((this.lib?.groups ?? []).map((g) => g.name.toLowerCase()));
+    for (let n = 2; taken.has(unique.toLowerCase()); n++) unique = `${name} ${n}`;
+    await this.run(async () => {
+      const id = await api.groupCreate(unique);
+      if (projectIds.length) await api.projectsSetGroup(projectIds, id);
+      // Making a group means you want to see groups.
+      const { view } = await import("./viewPrefs.svelte");
+      if (view.grouping !== "groups") view.set({ grouping: "groups" });
+      this.renamingGroup = id;
+    });
+    await this.reload();
+  }
+
+  async updateGroup(id: string, patch: { name?: string; color?: string }) {
+    await this.run(() => api.groupUpdate(id, patch));
+    await this.reload();
+  }
+
+  async moveGroup(id: string, delta: number) {
+    await this.run(() => api.groupMove(id, delta));
+    await this.reload();
+  }
+
+  async reorderGroup(id: string, index: number) {
+    // Move it locally first so the list doesn't jump back while saving.
+    const list = this.lib?.groups;
+    const from = list?.findIndex((g) => g.id === id) ?? -1;
+    if (list && from >= 0) {
+      const [g] = list.splice(from, 1);
+      list.splice(Math.min(index, list.length), 0, g);
+    }
+    await this.run(() => api.groupReorder(id, index));
+    await this.reload();
+  }
+
+  async deleteGroup(id: string) {
+    await this.run(() => api.groupDelete(id));
+    if (this.query.group === id) this.query.group = null;
+    await this.reload();
+  }
+
+  /**
+   * Drag and drop between projects: before or after `anchor`, and into `group`
+   * when `regroup`. Switches the page to the manual order so the result stays put.
+   */
+  async placeProjects(ids: ProjectId[], anchor: ProjectId, after: boolean, regroup: boolean, group: string | null) {
+    const list = this.lib?.projects;
+    if (list && !ids.includes(anchor)) {
+      // Move them locally first so the cards slide into place right away.
+      const moved = list.filter((p) => ids.includes(p.id));
+      for (const p of moved) {
+        list.splice(list.indexOf(p), 1);
+        if (regroup) p.group = group;
+      }
+      const at = list.findIndex((p) => p.id === anchor) + (after ? 1 : 0);
+      list.splice(at, 0, ...moved);
+    }
+    if (this.query.sort !== "manual") {
+      const { view } = await import("./viewPrefs.svelte");
+      view.set({ sort: "manual" });
+      this.query.sort = "manual";
+      const { agents } = await import("./agents.svelte");
+      agents.showToast("Sorted by your own order now", "ok");
+    }
+    await this.run(() => api.projectsPlace(ids, anchor, after, regroup, group));
+    await this.reload();
+  }
+
+  /** Puts projects in a group (`null` = ungrouped). */
+  async moveToGroup(ids: ProjectId[], group: string | null) {
+    await this.run(() => api.projectsSetGroup(ids, group));
+    await this.reload();
+  }
+
 
   async refreshOnFocus() {
     await api.refreshProjects().catch(() => {});
@@ -235,6 +329,18 @@ class AppUi {
 
   async copyPath(path: string) {
     await this.run(() => navigator.clipboard.writeText(path));
+  }
+
+  /** Clears a project's recent activity and launch history. */
+  async clearHistory(id: ProjectId) {
+    await this.run(() => api.projectClearHistory(id));
+    await this.reload();
+  }
+
+  /** Settings, Data: clears history everywhere (and learned ports when asked). */
+  async clearAllHistory(learnedPorts: boolean) {
+    await this.run(() => api.clearAllHistory(learnedPorts));
+    await this.reload();
   }
 
   dismissError() {

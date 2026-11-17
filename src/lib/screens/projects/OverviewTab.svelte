@@ -6,7 +6,9 @@
   import { relativeTime, shortDate, shortPath } from "$lib/format";
   import { runs } from "$lib/runs.svelte";
   import { spaces } from "$lib/spaces.svelte";
-  import { KIND_LABEL, isActive, type Activity, type Project } from "$lib/types";
+  import AddressPanel from "./AddressPanel.svelte";
+  import PackagesPanel from "./PackagesPanel.svelte";
+  import { INSTALL_COMMAND, KIND_LABEL, isActive, type Activity, type Project } from "$lib/types";
 
   // T8.1: actions, summary tiles that lead to their tab or screen, detected facts,
   // and recent activity.
@@ -16,7 +18,10 @@
   const editorName = $derived(ov?.editors.find((e) => e.command === ov.settings.editor)?.name ?? "editor");
   const defaultAgent = $derived(ov?.agents.find((a) => a.id === ov.settings.agent));
 
-  const projectRuns = $derived(runs.list.filter((r) => r.projectId === project.id));
+  // Installing packages isn't a dev server; it has its own panel.
+  const projectRuns = $derived(
+    runs.list.filter((r) => r.projectId === project.id && r.commandId !== INSTALL_COMMAND),
+  );
   const active = $derived(projectRuns.filter((r) => isActive(r.state)));
   const lastRun = $derived(projectRuns[0]);
   const livePorts = $derived(active.map((r) => r.portHint).filter((p): p is number => p != null));
@@ -130,6 +135,14 @@
     </button>
   </div>
 
+  {#if !project.missing && project.deps}
+    <PackagesPanel {project} deps={project.deps} />
+  {/if}
+
+  {#if !project.missing}
+    <AddressPanel {project} />
+  {/if}
+
   <dl class="facts panel">
     <dt>Type</dt>
     <dd class="mono">{KIND_LABEL[project.kind]}</dd>
@@ -170,7 +183,14 @@
   </dl>
 
   <section class="activity panel">
-    <div class="head"><span class="title">Recent activity</span></div>
+    <div class="head">
+      <span class="title">Recent activity</span>
+      {#if (project.activity ?? []).length || (project.launches ?? []).length}
+        <button class="link clear" title="Clear this project's activity and launch history" onclick={() => app.clearHistory(project.id)}
+          >Clear</button
+        >
+      {/if}
+    </div>
     {#each (project.activity ?? []).slice(0, 10) as a, i (i)}
       {@const d = describe(a)}
       <div class="act {d.tone}">
@@ -293,8 +313,18 @@
     cursor: pointer;
   }
   .head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     padding: var(--space-6) var(--space-8);
     border-bottom: 1px solid var(--line);
+  }
+  .clear {
+    font-size: 12.5px;
+    color: var(--text-muted);
+  }
+  .clear:hover {
+    color: var(--error-text);
   }
   .title {
     font-weight: 600;

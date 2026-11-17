@@ -87,6 +87,12 @@ impl LogBuffer {
         }
     }
 
+    /// Drops every line. Sequence numbers keep counting, so a viewer that asks for
+    /// lines after its last one simply gets the new ones.
+    pub fn clear(&mut self) {
+        self.lines.clear();
+    }
+
     /// The last line on stderr, else the last process line: shown next to FAILED.
     pub fn last_error_line(&self) -> Option<&str> {
         let rev = || {

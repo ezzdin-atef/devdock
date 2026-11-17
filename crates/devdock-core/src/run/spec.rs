@@ -149,6 +149,17 @@ pub fn discover(project_dir: &Path, custom: &[CustomCommand]) -> Discovered {
         }
     }
 
+    // Installing packages: listed so it runs (and logs) like any other command.
+    if let Some(deps) = crate::deps::check(project_dir) {
+        out.commands.push(RunCommand {
+            id: CommandId(crate::deps::INSTALL_COMMAND.into()),
+            name: "install packages".into(),
+            command_line: deps.command,
+            cwd: project_dir.to_path_buf(),
+            source: CommandSource::Detected,
+        });
+    }
+
     out.commands.extend(custom.iter().map(|c| {
         RunCommand {
             id: CommandId(format!("custom:{}", c.id)),

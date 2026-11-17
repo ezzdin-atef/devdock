@@ -18,6 +18,15 @@ pub fn open_in_explorer(folder: &Path, explorer: Option<&Path>) -> Result<(), La
     spawn(cmd, "explorer.exe")
 }
 
+/// Opens a local dev URL (`http://shop.localhost:4500`) in the default browser.
+/// Only URLs that pass `run::serve::is_local_url` get here.
+pub fn open_url(url: &str, explorer: Option<&Path>) -> Result<(), LaunchError> {
+    let program = explorer.unwrap_or(Path::new("explorer.exe"));
+    let mut cmd = Command::new(program);
+    cmd.arg(url);
+    spawn(cmd, "explorer.exe")
+}
+
 /// `editor` is the resolved path of the editor command (see `tools::which`),
 /// or `None` when it wasn't found on PATH.
 pub fn open_in_editor(

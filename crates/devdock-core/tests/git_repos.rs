@@ -223,3 +223,172 @@ fn reading_never_modifies_the_repository() {
     }
     assert_eq!(fs::read(&index).unwrap(), before, "the index was rewritten");
 }
+
+mod ops {
+    use super::*;
+    use devdock_core::git::ops::{self, GitOp};
+
+    fn other_clone(sb: &Sandbox) -> PathBuf {
+        let other = sb.path("other");
+        sb.git(
+            sb.dir.path(),
+            &["clone", sb.path("remote.git").to_str().unwrap(), "other"],
+        );
+        other
+    }
+
+    fn current(dir: &Path) -> String {
+        git::status(dir).unwrap().branch.unwrap()
+    }
+
+    #[test]
+    fn create_switch_and_list_branches() {
+        let Some(sb) = Sandbox::new() else { return };
+        let work = sb.repo_with_upstream();
+
+        let r = ops::run(
+            &work,
+            &GitOp::Create {
+                name: "feature/login".into(),
+            },
+        )
+        .unwrap();
+        assert!(r.ok, "{r:?}");
+        assert_eq!(current(&work), "feature/login");
+
+        let b = ops::branches(&work).unwrap();
+        let names: Vec<_> = b.local.iter().map(|l| l.name.as_str()).collect();
+        assert!(names.contains(&"main") && names.contains(&"feature/login"));
+        assert!(
+            b.local
+                .iter()
+                .find(|l| l.name == "feature/login")
+                .unwrap()
+                .current
+        );
+        assert_eq!(
+            b.local
+                .iter()
+                .find(|l| l.name == "main")
+                .unwrap()
+                .upstream
+                .as_deref(),
+            Some("origin/main")
+        );
+
+        let r = ops::run(
+            &work,
+            &GitOp::Switch {
+                branch: "main".into(),
+            },
+        )
+        .unwrap();
+        assert!(r.ok && r.summary == "Switched to main", "{r:?}");
+        assert_eq!(current(&work), "main");
+
+        assert!(
+            ops::run(
+                &work,
+                &GitOp::Create {
+                    name: "bad name..".into()
+                }
+            )
+            .is_err()
+        );
+    }
+
+    #[test]
+    fn first_push_sets_the_upstream() {
+        let Some(sb) = Sandbox::new() else { return };
+        let work = sb.repo_with_upstream();
+        assert!(
+            ops::run(
+                &work,
+                &GitOp::Create {
+                    name: "feat".into()
+                }
+            )
+            .unwrap()
+            .ok
+        );
+        sb.write("work/feat.txt", "f\n");
+        sb.git(&work, &["add", "."]);
+        sb.git(&work, &["commit", "-m", "Feature"]);
+
+        let r = ops::run(&work, &GitOp::Push).unwrap();
+        assert!(r.ok, "{r:?}");
+        assert!(r.summary.contains("upstream"), "{r:?}");
+        assert_eq!(
+            git::status(&work).unwrap().upstream.as_deref(),
+            Some("origin/feat")
+        );
+    }
+
+    #[test]
+    fn pull_fast_forwards_and_counts_commits() {
+        let Some(sb) = Sandbox::new() else { return };
+        let work = sb.repo_with_upstream();
+        let other = other_clone(&sb);
+        for i in 0..2 {
+            sb.write(&format!("other/t{i}.txt"), "t\n");
+            sb.git(&other, &["add", "."]);
+            sb.git(&other, &["commit", "-m", "Theirs"]);
+        }
+        sb.git(&other, &["push"]);
+
+        let r = ops::run(&work, &GitOp::Pull).unwrap();
+        assert!(r.ok, "{r:?}");
+        assert_eq!(r.summary, "Pulled 2 commits");
+        let again = ops::run(&work, &GitOp::Pull).unwrap();
+        assert_eq!(again.summary, "Already up to date");
+    }
+
+    #[test]
+    fn diverged_pull_is_refused_with_a_plain_reason() {
+        let Some(sb) = Sandbox::new() else { return };
+        let work = sb.repo_with_upstream();
+        let other = other_clone(&sb);
+        sb.write("other/theirs.txt", "t\n");
+        sb.git(&other, &["add", "."]);
+        sb.git(&other, &["commit", "-m", "Theirs"]);
+        sb.git(&other, &["push"]);
+        sb.write("work/mine.txt", "m\n");
+        sb.git(&work, &["add", "."]);
+        sb.git(&work, &["commit", "-m", "Mine"]);
+
+        let r = ops::run(&work, &GitOp::Pull).unwrap();
+        assert!(!r.ok);
+        assert!(r.summary.contains("both changed"), "{r:?}");
+    }
+
+    #[test]
+    fn remote_only_branch_is_checked_out_with_tracking() {
+        let Some(sb) = Sandbox::new() else { return };
+        let work = sb.repo_with_upstream();
+        let other = other_clone(&sb);
+        sb.git(&other, &["switch", "-c", "review"]);
+        sb.write("other/r.txt", "r\n");
+        sb.git(&other, &["add", "."]);
+        sb.git(&other, &["commit", "-m", "Review"]);
+        sb.git(&other, &["push", "-u", "origin", "review"]);
+
+        assert!(ops::run(&work, &GitOp::Fetch).unwrap().ok);
+        let b = ops::branches(&work).unwrap();
+        assert!(b.remote_only.contains(&"origin/review".to_owned()), "{b:?}");
+
+        let r = ops::run(
+            &work,
+            &GitOp::Switch {
+                branch: "origin/review".into(),
+            },
+        )
+        .unwrap();
+        assert!(r.ok, "{r:?}");
+        assert_eq!(r.summary, "Switched to review");
+        assert_eq!(current(&work), "review");
+        assert_eq!(
+            git::status(&work).unwrap().upstream.as_deref(),
+            Some("origin/review")
+        );
+    }
+}

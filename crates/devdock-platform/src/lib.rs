@@ -5,7 +5,7 @@
 mod win;
 
 #[cfg(windows)]
-pub use win::{JobTree, WinProbe};
+pub use win::{JobTree, WinProbe, run_elevated};
 
 /// The process-tree implementation for this OS.
 #[cfg(windows)]

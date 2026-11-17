@@ -94,18 +94,90 @@ export interface Project {
   activity: Activity[];
   /** command id -> port learned from its output */
   ports: Record<string, number>;
+  /** saved `*.localhost` name; null = derived from the name (see `host`) */
+  domain: string | null;
+  /** the name the project opens at, e.g. `shop.localhost` */
+  host: string;
+  /** open without a port (through the proxy); null = follow Settings */
+  hidePort: boolean | null;
+  /** package install status; null = nothing to install */
+  deps: DepsStatus | null;
+  /** the group (folder) it's in, if any */
+  group?: string | null;
+}
+
+/** deps.rs */
+export type DepsState = "installed" | "missing" | "outdated";
+export interface DepsStatus {
+  manager: "npm" | "pnpm" | "yarn" | "bun";
+  state: DepsState;
+  /** what Install runs, e.g. `pnpm install` */
+  command: string;
+  lockfile: string | null;
+}
+/** The Run/Logs command id for installing packages. */
+export const INSTALL_COMMAND = "deps:install";
+
+/** git/ops.rs */
+export interface LocalBranch {
+  name: string;
+  current: boolean;
+  upstream: string | null;
+  ahead: number;
+  behind: number;
+  /** its upstream was deleted on the remote */
+  gone: boolean;
+  /** "3 days ago" */
+  updated: string;
+}
+export interface Branches {
+  local: LocalBranch[];
+  /** remote branches with no local branch of that name, e.g. `origin/feature` */
+  remoteOnly: string[];
+}
+export type GitOp =
+  | { kind: "fetch" }
+  | { kind: "pull" }
+  | { kind: "push" }
+  | { kind: "switch"; branch: string }
+  | { kind: "create"; name: string };
+export interface OpResult {
+  ok: boolean;
+  summary: string;
+  /** git's own output */
+  output: string;
 }
 
 /** library.rs */
 export type Library = "all" | "favorites" | "recent" | "missing" | "new";
-export type SortBy = "recent" | "name" | "kind";
+export type SortBy = "recent" | "name" | "kind" | "manual";
 
 export interface Query {
   search: string;
   library: Library;
   kind: Kind | null;
   sort: SortBy;
+  /** only this group's projects; UNGROUPED for projects in none */
+  group: string | null;
 }
+
+/** library.rs: `Query.group` value for projects in no group. */
+export const UNGROUPED = "-";
+
+/** groups.rs */
+/** A named colour (see GROUP_COLORS) or a custom `#rrggbb`. */
+export type GroupColor = string;
+export const GROUP_COLORS = [
+  "red", "orange", "amber", "yellow", "lime", "green", "emerald", "teal", "cyan",
+  "sky", "blue", "indigo", "violet", "purple", "pink", "rose", "slate", "stone",
+] as const;
+export interface Group {
+  id: string;
+  name: string;
+  color: GroupColor;
+}
+/** How the Projects page is split into sections (a view preference). */
+export type ListGrouping = "groups" | "folders" | "kind" | "none";
 
 export interface Counts {
   all: number;
@@ -114,6 +186,9 @@ export interface Counts {
   missing: number;
   new: number;
   kinds: Partial<Record<Kind, number>>;
+  /** projects per group id */
+  groups: Record<string, number>;
+  ungrouped: number;
 }
 
 /** store.rs `ScanRoot` */
@@ -126,6 +201,7 @@ export interface ScanRoot {
 export interface LibraryView {
   projects: Project[];
   counts: Counts;
+  groups: Group[];
   scanRoots: ScanRoot[];
   scanning: boolean;
   savedTo: string;
@@ -174,6 +250,29 @@ export interface Settings {
   terminal: TerminalKind;
   agent: AgentId;
   checkPorts: boolean;
+  /** Commands without their own port setting get a saved auto-picked port. */
+  autoPort: boolean;
+  /** Serve `http://<name>.localhost` with no port through DevDock's proxy. */
+  proxy: boolean;
+  proxyPort: number;
+  /** Also serve HTTPS (DevDock's certificate must be trusted). */
+  https: boolean;
+  httpsPort: number;
+}
+
+/** src-tauri proxy.rs `ProxyStatus` */
+export interface ProxyStatus {
+  /** live ports; null = not listening */
+  http: number | null;
+  https: number | null;
+  httpError: string | null;
+  httpsError: string | null;
+  /** listening on IPv6 only: who holds the IPv4 port */
+  httpNote: string | null;
+  httpsNote: string | null;
+  /** null until HTTPS was turned on once */
+  ca: { path: string; trusted: boolean } | null;
+  hosts: { path: string; needed: string[]; missing: string[]; stale: boolean; error: string | null };
 }
 export interface Shortcut {
   slot: number;
@@ -200,7 +299,7 @@ export interface ErrorDto {
   fix: string | null;
 }
 
-export type DetailTab = "overview" | "git" | "run" | "agents";
+export type DetailTab = "overview" | "git" | "run" | "logs" | "agents";
 
 /** run/spec.rs */
 export type CommandId = string;
@@ -238,7 +337,18 @@ export interface RunCommand {
   run: RunInfo | null;
   /** Learned from an earlier run's output; checked before starting. */
   knownPort: number | null;
+  /** After applying the Settings default. */
+  portMode: PortMode;
+  /** Saved port for auto/fixed (auto: picked on the first run). */
+  port: number | null;
+  /** The user's port flag; null = DevDock decides (see `detectedArgs`). */
+  portArgs: string | null;
+  /** The flag DevDock adds for this script, if it knows the tool. */
+  detectedArgs: string | null;
 }
+
+/** run/serve.rs */
+export type PortMode = "default" | "auto" | "fixed";
 
 /** ports/mod.rs `ProcInfo`; null fields = Windows wouldn't tell (unknown). */
 export interface ProcInfo {
@@ -294,6 +404,18 @@ export interface Ended {
 export interface CommandList {
   commands: RunCommand[];
   warning: string | null;
+  /** the project's address, e.g. `shop.localhost` or `shop.test` */
+  host: string;
+  /** a `.test` address with no hosts-file entry yet (it won't resolve) */
+  hostsMissing: boolean;
+  /** proxy ports live now for this project; null = off or port shown */
+  proxy: { http: number | null; https: number | null };
+  /** this project hides its port */
+  portless: boolean;
+  /** why the proxy isn't listening, when this project needs it */
+  proxyError: string | null;
+  /** the proxy works but only on IPv6 (another program has IPv4 port 80) */
+  proxyNote: string | null;
 }
 
 /** run/logs.rs */

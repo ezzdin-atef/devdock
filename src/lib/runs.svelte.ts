@@ -4,10 +4,12 @@
 import { app } from "./app.svelte";
 import * as api from "./api";
 import {
+  INSTALL_COMMAND,
   isActive,
   type CommandId,
   type CommandList,
   type Conflict,
+  type PortMode,
   type ProjectId,
   type RunChanged,
   type RunInfo,
@@ -24,6 +26,8 @@ class RunsUi {
   selectedCommand = $state<Record<ProjectId, CommandId>>({});
   /** Bumped per run key when new log lines exist; consoles watch their key. */
   logTick = $state<Record<string, number>>({});
+  /** Bumped when a command's log is cleared, so open consoles start over. */
+  logResets = $state<Record<string, number>>({});
   /** Set when the window close was blocked because processes are running. */
   closeRequested = $state<number | null>(null);
   /** Ticks every second so uptimes move. */
@@ -63,6 +67,8 @@ class RunsUi {
     const projects = [...this.dirtyProjects];
     this.dirtyProjects.clear();
     await this.refreshList();
+    // An install started or finished: the list's "packages" state may have changed.
+    if (this.list.some((r) => r.commandId === INSTALL_COMMAND && projects.includes(r.projectId))) app.reload();
     for (const p of projects) if (this.commandsByProject[p]) await this.loadCommands(p);
   }
 
@@ -150,6 +156,46 @@ class RunsUi {
     await this.refreshList();
   }
 
+  /** Saves a command's port settings. Returns false (and shows the error) on failure. */
+  async setPrefs(
+    projectId: ProjectId,
+    commandId: CommandId,
+    mode: PortMode,
+    port: number | null,
+    portArgs: string | null,
+  ): Promise<boolean> {
+    try {
+      await api.runSetPrefs(projectId, commandId, mode, port, portArgs);
+      app.error = null;
+      await this.loadCommands(projectId);
+      return true;
+    } catch (err) {
+      app.error = api.toErrorDto(err);
+      return false;
+    }
+  }
+
+  /** Saves a project's address. Returns the error message to show next to the field, or null. */
+  async setAddress(projectId: ProjectId, domain: string, hidePort: boolean | null): Promise<string | null> {
+    try {
+      await api.setProjectAddress(projectId, domain, hidePort);
+      await Promise.all([this.loadCommands(projectId), app.reload()]);
+      return null;
+    } catch (err) {
+      const e = api.toErrorDto(err);
+      return e.fix ? `${e.message} ${e.fix}` : e.message;
+    }
+  }
+
+  async openUrl(url: string) {
+    try {
+      await api.openUrl(url);
+      app.error = null;
+    } catch (err) {
+      app.error = api.toErrorDto(err);
+    }
+  }
+
   async addCommand(projectId: ProjectId, name: string, line: string, subdir: string): Promise<boolean> {
     try {
       const id = await api.addCommand(projectId, name, line, subdir.trim() || null);
@@ -174,10 +220,45 @@ class RunsUi {
   }
 
   /** From the Running screen: jump to a run's console in its project. */
+  /** Empties a command's log (and its FAILED message). */
+  async clearLogs(projectId: ProjectId, commandId: CommandId) {
+    const k = runKey(projectId, commandId);
+    try {
+      await api.runClearLogs(projectId, commandId);
+      this.logResets[k] = (this.logResets[k] ?? 0) + 1;
+      app.error = null;
+    } catch (err) {
+      app.error = api.toErrorDto(err);
+    }
+    await this.refreshList();
+  }
+
+  /** Forgets a finished run: its state, error and log. */
+  forget(projectId: ProjectId, commandId: CommandId) {
+    const k = runKey(projectId, commandId);
+    delete this.conflicts[k];
+    return this.act(projectId, commandId, async () => {
+      await api.runForget(projectId, commandId);
+      this.logResets[k] = (this.logResets[k] ?? 0) + 1;
+    });
+  }
+
+  /** Forgets every finished run (the Running screen's history). */
+  async clearFinished() {
+    try {
+      await api.runsClearFinished();
+      app.error = null;
+    } catch (err) {
+      app.error = api.toErrorDto(err);
+    }
+    await this.refreshList();
+    for (const p of Object.keys(this.commandsByProject)) await this.loadCommands(p);
+  }
+
   async showLogs(projectId: ProjectId, commandId: CommandId) {
     app.view = "projects";
     app.clearFilters();
-    app.tab = "run";
+    app.tab = "logs";
     this.selectedCommand[projectId] = commandId;
     await app.select(projectId);
   }

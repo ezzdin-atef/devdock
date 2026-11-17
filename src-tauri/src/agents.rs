@@ -223,6 +223,7 @@ pub(crate) fn launch(
 pub fn set_settings(core: State<'_, Core>, settings: Settings) -> CmdResult<()> {
     lock(&core.state).set_settings(settings)?;
     core.saver.mark_dirty();
+    crate::proxy::apply(&core);
     Ok(())
 }
 

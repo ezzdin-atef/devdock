@@ -60,7 +60,13 @@
     </span>
     <span class="crumbs" data-tauri-drag-region>
       <span class="slash" aria-hidden="true">/</span>
-      <span class="crumb" data-tauri-drag-region>{VIEW_LABEL[app.view]}</span>
+      {#if context}
+        <button class="crumb back" title="Back to all projects (Esc)" onclick={() => app.select(null)}
+          >{VIEW_LABEL[app.view]}</button
+        >
+      {:else}
+        <span class="crumb" data-tauri-drag-region>{VIEW_LABEL[app.view]}</span>
+      {/if}
       {#if context}
         <span class="slash" aria-hidden="true">/</span>
         <span class="crumb current" data-tauri-drag-region title={context}>{context}</span>
@@ -126,6 +132,18 @@
 </header>
 
 <style>
+  .crumb.back {
+    border: 0;
+    padding: 0;
+    background: transparent;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
+  .crumb.back:hover {
+    color: var(--text);
+    text-decoration: underline;
+  }
   .title-bar {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
@@ -277,7 +295,7 @@
     animation: dd-overlay 220ms var(--ease);
   }
   .update:hover {
-    filter: brightness(1.08);
+    background: var(--accent-hover);
   }
   .running .dot {
     width: 7px;

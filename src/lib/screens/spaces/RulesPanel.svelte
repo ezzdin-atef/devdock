@@ -1,4 +1,6 @@
 <script lang="ts">
+  import Checkbox from "$lib/components/Checkbox.svelte";
+  import Select from "$lib/components/Select.svelte";
   import { untrack } from "svelte";
   import { agents } from "$lib/agents.svelte";
   import Button from "$lib/components/Button.svelte";
@@ -44,7 +46,7 @@
   <div class="head"><span class="title">Rules</span></div>
   <div class="body">
     <label class="row">
-      <input type="checkbox" bind:checked={enabled} />
+      <Checkbox bind:checked={enabled} />
       Restart a service that crashes, up to
       <input class="num mono" bind:value={max} inputmode="numeric" disabled={!enabled} />
       times within
@@ -59,20 +61,26 @@
     <div class="sub eyebrow">After start</div>
     <div class="row wrap">
       <span>In</span>
-      <select bind:value={projectId}>
-        <option value="">— no preset —</option>
-        {#each projectChoices as [id, name] (id)}<option value={id}>{name}</option>{/each}
-      </select>
-      <label class="inline"><input type="checkbox" bind:checked={openEditor} disabled={!projectId} /> open the editor</label>
+      <Select
+        bind:value={projectId}
+        ariaLabel="Project to open"
+        options={[{ value: "", label: "no preset" }, ...projectChoices.map(([id, name]) => ({ value: id, label: name }))]}
+      />
+      <label class="inline"><Checkbox bind:checked={openEditor} disabled={!projectId} /> open the editor</label>
       <span>and launch</span>
-      <select bind:value={agent} disabled={!projectId}>
-        <option value="">no agent</option>
-        {#each agents.overview?.agents ?? [] as a (a.id)}<option value={a.id}>{a.name}</option>{/each}
-      </select>
+      <Select
+        bind:value={agent}
+        disabled={!projectId}
+        ariaLabel="Agent to launch"
+        options={[{ value: "", label: "no agent" }, ...(agents.overview?.agents ?? []).map((a) => ({ value: a.id, label: a.name }))]}
+      />
       <span>in</span>
-      <select bind:value={terminal} disabled={!projectId || !agent}>
-        {#each agents.overview?.terminals ?? [] as t (t.kind)}<option value={t.kind}>{t.name}</option>{/each}
-      </select>
+      <Select
+        bind:value={terminal}
+        disabled={!projectId || !agent}
+        ariaLabel="Terminal"
+        options={(agents.overview?.terminals ?? []).map((t) => ({ value: t.kind, label: t.name }))}
+      />
     </div>
     <div class="actions">
       <Button variant="secondary" onclick={save} disabled={!dirty}>Save rules</Button>
@@ -122,18 +130,6 @@
     color: var(--text);
     text-align: center;
     user-select: text;
-  }
-  select {
-    height: 32px;
-    padding: 0 var(--space-4);
-    background: var(--bg-app);
-    border: 1px solid var(--line-strong);
-    border-radius: var(--radius-button-sm);
-    color: var(--text);
-    font: inherit;
-  }
-  input[type="checkbox"] {
-    accent-color: var(--accent-fg);
   }
   .help {
     margin: 0;

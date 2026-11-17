@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Select from "$lib/components/Select.svelte";
   import { onMount } from "svelte";
   import { agents } from "$lib/agents.svelte";
   import { app } from "$lib/app.svelte";
@@ -6,6 +7,7 @@
   import Icon from "$lib/components/Icon.svelte";
   import { clockTime } from "$lib/format";
   import type { AgentId, TerminalKind } from "$lib/types";
+  import AddressSettings from "./settings/AddressSettings.svelte";
   import DataSettings from "./settings/DataSettings.svelte";
   import { theme, type ThemePref } from "$lib/theme.svelte";
   import { updater } from "$lib/updater.svelte";
@@ -66,39 +68,39 @@
             <div class="label">Editor</div>
             <div class="help">Used by "Open in editor". Must be on PATH.</div>
           </div>
-          <select value={ov.settings.editor} onchange={(e) => agents.setSettings({ editor: e.currentTarget.value })}>
-            {#each ov.editors as ed (ed.command)}
-              <option value={ed.command}>{ed.name}{ed.path ? "" : " (not found)"}</option>
-            {/each}
-          </select>
+          <Select
+            value={ov.settings.editor}
+            width="220px"
+            ariaLabel="Editor"
+            options={ov.editors.map((ed) => ({ value: ed.command, label: ed.name, hint: ed.path ? undefined : "not found" }))}
+            onchange={(v) => agents.setSettings({ editor: v })}
+          />
         </div>
         <div class="row">
           <div>
             <div class="label">Default terminal</div>
             <div class="help">Preselected in each project's Agents tab.</div>
           </div>
-          <select
+          <Select
             value={ov.settings.terminal}
-            onchange={(e) => agents.setSettings({ terminal: e.currentTarget.value as TerminalKind })}
-          >
-            {#each ov.terminals as t (t.kind)}
-              <option value={t.kind}>{t.name}{t.available ? "" : " (not found)"}</option>
-            {/each}
-          </select>
+            width="220px"
+            ariaLabel="Default terminal"
+            options={ov.terminals.map((t) => ({ value: t.kind, label: t.name, hint: t.available ? undefined : "not found" }))}
+            onchange={(v) => agents.setSettings({ terminal: v as TerminalKind })}
+          />
         </div>
         <div class="row">
           <div>
             <div class="label">Default agent</div>
             <div class="help">Marked DEFAULT in the Agents tab.</div>
           </div>
-          <select
+          <Select
             value={ov.settings.agent}
-            onchange={(e) => agents.setSettings({ agent: e.currentTarget.value as AgentId })}
-          >
-            {#each ov.agents as a (a.id)}
-              <option value={a.id}>{a.name}{a.path ? "" : " (not installed)"}</option>
-            {/each}
-          </select>
+            width="220px"
+            ariaLabel="Default agent"
+            options={ov.agents.map((a) => ({ value: a.id, label: a.name, hint: a.path ? undefined : "not installed" }))}
+            onchange={(v) => agents.setSettings({ agent: v as AgentId })}
+          />
         </div>
       </section>
 
@@ -132,6 +134,8 @@
       </section>
 
       <DataSettings />
+
+      <AddressSettings />
 
       <section class="panel">
         <div class="row">
@@ -218,20 +222,6 @@
   .help {
     font-size: 12.5px;
     color: var(--text-muted);
-  }
-  select {
-    min-width: 220px;
-    height: 36px;
-    padding: 0 var(--space-5);
-    background: var(--bg-app);
-    border: 1px solid var(--line-strong);
-    border-radius: var(--radius-button);
-    color: var(--text);
-    font: inherit;
-  }
-  select:focus {
-    outline: none;
-    border-color: var(--accent-fg);
   }
   .segmented {
     display: inline-flex;

@@ -62,8 +62,9 @@
     </div>
     {#if conflict.suggestedPort}
       <p class="hint">
-        "Start on port {conflict.suggestedPort}" sets <span class="mono">PORT={conflict.suggestedPort}</span>;
-        it works if the server reads <span class="mono">PORT</span> (Next.js, Express and most Node servers do).
+        "Start on port {conflict.suggestedPort}" sets <span class="mono">PORT={conflict.suggestedPort}</span> and adds
+        <span class="mono">--port</span> for tools DevDock knows (Vite, Astro, Angular...). To stop this for good, set the
+        command's port to Auto.
       </p>
     {/if}
   </div>

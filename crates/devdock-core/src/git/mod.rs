@@ -1,7 +1,9 @@
-//! Read-only Git state via the git CLI (M3). DevDock never writes to a repository.
+//! Git state via the git CLI (M3). Reading never writes to a repository; the only
+//! changes are the explicit Git-tab actions in `ops` (switch, pull, push...).
 
 mod cache;
 mod facts;
+pub mod ops;
 mod run;
 mod status;
 

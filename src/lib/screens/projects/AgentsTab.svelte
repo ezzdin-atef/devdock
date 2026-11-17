@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Select from "$lib/components/Select.svelte";
   import { agents } from "$lib/agents.svelte";
   import Button from "$lib/components/Button.svelte";
   import Icon from "$lib/components/Icon.svelte";
@@ -51,20 +52,20 @@
     <div class="selects">
       <label>
         <span class="eyebrow">Terminal</span>
-        <select bind:value={choice.terminal}>
-          {#each ov.terminals as t (t.kind)}
-            <option value={t.kind}>{t.name}{t.available ? "" : " (not found)"}</option>
-          {/each}
-        </select>
+        <Select
+          bind:value={choice.terminal}
+          ariaLabel="Terminal"
+          options={ov.terminals.map((t) => ({ value: t.kind, label: t.name, hint: t.available ? undefined : "not found" }))}
+        />
       </label>
       <label>
         <span class="eyebrow">Working folder</span>
-        <select bind:value={choice.subdir} class="mono">
-          <option value="">project root</option>
-          {#each folders as f (f)}
-            <option value={f}>{f}</option>
-          {/each}
-        </select>
+        <Select
+          bind:value={choice.subdir}
+          mono
+          ariaLabel="Working folder"
+          options={[{ value: "", label: "project root" }, ...folders.map((f) => ({ value: f, label: f }))]}
+        />
       </label>
     </div>
     {#if !terminalOk}
@@ -143,14 +144,18 @@
       {#if freeSlots.length}
         <div class="bind">
           <span>Bind</span>
-          <select bind:value={bindSlot} class="mono" aria-label="Slot">
-            {#each freeSlots as n (n)}<option value={n}>Ctrl Alt {n}</option>{/each}
-          </select>
+          <Select
+            bind:value={bindSlot}
+            mono
+            ariaLabel="Slot"
+            options={freeSlots.map((n) => ({ value: n, label: `Ctrl Alt ${n}` }))}
+          />
           <span>to</span>
-          <select bind:value={bindAgent} aria-label="What to launch">
-            {#each ov.agents as a (a.id)}<option value={a.id}>{a.name}</option>{/each}
-            <option value="terminal">Terminal only</option>
-          </select>
+          <Select
+            bind:value={bindAgent}
+            ariaLabel="What to launch"
+            options={[...ov.agents.map((a) => ({ value: a.id as string, label: a.name })), { value: "terminal", label: "Terminal only" }]}
+          />
           <span class="muted">with the terminal and folder above</span>
           <Button
             variant="secondary"
@@ -197,23 +202,6 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
-  }
-  select {
-    height: 36px;
-    padding: 0 var(--space-5);
-    background: var(--bg-panel);
-    border: 1px solid var(--line-strong);
-    border-radius: var(--radius-button);
-    color: var(--text);
-    font: inherit;
-  }
-  select.mono {
-    font-family: var(--font-mono);
-    font-size: 12.5px;
-  }
-  select:focus {
-    outline: none;
-    border-color: var(--accent-fg);
   }
   .cards {
     display: grid;
@@ -358,8 +346,5 @@
   }
   .x:hover {
     color: var(--error-text);
-  }
-  .bind select {
-    height: 32px;
   }
 </style>

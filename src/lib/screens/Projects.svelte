@@ -1,14 +1,13 @@
 <script lang="ts">
   import { app } from "$lib/app.svelte";
+  import DragGhost from "$lib/components/DragGhost.svelte";
   import ErrorBanner from "$lib/components/ErrorBanner.svelte";
   import LibrarySidebar from "./projects/LibrarySidebar.svelte";
   import ProjectDetail from "./projects/ProjectDetail.svelte";
-  import ProjectList from "./projects/ProjectList.svelte";
 </script>
 
 <div class="screen">
   <LibrarySidebar />
-  <ProjectList />
   <section class="main">
     {#if app.notice}
       <ErrorBanner error={app.notice} tone="warning" ondismiss={() => (app.notice = null)} />
@@ -19,6 +18,8 @@
     <ProjectDetail />
   </section>
 </div>
+
+<DragGhost />
 
 <style>
   .screen {

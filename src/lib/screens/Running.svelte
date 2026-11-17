@@ -15,9 +15,16 @@
       <div class="eyebrow">Owned by DevDock</div>
       <h1>Running <span class="count mono">{runs.active.length}</span></h1>
     </div>
-    {#if runs.active.length > 0}
-      <button class="stop-all" onclick={() => runs.stopAll()}>■ Stop everything</button>
-    {/if}
+    <div class="head-actions">
+      {#if runs.list.length > runs.active.length}
+        <Button variant="secondary" onclick={() => runs.clearFinished()} title="Remove finished, stopped and failed runs from this list">
+          Clear finished
+        </Button>
+      {/if}
+      {#if runs.active.length > 0}
+        <button class="stop-all" onclick={() => runs.stopAll()}>■ Stop everything</button>
+      {/if}
+    </div>
   </header>
 
   {#if runs.list.length === 0}
@@ -114,6 +121,11 @@
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
+  }
+  .head-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
   }
   h1 {
     margin: var(--space-1) 0 0;

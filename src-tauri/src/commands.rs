@@ -11,6 +11,7 @@ use tauri::{AppHandle, Emitter, State};
 use devdock_core::error::ErrorDto;
 use devdock_core::git::Depth;
 use devdock_core::git_job;
+use devdock_core::groups::GroupId;
 use devdock_core::launcher;
 use devdock_core::library::Query;
 use devdock_core::project::ProjectId;
@@ -32,6 +33,8 @@ pub struct Core {
     /// Runs started with a one-off `PORT=` override; their port isn't learned.
     pub port_overrides: Mutex<std::collections::HashSet<devdock_core::run::RunKey>>,
     pub saver: Saver,
+    /// Local-address proxy listeners (HTTP/HTTPS), kept in step with Settings.
+    pub proxy: Mutex<crate::proxy::ProxyHub>,
     pub saved_to: PathBuf,
     pub notice: Mutex<Option<ErrorDto>>,
     /// Command palette items, built when the palette opens.
@@ -109,6 +112,77 @@ pub fn remove_project(core: State<'_, Core>, id: ProjectId) -> CmdResult<()> {
 #[tauri::command]
 pub fn rename_project(core: State<'_, Core>, id: ProjectId, name: String) -> CmdResult<()> {
     lock(&core.state).rename(&id, &name)?;
+    core.saver.mark_dirty();
+    Ok(())
+}
+
+/// A new group (folder) for the project list. Returns its id.
+#[tauri::command]
+pub fn group_create(core: State<'_, Core>, name: String) -> CmdResult<GroupId> {
+    let id = lock(&core.state).create_group(&name, now_ms())?;
+    core.saver.mark_dirty();
+    Ok(id)
+}
+
+/// Renames a group and/or changes its colour.
+#[tauri::command]
+pub fn group_update(
+    core: State<'_, Core>,
+    id: GroupId,
+    name: Option<String>,
+    color: Option<String>,
+) -> CmdResult<()> {
+    lock(&core.state).update_group(&id, name.as_deref(), color.as_deref())?;
+    core.saver.mark_dirty();
+    Ok(())
+}
+
+/// Moves a group up (-1) or down (+1) in the list.
+#[tauri::command]
+pub fn group_move(core: State<'_, Core>, id: GroupId, delta: i32) {
+    lock(&core.state).move_group(&id, delta);
+    core.saver.mark_dirty();
+}
+
+/// Moves a group to a position in the list (drag and drop).
+#[tauri::command]
+pub fn group_reorder(core: State<'_, Core>, id: GroupId, index: usize) {
+    lock(&core.state).reorder_group(&id, index);
+    core.saver.mark_dirty();
+}
+
+/// Deletes a group; its projects stay, ungrouped.
+#[tauri::command]
+pub fn group_delete(core: State<'_, Core>, id: GroupId) {
+    lock(&core.state).delete_group(&id);
+    core.saver.mark_dirty();
+}
+
+/// Drag and drop: puts projects before or after `anchor`. With `regroup`, they
+/// also move into `group` (`null` = ungrouped).
+#[tauri::command]
+pub fn projects_place(
+    core: State<'_, Core>,
+    ids: Vec<ProjectId>,
+    anchor: ProjectId,
+    after: bool,
+    regroup: bool,
+    group: Option<GroupId>,
+) -> CmdResult<()> {
+    let group = regroup.then_some(group.as_ref());
+    lock(&core.state).place_projects(&ids, &anchor, after, group)?;
+    core.saver.mark_dirty();
+    Ok(())
+}
+
+/// Puts projects in a group, or takes them out of any group (`group: null`).
+#[tauri::command]
+pub fn projects_set_group(
+    core: State<'_, Core>,
+    ids: Vec<ProjectId>,
+    group: Option<GroupId>,
+) -> CmdResult<()> {
+    lock(&core.state).set_group(&ids, group.as_ref())?;
     core.saver.mark_dirty();
     Ok(())
 }
@@ -222,6 +296,39 @@ pub fn git_refresh(app: AppHandle, core: State<'_, Core>, ids: Vec<ProjectId>, d
 struct GitUpdated<'a> {
     id: &'a ProjectId,
     details: bool,
+}
+
+fn project_dir(core: &Core, id: &ProjectId) -> CmdResult<PathBuf> {
+    Ok(lock(&core.state).get(id)?.path.clone())
+}
+
+fn git_failed(err: devdock_core::git::GitError) -> ErrorDto {
+    err.into()
+}
+
+/// Local branches (with upstream and ahead/behind) and remote-only branches.
+#[tauri::command(async)]
+pub fn git_branches(
+    core: State<'_, Core>,
+    id: ProjectId,
+) -> CmdResult<devdock_core::git::ops::Branches> {
+    let dir = project_dir(&core, &id)?;
+    devdock_core::git::ops::branches(&dir).map_err(git_failed)
+}
+
+/// A Git-tab action: fetch, pull, push, switch or create a branch. Returns git's
+/// own output; refreshes the project's git state afterwards.
+#[tauri::command(async)]
+pub fn git_op(
+    app: AppHandle,
+    core: State<'_, Core>,
+    id: ProjectId,
+    op: devdock_core::git::ops::GitOp,
+) -> CmdResult<devdock_core::git::ops::OpResult> {
+    let dir = project_dir(&core, &id)?;
+    let result = devdock_core::git::ops::run(&dir, &op).map_err(git_failed)?;
+    git_refresh(app, core, vec![id], true);
+    Ok(result)
 }
 
 /// Cached Git-tab facts for one project, or null before the first refresh.

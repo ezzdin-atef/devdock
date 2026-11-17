@@ -1,4 +1,6 @@
 <script lang="ts">
+  import Checkbox from "$lib/components/Checkbox.svelte";
+  import Select from "$lib/components/Select.svelte";
   import { agents } from "$lib/agents.svelte";
   import { app } from "$lib/app.svelte";
   import * as api from "$lib/api";
@@ -12,6 +14,16 @@
   type Preview = Awaited<ReturnType<typeof api.importPreview>>;
   let pending = $state<{ path: string; preview: Preview } | null>(null);
   let busy = $state(false);
+  /** The "Clear history" confirmation is open. */
+  let clearing = $state(false);
+  let alsoPorts = $state(false);
+
+  async function confirmClear() {
+    await app.clearAllHistory(alsoPorts);
+    await runs.refreshList();
+    clearing = false;
+    alsoPorts = false;
+  }
   const settings = $derived(agents.overview?.settings);
 
   async function setDepth(path: string, depth: number) {
@@ -80,9 +92,14 @@
       <span class="mono small path" title={root.path}>{root.path}</span>
       <label class="depth">
         depth
-        <select value={root.depth} onchange={(e) => setDepth(root.path, Number(e.currentTarget.value))}>
-          {#each [1, 2, 3, 4, 5, 6] as d (d)}<option value={d}>{d}</option>{/each}
-        </select>
+        <Select
+          value={root.depth}
+          mono
+          width="64px"
+          ariaLabel="Scan depth for {root.path}"
+          options={[1, 2, 3, 4, 5, 6].map((d) => ({ value: d, label: String(d) }))}
+          onchange={(d) => setDepth(root.path, d)}
+        />
       </label>
       <button class="icon" aria-label="Remove scan root {root.path}" title="Stop scanning this folder" onclick={() => app.removeScanRoot(root.path)}>
         <Icon name="x" size={13} />
@@ -96,25 +113,38 @@
 <section class="panel">
   <div class="head"><span class="title">Safety</span></div>
   <label class="row toggle locked">
-    <input type="checkbox" checked disabled />
+    <Checkbox variant="switch" checked disabled />
     <span>
       Ask before ending a process DevDock didn't start
       <span class="help block">Always on. The dialog shows the command, folder, start time and children first.</span>
     </span>
   </label>
   <label class="row toggle">
-    <input
-      type="checkbox"
+    <Checkbox
+      variant="switch"
       checked={settings?.checkPorts ?? true}
-      onchange={(e) => agents.setSettings({ checkPorts: e.currentTarget.checked })}
+      onchange={(v) => agents.setSettings({ checkPorts: v })}
     />
     <span>
       Check a command's port before starting it
       <span class="help block">Shows the conflict banner instead of starting when the port is taken.</span>
     </span>
   </label>
+  <label class="row toggle">
+    <Checkbox
+      variant="switch"
+      checked={settings?.autoPort ?? false}
+      onchange={(v) => agents.setSettings({ autoPort: v })}
+    />
+    <span>
+      Give commands their own port
+      <span class="help block"
+        >Commands without a port setting get a free port, picked once and saved, instead of 3000 or 5173.</span
+      >
+    </span>
+  </label>
   <label class="row toggle locked">
-    <input type="checkbox" checked disabled />
+    <Checkbox variant="switch" checked disabled />
     <span>
       Stop DevDock's processes when it closes
       <span class="help block">Always on: each run lives in a Windows job that ends with DevDock. Closing asks first.</span>
@@ -148,9 +178,48 @@
       </div>
     </div>
   {/if}
+  <div class="row">
+    <span class="grow">
+      History
+      <span class="help block"
+        >Recent activity and agent launches for every project, and the finished runs on the Running screen.</span
+      >
+    </span>
+    <Button variant="secondary" onclick={() => (clearing = !clearing)}>Clear history…</Button>
+  </div>
+  {#if clearing}
+    <div class="confirm" role="alertdialog" aria-labelledby="clear-title">
+      <div id="clear-title" class="confirm-title">Clear history for every project?</div>
+      <p>
+        Activity, launch history and finished runs go. Projects, commands, saved ports, addresses and settings stay.
+        Commands that are running keep running.
+      </p>
+      <label class="also">
+        <Checkbox bind:checked={alsoPorts} />
+        Also forget ports learned from earlier runs (they're checked for conflicts before starting)
+      </label>
+      <div class="actions">
+        <Button variant="secondary" onclick={() => (clearing = false)}>Cancel</Button>
+        <button class="danger" onclick={confirmClear}>Clear history</button>
+      </div>
+    </div>
+  {/if}
 </section>
 
 <style>
+  .grow {
+    flex: 1;
+    min-width: 0;
+  }
+  .also {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+    font-size: 13px;
+    color: var(--text-soft);
+    cursor: pointer;
+  }
   .panel {
     background: var(--bg-panel);
     border: 1px solid var(--line);
@@ -198,15 +267,6 @@
     font-size: 12.5px;
     color: var(--text-muted);
   }
-  select {
-    height: 30px;
-    padding: 0 var(--space-4);
-    background: var(--bg-app);
-    border: 1px solid var(--line-strong);
-    border-radius: var(--radius-button-sm);
-    color: var(--text);
-    font: inherit;
-  }
   .icon {
     display: grid;
     place-items: center;
@@ -225,10 +285,6 @@
   .toggle {
     align-items: flex-start;
     cursor: pointer;
-  }
-  .toggle input {
-    margin-top: 3px;
-    accent-color: var(--accent-fg);
   }
   .locked {
     cursor: default;

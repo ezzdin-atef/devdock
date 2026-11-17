@@ -1,28 +1,17 @@
+<script lang="ts" module>
+  export type { MenuAnchor } from "$lib/components/Menu.svelte";
+</script>
+
 <script lang="ts">
-  import { onMount } from "svelte";
   import { app } from "$lib/app.svelte";
+  import Icon from "$lib/components/Icon.svelte";
+  import Menu, { type MenuAnchor } from "$lib/components/Menu.svelte";
+  import { colorOf } from "$lib/sections";
   import type { Project } from "$lib/types";
 
-  // DESIGN.md "Context menu": destructive item last, below a divider, with a note.
-  let { project, onclose }: { project: Project; onclose: () => void } = $props();
-  let menu: HTMLDivElement;
-
-  onMount(() => {
-    menu.querySelector<HTMLButtonElement>("button")?.focus();
-    const onPointer = (e: PointerEvent) => {
-      if (!menu.contains(e.target as Node)) onclose();
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onclose();
-    };
-    // Defer so the click that opened the menu doesn't close it.
-    setTimeout(() => window.addEventListener("pointerdown", onPointer));
-    window.addEventListener("keydown", onKey);
-    return () => {
-      window.removeEventListener("pointerdown", onPointer);
-      window.removeEventListener("keydown", onKey);
-    };
-  });
+  // Project actions: open, rename, move to a group, copy path, favorite, remove.
+  let { project, at, onclose }: { project: Project; at: MenuAnchor; onclose: () => void } = $props();
+  const groups = $derived(app.lib?.groups ?? []);
 
   function act(fn: () => void) {
     onclose();
@@ -30,67 +19,50 @@
   }
 </script>
 
-<div class="menu" role="menu" bind:this={menu}>
+<Menu {at} {onclose} label="Actions for {project.name}" width={232}>
+  <button role="menuitem" onclick={() => act(() => app.select(project.id))}>Open</button>
   <button role="menuitem" onclick={() => act(() => app.startRename(project.id))}>Rename</button>
   <button role="menuitem" onclick={() => act(() => app.copyPath(project.path))}>Copy path</button>
-  <button
-    role="menuitem"
-    onclick={() => act(() => app.toggleFavorite(project.id, !project.favorite))}
-  >
+  <button role="menuitem" onclick={() => act(() => app.toggleFavorite(project.id, !project.favorite))}>
     {project.favorite ? "Remove from favorites" : "Add to favorites"}
   </button>
-  {#if project.missing}
+  {#if !project.missing}
+    <button role="menuitem" onclick={() => act(() => app.openInExplorer(project.id))}>Show in Explorer</button>
+  {:else}
     <button role="menuitem" onclick={() => act(() => app.locate(project.id))}>Locate…</button>
   {/if}
   <hr />
-  <button role="menuitem" class="danger" onclick={() => act(() => app.remove(project.id))}>
-    Remove from DevDock
+  <div class="menu-label">Move to group</div>
+  {#each groups as g (g.id)}
+    <button
+      role="menuitem"
+      disabled={project.group === g.id}
+      onclick={() => act(() => app.moveToGroup([project.id], g.id))}
+    >
+      <span class="dot" style:background={colorOf(g.color)}></span>
+      <span class="grow">{g.name}</span>
+      {#if project.group === g.id}<Icon name="check" size={12} />{/if}
+    </button>
+  {/each}
+  <button role="menuitem" onclick={() => act(() => app.createGroup("New group", [project.id]))}>
+    <Icon name="plus" size={12} /> New group…
   </button>
+  {#if project.group}
+    <button role="menuitem" onclick={() => act(() => app.moveToGroup([project.id], null))}>Remove from group</button>
+  {/if}
+  <hr />
+  <button role="menuitem" class="danger" onclick={() => act(() => app.remove(project.id))}>Remove from DevDock</button>
   <p class="note">The folder on disk is not touched.</p>
-</div>
+</Menu>
 
 <style>
-  .menu {
-    position: absolute;
-    right: var(--space-4);
-    top: calc(100% - var(--space-2));
-    z-index: 20;
-    width: 220px;
-    padding: var(--space-3);
-    background: var(--bg-overlay);
-    border: 1px solid var(--line-overlay);
-    border-radius: 10px;
-    box-shadow: var(--shadow-menu);
-    animation: dd-overlay 140ms var(--ease);
-    transform-origin: top right;
+  .dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
   }
-  button {
-    display: block;
-    width: 100%;
-    height: 34px;
-    padding: 0 var(--space-5);
-    border: 0;
-    border-radius: var(--radius-button-sm);
-    background: transparent;
-    text-align: left;
-    cursor: pointer;
-  }
-  button:hover,
-  button:focus-visible {
-    background: var(--bg-hover);
-    outline: none;
-  }
-  hr {
-    border: 0;
-    border-top: 1px solid var(--line);
-    margin: var(--space-3) 0;
-  }
-  .danger {
-    color: var(--error-text);
-  }
-  .note {
-    margin: var(--space-1) var(--space-5) var(--space-2);
-    font-size: 12.5px;
-    color: var(--text-muted);
+  .grow {
+    flex: 1;
   }
 </style>

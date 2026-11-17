@@ -3,6 +3,7 @@ mod commands;
 mod data;
 mod palette;
 mod ports;
+mod proxy;
 mod runs;
 mod workspaces;
 
@@ -56,6 +57,7 @@ fn setup(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
         probe: devdock_platform::system_probe(),
         port_overrides: Mutex::default(),
         spaces: Mutex::default(),
+        proxy: Mutex::default(),
         palette: Mutex::default(),
         runner,
         state,
@@ -63,6 +65,7 @@ fn setup(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
         saved_to,
         notice: Mutex::new(loaded.warning.map(ErrorDto::store_warning)),
     });
+    proxy::apply(&app.state::<Core>());
     Ok(())
 }
 
@@ -91,6 +94,13 @@ pub fn run() {
             commands::remove_project,
             commands::rename_project,
             commands::set_favorite,
+            commands::group_create,
+            commands::group_update,
+            commands::group_move,
+            commands::group_reorder,
+            commands::group_delete,
+            commands::projects_set_group,
+            commands::projects_place,
             commands::mark_seen,
             commands::relocate_project,
             commands::refresh_projects,
@@ -101,13 +111,27 @@ pub fn run() {
             commands::rescan,
             commands::git_refresh,
             commands::git_details,
+            commands::git_branches,
+            commands::git_op,
             runs::run_commands,
             runs::run_start,
+            runs::run_set_prefs,
+            runs::set_project_address,
+            runs::open_url,
+            proxy::proxy_status,
+            proxy::ca_trust,
+            proxy::ca_untrust,
+            proxy::hosts_sync,
             runs::run_stop,
             runs::run_restart,
             runs::run_logs,
             runs::runs_list,
             runs::run_stop_all,
+            runs::run_clear_logs,
+            runs::run_forget,
+            runs::runs_clear_finished,
+            runs::project_clear_history,
+            runs::clear_all_history,
             runs::add_command,
             runs::remove_command,
             runs::quit_app,

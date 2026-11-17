@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Select from "$lib/components/Select.svelte";
   import { untrack } from "svelte";
   import { app } from "$lib/app.svelte";
   import * as api from "$lib/api";
@@ -98,10 +99,12 @@
     <label>Start order<input bind:value={order} class="mono" inputmode="numeric" /></label>
     <label class="wide">
       Project
-      <select bind:value={projectId}>
-        <option value="" disabled>Choose a project</option>
-        {#each projects as p (p.id)}<option value={p.id}>{p.name}</option>{/each}
-      </select>
+      <Select
+        bind:value={projectId}
+        placeholder="Choose a project"
+        ariaLabel="Project"
+        options={projects.map((p) => ({ value: p.id, label: p.name }))}
+      />
     </label>
     <div class="wide seg" role="radiogroup" aria-label="Source">
       <button type="button" class:on={kind === "command"} onclick={() => (kind = "command")}>Run command</button>
@@ -110,18 +113,24 @@
     {#if kind === "command"}
       <label class="wide">
         Command
-        <select bind:value={commandId} class="mono">
-          <option value="" disabled>{projectId ? "Choose a command" : "Choose a project first"}</option>
-          {#each commands as c (c.id)}<option value={c.id}>{c.name} — {c.commandLine}</option>{/each}
-        </select>
+        <Select
+          bind:value={commandId}
+          mono
+          disabled={!projectId}
+          placeholder={projectId ? "Choose a command" : "Choose a project first"}
+          ariaLabel="Command"
+          options={commands.map((c) => ({ value: c.id, label: c.name, hint: c.commandLine }))}
+        />
       </label>
       {#if otherWorktrees.length}
         <label class="wide">
           Run in
-          <select bind:value={worktree} class="mono">
-            <option value="">main checkout</option>
-            {#each otherWorktrees as w (w)}<option value={w}>{w}</option>{/each}
-          </select>
+          <Select
+            bind:value={worktree}
+            mono
+            ariaLabel="Run in"
+            options={[{ value: "", label: "main checkout" }, ...otherWorktrees.map((w) => ({ value: w, label: w }))]}
+          />
         </label>
       {/if}
     {:else}
@@ -131,11 +140,15 @@
     <label>Port<input bind:value={port} class="mono" inputmode="numeric" placeholder="3000" /></label>
     <label>
       Health check
-      <select bind:value={healthKind}>
-        <option value="none">none (up after 1.5 s)</option>
-        <option value="tcp">TCP port</option>
-        <option value="http">HTTP GET</option>
-      </select>
+      <Select
+        bind:value={healthKind}
+        ariaLabel="Health check"
+        options={[
+          { value: "none", label: "none", hint: "up after 1.5 s" },
+          { value: "tcp", label: "TCP port" },
+          { value: "http", label: "HTTP GET" },
+        ]}
+      />
     </label>
     {#if healthKind === "http"}
       <label class="wide">URL<input bind:value={url} class="mono" placeholder="http://localhost:3000/health" /></label>
@@ -185,8 +198,7 @@
     font-size: 12.5px;
     color: var(--text-muted);
   }
-  input,
-  select {
+  input {
     height: 34px;
     padding: 0 var(--space-5);
     background: var(--bg-app);
@@ -201,8 +213,7 @@
     font-family: var(--font-mono);
     font-size: 12.5px;
   }
-  input:focus,
-  select:focus {
+  input:focus {
     outline: none;
     border-color: var(--accent-fg);
   }

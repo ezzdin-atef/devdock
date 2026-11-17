@@ -36,6 +36,8 @@ pub struct Saved {
     pub shortcuts: Vec<crate::prefs::Shortcut>,
     #[serde(default)]
     pub workspaces: Vec<crate::workspace::Workspace>,
+    #[serde(default)]
+    pub groups: Vec<crate::groups::Group>,
 }
 
 impl Default for Saved {
@@ -47,6 +49,7 @@ impl Default for Saved {
             settings: Default::default(),
             shortcuts: Vec::new(),
             workspaces: Vec::new(),
+            groups: Vec::new(),
         }
     }
 }

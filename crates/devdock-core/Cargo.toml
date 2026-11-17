@@ -7,6 +7,9 @@ license.workspace = true
 publish = false
 
 [dependencies]
+rcgen = { version = "0.14.10", default-features = false, features = ["ring", "pem", "x509-parser"] }
+ring = "0.17"
+rustls = { version = "0.23.46", default-features = false, features = ["ring", "std", "tls12"] }
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true

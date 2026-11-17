@@ -62,16 +62,14 @@ export function keyboard(e: KeyboardEvent) {
   if (e.key === "ArrowDown" || e.key === "ArrowUp") {
     const delta = e.key === "ArrowDown" ? 1 : -1;
     if (app.view === "projects") {
+      // With a project open, arrows step to the previous/next one; on the cards
+      // page they scroll as usual.
+      if (!app.selectedId) return;
       const ids = (app.lib?.projects ?? []).map((p) => p.id);
       const next = step(ids, app.selectedId, delta);
       if (next) {
         e.preventDefault();
         app.select(next);
-        queueMicrotask(() =>
-          document
-            .querySelector(`.row-hit[aria-label="Select ${CSS.escape(app.selected?.name ?? "")}"]`)
-            ?.scrollIntoView({ block: "nearest" }),
-        );
       }
     } else if (app.view === "spaces") {
       const next = step(spaces.list.map((w) => w.id), spaces.selectedId, delta);
@@ -80,6 +78,13 @@ export function keyboard(e: KeyboardEvent) {
         spaces.selectedId = next;
       }
     }
+    return;
+  }
+
+  // Esc from an open project: back to all projects.
+  if (e.key === "Escape" && app.view === "projects" && app.selectedId) {
+    e.preventDefault();
+    app.select(null);
     return;
   }
 

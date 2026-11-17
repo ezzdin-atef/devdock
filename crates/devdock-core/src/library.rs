@@ -27,6 +27,8 @@ pub enum SortBy {
     Recent,
     Name,
     Kind,
+    /// The user's own order (drag and drop): the order projects are saved in.
+    Manual,
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Deserialize)]
@@ -36,6 +38,19 @@ pub struct Query {
     pub library: Library,
     pub kind: Option<ProjectKind>,
     pub sort: SortBy,
+    /// Only this group's projects; `UNGROUPED` for projects in no group.
+    pub group: Option<String>,
+}
+
+/// `Query::group` value for "projects in no group".
+pub const UNGROUPED: &str = "-";
+
+fn in_group(p: &Project, group: Option<&str>) -> bool {
+    match group {
+        None => true,
+        Some(UNGROUPED) => p.group.is_none(),
+        Some(g) => p.group.as_ref().is_some_and(|id| id.0 == g),
+    }
 }
 
 /// Facts about projects that aren't stored on the project itself.
@@ -66,6 +81,9 @@ pub struct Counts {
     pub new: usize,
     /// Per kind, within the current library + search (so chips match what you'd see).
     pub kinds: BTreeMap<ProjectKind, usize>,
+    /// Projects per group id (all projects, like the library counts).
+    pub groups: BTreeMap<String, usize>,
+    pub ungrouped: usize,
 }
 
 fn matches_search(p: &Project, needle: &str) -> bool {
@@ -82,10 +100,13 @@ pub fn filter<'a>(projects: &'a [Project], q: &Query, flags: &Flags<'_>) -> Vec<
         .filter(|p| flags.in_library(p, q.library))
         .filter(|p| matches_search(p, &needle))
         .filter(|p| q.kind.is_none_or(|k| p.kind == k))
+        .filter(|p| in_group(p, q.group.as_deref()))
         .collect();
 
     let by_name = |a: &&Project, b: &&Project| a.name.to_lowercase().cmp(&b.name.to_lowercase());
     match q.sort {
+        // `filter` keeps the saved order, which is the manual order.
+        SortBy::Manual => {}
         SortBy::Name => out.sort_by(by_name),
         SortBy::Kind => out.sort_by(|a, b| a.kind.cmp(&b.kind).then_with(|| by_name(a, b))),
         // Most recently opened first; never-opened ones after, newest added first.
@@ -114,7 +135,13 @@ pub fn counts(projects: &[Project], q: &Query, flags: &Flags<'_>) -> Counts {
     {
         *kinds.entry(p.kind).or_insert(0) += 1;
     }
+    let mut groups = BTreeMap::new();
+    for g in projects.iter().filter_map(|p| p.group.as_ref()) {
+        *groups.entry(g.0.clone()).or_insert(0) += 1;
+    }
     Counts {
+        groups,
+        ungrouped: projects.iter().filter(|p| p.group.is_none()).count(),
         all: projects.len(),
         favorites: count(Library::Favorites),
         recent: count(Library::Recent),
@@ -141,6 +168,10 @@ mod tests {
             added_at: 0,
             commands: Vec::new(),
             ports: Default::default(),
+            run_prefs: Default::default(),
+            domain: None,
+            hide_port: None,
+            group: None,
             launches: Vec::new(),
             activity: Vec::new(),
         }

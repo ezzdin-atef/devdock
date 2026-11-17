@@ -36,30 +36,61 @@
     cursor: pointer;
     white-space: nowrap;
     transition:
-      filter var(--t-fast) var(--ease),
-      background var(--t-fast) var(--ease);
+      background var(--t-fast) var(--ease),
+      border-color var(--t-fast) var(--ease),
+      color var(--t-fast) var(--ease),
+      box-shadow var(--t-fast) var(--ease),
+      transform 60ms var(--ease);
   }
-  .btn:hover:not(:disabled) {
-    filter: brightness(1.15);
+  .btn:focus-visible {
+    outline: 2px solid var(--accent-fg);
+    outline-offset: 2px;
+  }
+  .btn:active:not(:disabled) {
+    transform: translateY(1px);
   }
   .btn:disabled {
     opacity: 0.5;
     cursor: default;
   }
+
   .primary {
     background: var(--accent);
     color: var(--accent-ink);
     font-weight: 600;
   }
-  .secondary {
-    background: var(--bg-raised);
-    border-color: var(--line);
-    color: var(--text);
+  .primary:hover:not(:disabled) {
+    background: var(--accent-hover);
   }
+  .primary:active:not(:disabled) {
+    background: var(--accent-press);
+  }
+
+  .secondary {
+    background: var(--btn-bg);
+    border-color: var(--btn-border);
+    color: var(--text);
+    box-shadow: 0 1px 1px rgb(0 0 0 / 0.04);
+  }
+  .secondary:hover:not(:disabled) {
+    background: var(--btn-hover);
+    border-color: var(--btn-hover-border);
+  }
+  .secondary:active:not(:disabled) {
+    background: var(--btn-press);
+    box-shadow: none;
+  }
+
   .ghost {
     background: transparent;
     color: var(--accent-fg);
     font-weight: 600;
     padding: 0 var(--space-4);
+  }
+  .ghost:hover:not(:disabled) {
+    background: var(--accent-tint);
+  }
+  .ghost:active:not(:disabled) {
+    background: var(--accent-active);
   }
 </style>

@@ -3,10 +3,13 @@
 
 pub mod activity;
 pub mod agents;
+pub mod deps;
 pub mod detect;
 pub mod error;
 pub mod git;
 pub mod git_job;
+pub mod groups;
+pub mod hosts;
 pub mod launcher;
 pub mod library;
 pub mod palette;
@@ -14,6 +17,7 @@ pub mod paths;
 pub mod ports;
 pub mod prefs;
 pub mod project;
+pub mod proxy;
 pub mod run;
 pub mod saver;
 pub mod scan;

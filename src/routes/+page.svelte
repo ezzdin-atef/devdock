@@ -17,6 +17,7 @@
   import Palette from "$lib/components/Palette.svelte";
   import { palette } from "$lib/palette.svelte";
   import { keyboard } from "$lib/keyboard";
+  import { nav } from "$lib/nav.svelte";
   import { agents } from "$lib/agents.svelte";
   import { spaces } from "$lib/spaces.svelte";
   import Projects from "$lib/screens/Projects.svelte";
@@ -28,6 +29,7 @@
     theme.init();
     updater.init();
     app.init();
+    nav.init();
     runs.init();
     agents.load();
     spaces.init();

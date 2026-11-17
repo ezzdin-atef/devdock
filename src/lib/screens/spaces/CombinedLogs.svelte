@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Checkbox from "$lib/components/Checkbox.svelte";
   import { onDestroy, tick } from "svelte";
   import * as api from "$lib/api";
   import { logTime } from "$lib/format";
@@ -72,7 +73,7 @@
         >
       {/each}
     </div>
-    <label class="follow"><input type="checkbox" bind:checked={follow} /> Follow</label>
+    <label class="follow"><Checkbox bind:checked={follow} /> Follow</label>
   </div>
   <div class="console mono" bind:this={box} role="log">
     {#each shown as l (`${l.service}:${l.seq}`)}
@@ -128,9 +129,6 @@
     gap: var(--space-3);
     font-size: 12.5px;
     color: var(--text-muted);
-  }
-  .follow input {
-    accent-color: var(--accent-fg);
   }
   .console {
     height: clamp(220px, 38vh, 520px);

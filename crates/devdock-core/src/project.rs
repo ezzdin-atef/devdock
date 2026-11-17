@@ -46,6 +46,19 @@ pub struct Project {
     /// pre-launch conflict check.
     #[serde(default)]
     pub ports: std::collections::BTreeMap<String, u16>,
+    /// Per command (command id -> prefs): port mode, saved port, port flag.
+    #[serde(default, skip_serializing_if = "std::collections::BTreeMap::is_empty")]
+    pub run_prefs: std::collections::BTreeMap<String, crate::run::RunPrefs>,
+    /// `shop.localhost`; `None` = derived from the name (see `run::serve`).
+    #[serde(default)]
+    pub domain: Option<String>,
+    /// Open at `http://shop.localhost` (through DevDock's proxy) instead of
+    /// `http://shop.localhost:4521`. `None` = follow Settings.
+    #[serde(default)]
+    pub hide_port: Option<bool>,
+    /// The user's group (folder) this project is in, if any.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub group: Option<crate::groups::GroupId>,
     /// Recent agent/terminal launches, newest first (at most `KEEP_LAUNCHES`).
     #[serde(default)]
     pub launches: Vec<crate::agents::LaunchRecord>,
@@ -68,6 +81,10 @@ impl Project {
             added_at: now,
             commands: Vec::new(),
             ports: Default::default(),
+            run_prefs: Default::default(),
+            domain: None,
+            hide_port: None,
+            group: None,
             launches: Vec::new(),
             activity: Vec::new(),
             path,

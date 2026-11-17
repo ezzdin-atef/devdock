@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Checkbox from "./Checkbox.svelte";
   import { onMount } from "svelte";
   import { relativeTime } from "$lib/format";
   import { ports } from "$lib/ports.svelte";
@@ -71,7 +72,7 @@
 
       {#if row.owner === "external" && row.children.length > 0}
         <label class="option">
-          <input type="checkbox" bind:checked={ports.withChildren} />
+          <Checkbox bind:checked={ports.withChildren} />
           Also end its {row.children.length === 1 ? "child process" : `${row.children.length} child processes`}
         </label>
       {/if}
@@ -168,9 +169,6 @@
     gap: var(--space-4);
     margin-bottom: var(--space-8);
     cursor: pointer;
-  }
-  .option input {
-    accent-color: var(--error);
   }
   .err {
     margin-bottom: var(--space-8);

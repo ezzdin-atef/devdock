@@ -8,6 +8,8 @@
   import OverviewTab from "./OverviewTab.svelte";
   import GitTab from "./GitTab.svelte";
   import RunTab from "./RunTab.svelte";
+  import LogsTab from "./LogsTab.svelte";
+  import Home from "./Home.svelte";
   import RenameInput from "./RenameInput.svelte";
   import Logo from "$lib/components/Logo.svelte";
   import PathLine from "$lib/components/PathLine.svelte";
@@ -15,9 +17,16 @@
   const total = $derived(app.lib?.counts.all ?? 0);
 </script>
 
-<section class="detail" class:fill={app.selected && app.tab === "run" && !app.selected.missing}>
+<section
+  class="detail"
+  class:fill={app.selected && (app.tab === "run" || app.tab === "logs") && !app.selected.missing}
+  class:wide={!app.selected || app.tab === "logs"}
+>
   {#if app.selected}
     {@const project = app.selected}
+    <button class="back-link" onclick={() => app.select(null)} title="Back to all projects (Esc)">
+      <span class="back-icon"><Icon name="chevron" size={13} /></span> All projects
+    </button>
     <header>
       <div class="eyebrow">{KIND_LABEL[project.kind]}{project.isGit ? " · git" : ""}</div>
       <div class="title-row">
@@ -72,6 +81,12 @@
       </button>
       <button
         role="tab"
+        aria-selected={app.tab === "logs"}
+        class:active={app.tab === "logs"}
+        onclick={() => (app.tab = "logs")}>Logs</button
+      >
+      <button
+        role="tab"
         aria-selected={app.tab === "agents"}
         class:active={app.tab === "agents"}
         onclick={() => (app.tab = "agents")}>Agents</button
@@ -84,6 +99,8 @@
       <GitTab {project} />
     {:else if app.tab === "run"}
       <RunTab {project} />
+    {:else if app.tab === "logs"}
+      <LogsTab {project} />
     {:else if app.tab === "agents"}
       <AgentsTab {project} />
     {:else}
@@ -150,17 +167,8 @@
         </li>
       </ol>
     </div>
-  {:else if app.lib}
-    <div class="pick">
-      <p>Pick a project from the list to see its Git state, commands and ports.</p>
-      <p class="keys">
-        <span class="kbd mono">↑</span><span class="kbd mono">↓</span> move
-        <span class="sep"></span>
-        <span class="kbd mono">Enter</span> open
-        <span class="sep"></span>
-        <span class="kbd mono">Ctrl K</span> jump to anything
-      </p>
-    </div>
+  {:else}
+    <Home />
   {/if}
 </section>
 
@@ -169,7 +177,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-9);
-    max-width: 760px;
+    max-width: 980px;
   }
   .title-row {
     display: flex;
@@ -212,6 +220,10 @@
   .detail.fill {
     flex: 1;
     min-height: 560px;
+  }
+  /* Logs use the full width of the window: long lines need it. */
+  .detail.wide {
+    max-width: none;
   }
   .detail.fill .tab-body {
     flex: 1;
@@ -382,22 +394,28 @@
     font-weight: 400;
     color: var(--text-soft);
   }
-  .pick {
-    padding-top: clamp(16px, 6vh, 64px);
-    color: var(--text-muted);
-    animation: dd-enter 240ms var(--ease);
-  }
-  .pick p {
-    margin: 0;
-  }
-  .pick .keys {
-    display: flex;
+  .back-link {
+    align-self: flex-start;
+    display: inline-flex;
     align-items: center;
-    gap: var(--space-3);
-    margin-top: var(--space-6);
-    font-size: 12.5px;
+    gap: var(--space-2);
+    height: 28px;
+    margin: calc(var(--space-4) * -1) 0 calc(var(--space-4) * -1) calc(var(--space-3) * -1);
+    padding: 0 var(--space-4) 0 var(--space-2);
+    border: 0;
+    border-radius: var(--radius-button-sm);
+    background: transparent;
+    color: var(--text-muted);
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
   }
-  .sep {
-    width: var(--space-6);
+  .back-link:hover {
+    background: var(--bg-hover);
+    color: var(--text);
+  }
+  .back-icon {
+    display: grid;
+    transform: rotate(90deg);
   }
 </style>
