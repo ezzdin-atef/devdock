@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DevDock - one calm control panel for every project on your machine</title>
+  <meta name="description" content="DevDock is a free, local-first Windows app that finds your projects, shows their Git state, runs their dev servers, explains who holds which port, launches coding agents and starts whole stacks in order.">
+  <meta name="theme-color" content="#0e0f11">
+  <meta property="og:title" content="DevDock - a control panel for your local projects">
+  <meta property="og:description" content="Find projects, see Git state, run dev servers, resolve port clashes, launch coding agents and start whole workspaces - from one window. Free, open source, Windows.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="screenshots/overview.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" type="image/svg+xml" href="brand/devdock-icon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Schibsted+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="nav" id="nav">
+  <div class="wrap">
+    <a class="brand" href="#top"><img src="brand/devdock-icon.svg" alt="" width="28" height="28">DevDock</a>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="nav-links">Menu</button>
+    <nav class="nav-links" id="nav-links" aria-label="Primary">
+      <a href="#problem">Why</a>
+      <a href="#features">Features</a>
+      <a href="#safety">Safety</a>
+      <a href="#install">Install</a>
+      <a href="#faq">FAQ</a>
+      <a class="btn small" href="https://github.com/ezzdin-atef/devdock">GitHub</a>
+      <a class="btn small primary" href="https://github.com/ezzdin-atef/devdock/releases/latest">Download</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- ================= HERO ================= -->
+<section class="hero" id="top">
+  <div class="wrap">
+    <p class="eyebrow">Windows desktop app &middot; v0.3.0 &middot; free &amp; open source</p>
+    <h1>Every project on your machine.<br><span>One calm control panel.</span></h1>
+    <p class="lede">DevDock finds your local projects, shows their Git state, runs their dev servers, tells you who is holding port 3000, opens coding agents in the right folder and starts whole stacks in order. All from one window, with no accounts and no cloud.</p>
+    <div class="hero-actions">
+      <a class="btn primary" href="https://github.com/ezzdin-atef/devdock/releases/latest">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 21h16"/></svg>
+        Download for Windows
+      </a>
+      <a class="btn" href="https://github.com/ezzdin-atef/devdock">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.37-3.87-1.37-.53-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.69 5.38-5.26 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z"/></svg>
+        View source
+      </a>
+    </div>
+    <div class="hero-meta">
+      <span>Windows 10 / 11 x64</span>
+      <span>Rust + Tauri 2</span>
+      <span>Local-first, no telemetry</span>
+      <span>MIT licensed</span>
+    </div>
+    <div class="window">
+      <div class="window-bar"><i></i><i></i><i></i><b>DevDock - Projects / Overview</b></div>
+      <img src="screenshots/overview.png" width="1280" height="900" alt="DevDock main window: a project list on the left and the selected project's overview on the right, with Git branch, a running dev server, its port and installed agents.">
+    </div>
+  </div>
+</section>
+
+<!-- ================= PROBLEM ================= -->
+<section id="problem">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">The problem</p>
+      <h2>A normal dev day leaks time in small, repeated pieces.</h2>
+      <p>None of these is a disaster on its own. Together, across several local projects, they add up to dozens of interruptions a day. DevDock turns each one into one or two actions.</p>
+    </div>
+
+    <div class="pain-grid">
+      <div class="pain">
+        <span class="before">Before</span>
+        <p>Hunt for the folder, then open Explorer, the editor and a terminal one by one, <code>cd</code>-ing each time.</p>
+        <p class="fix"><span class="after">With DevDock</span><br><kbd>Ctrl</kbd> <kbd>K</kbd>, type part of the name, press <kbd>Enter</kbd>, click your editor.</p>
+      </div>
+      <div class="pain">
+        <span class="before">Before</span>
+        <p>Forget which branch a project is on, or whether it has uncommitted work, until you run <code>git status</code>.</p>
+        <p class="fix"><span class="after">With DevDock</span><br>Branch, ahead/behind and changed counts sit on every project row and overview.</p>
+      </div>
+      <div class="pain">
+        <span class="before">Before</span>
+        <p>Five terminals running <code>npm run dev</code>, and no idea which one is which, or which ones are still alive.</p>
+        <p class="fix"><span class="after">With DevDock</span><br>One <strong>Running</strong> screen lists every process it owns, with logs, ports and stop buttons.</p>
+      </div>
+      <div class="pain">
+        <span class="before">Before</span>
+        <p><code>Error: listen EADDRINUSE :::3000</code> - and no quick way to see who holds the port or if it's safe to stop.</p>
+        <p class="fix"><span class="after">With DevDock</span><br>A conflict check before launch names the holder and offers a safe next step.</p>
+      </div>
+      <div class="pain">
+        <span class="before">Before</span>
+        <p>Open a terminal, <code>cd</code> into the right folder, then start Claude Code or Codex - every single time.</p>
+        <p class="fix"><span class="after">With DevDock</span><br>One click (or <kbd>Ctrl</kbd> <kbd>Alt</kbd> <kbd>1</kbd>) opens the agent already in the project.</p>
+      </div>
+      <div class="pain">
+        <span class="before">Before</span>
+        <p>Start the database, then the API, then the frontend, by hand, in the right order, waiting for each one.</p>
+        <p class="fix"><span class="after">With DevDock</span><br>A workspace starts them in order, waits on health checks, and restarts crashes.</p>
+      </div>
+    </div>
+
+    <div class="not-list">
+      <div>
+        <p class="eyebrow">The approach</p>
+        <h3>It organizes your tools instead of replacing them.</h3>
+        <p class="muted" style="margin:12px 0 0">DevDock is not another IDE, Git client, terminal or AI chat window. Every action ends in a real tool you already use - Explorer, your editor, Windows Terminal, an agent CLI - opened in the right folder. You keep your workflow; DevDock removes the steps between you and it.</p>
+      </div>
+      <ul aria-label="What DevDock is and isn't">
+        <li><s>An IDE</s><b>opens yours</b></li>
+        <li><s>A Git client</s><b>reads Git</b></li>
+        <li><s>A terminal</s><b>opens one</b></li>
+        <li><s>An AI chat app</s><b>launches agents</b></li>
+        <li><s>A cloud service</s><b>local JSON</b></li>
+        <li><s>An account</s><b>none needed</b></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FEATURES ================= -->
+<section id="features">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">Features</p>
+      <h2>Eight tools in one window, each fixing one specific pain.</h2>
+      <p>Every feature below states the problem it solves, how it solves it, and the details that make it trustworthy in daily use.</p>
+    </div>
+
+    <nav class="feature-index" aria-label="Feature index">
+      <a href="#f-projects"><span class="n">01</span><strong>Projects</strong><span>Find, scan and open every local project.</span></a>
+      <a href="#f-git"><span class="n">02</span><strong>Git</strong><span>Branch and changes at a glance, read-only.</span></a>
+      <a href="#f-run"><span class="n">03</span><strong>Run</strong><span>Dev servers with real process-tree control.</span></a>
+      <a href="#f-ports"><span class="n">04</span><strong>Ports</strong><span>Who holds which port, and is it safe to stop.</span></a>
+      <a href="#f-agents"><span class="n">05</span><strong>Agents</strong><span>Claude Code, Codex, OpenCode in the right folder.</span></a>
+      <a href="#f-workspaces"><span class="n">06</span><strong>Workspaces</strong><span>Whole stacks, started in order with health checks.</span></a>
+      <a href="#f-palette"><span class="n">07</span><strong>Command palette</strong><span>Jump to anything with Ctrl K.</span></a>
+      <a href="#f-settings"><span class="n">08</span><strong>Settings &amp; updates</strong><span>Your tools, themes, data and signed updates.</span></a>
+    </nav>
+
+    <!-- 01 Projects -->
+    <article class="feature" id="f-projects" style="margin-top:56px">
+      <div class="feature-copy">
+        <p class="tag">01 &middot; Projects</p>
+        <h3>All your projects, found and typed for you.</h3>
+        <p class="summary">A single list of everything you work on, across drives and folders, with the right actions one click away.</p>
+        <div class="pf">
+          <div class="problem"><span class="lbl">Problem</span><p>Projects are scattered across <code>D:\dev</code>, <code>C:\work</code> and old clones. Getting to one means browsing folders and then opening each tool separately.</p></div>
+          <div class="solution"><span class="lbl">How DevDock fixes it</span><p>Add folders directly or point DevDock at <strong>scan roots</strong>; it finds the projects below them, detects their type, and gives each one buttons for Explorer, your editor, a terminal and an agent.</p></div>
+        </div>
+        <ul class="details">
+          <li>Add with the folder picker, by dropping a folder onto the window, or with scan roots searched to a depth you choose. Scans skip <code>node_modules</code>, <code>target</code>, <code>.next</code>, <code>vendor</code> and <code>.git</code>.</li>
+          <li>Type detection from marker files: <strong>Next.js</strong>, <strong>Node</strong>, <strong>Rust</strong>, <strong>PHP</strong> and <strong>Docker Compose</strong>.</li>
+          <li>Search by name or path, sort by recent, name or type, filter by type, and pin favourites.</li>
+          <li>Paths are normalized, so the same folder can never be added twice. Projects new from a scan are marked until you look at them.</li>
+          <li>Moved or deleted folders are flagged with <strong>Locate...</strong> or <strong>Remove</strong> - and Remove never touches the folder on disk.</li>
+          <li>Opens in VS Code, Cursor, VS Code Insiders, Windsurf or Zed.</li>
+        </ul>
+      </div>
+      <div class="feature-visual">
+        <div class="mock" role="img" aria-label="Mock of the project list with type badges and Git state">
+          <div class="mock-head">Library &middot; All projects <span class="pill">3 roots</span></div>
+          <div class="mock-body">
+            <div class="row"><span class="dot"></span><div><strong>storefront</strong><br><span class="mono">main &middot; D:\dev\storefront</span></div><div class="right"><span class="pill">Next.js</span></div></div>
+            <div class="row"><span class="dot idle"></span><div><strong>billing-api</strong><br><span class="mono">feat/invoices <span class="accent">&uarr;2</span> &middot; D:\dev\billing-api</span></div><div class="right"><span class="pill">Node</span></div></div>
+            <div class="row"><span class="dot idle"></span><div><strong>indexer</strong><br><span class="mono">main &middot; C:\work\indexer</span></div><div class="right"><span class="pill">Rust</span></div></div>
+            <div class="row"><span class="dot idle"></span><div><strong>legacy-portal</strong><br><span class="mono">develop &middot; C:\work\portal</span></div><div class="right"><span class="pill">PHP</span></div></div>
+            <div class="row"><span class="dot idle"></span><div><strong>infra</strong><br><span class="mono">no git &middot; D:\dev\infra</span></div><div class="right"><span class="pill">Compose</span></div></div>
+            <div class="row" style="border-color:var(--err-line);background:var(--err-tint)"><span class="dot" style="background:var(--err)"></span><div><strong>old-prototype</strong><br><span class="mono">folder missing</span></div><div class="right"><span class="pill err">Locate...</span></div></div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- 02 Git -->
+    <article class="feature flip" id="f-git">
+      <div class="feature-copy">
+        <p class="tag">02 &middot; Git (read-only)</p>
+        <h3>Know the state of every repo before you touch it.</h3>
+        <p class="summary">Branch, sync status and pending changes, shown wherever the project appears - without DevDock ever writing to your repository.</p>
+        <div class="pf">
+          <div class="problem"><span class="lbl">Problem</span><p>You start work on the wrong branch, or forget you left uncommitted changes in a project two days ago. Finding out means opening a terminal and running <code>git status</code> in each one.</p></div>
+          <div class="solution"><span class="lbl">How DevDock fixes it</span><p>DevDock reads Git through the <code>git</code> CLI and surfaces the facts you need on the project row and in a dedicated Git tab. It is strictly read-only, so it can never get in the way of your own Git workflow.</p></div>
+        </div>
+        <ul class="details">
+          <li>Repository root, current branch, upstream, and ahead / behind counts.</li>
+          <li>Staged, modified and untracked counts, plus the last commit's hash, message, author and time.</li>
+          <li>Remotes and worktrees listed in one place.</li>
+          <li>Works for projects inside a shared monorepo and for Git worktrees.</li>
+          <li>Results are cached, so the list stays fast with many repositories.</li>
+        </ul>
+      </div>
+      <div class="feature-visual">
+        <div class="mock" role="img" aria-label="Mock of the Git tab showing branch, counts and last commit">
+          <div class="mock-head">billing-api &middot; Git <span class="pill info">read-only</span></div>
+          <div class="mock-body">
+            <div class="tiles">
+              <div class="tile"><div class="k">Staged</div><div class="v">1</div></div>
+              <div class="tile"><div class="k">Modified</div><div class="v accent">4</div></div>
+              <div class="tile"><div class="k">Untracked</div><div class="v">2</div></div>
+            </div>
+            <div class="row"><span class="mono" style="width:90px">BRANCH</span><strong class="mono" style="color:var(--text)">feat/invoices</strong><div class="right"><span class="pill warn">&uarr;2 ahead</span><span class="pill">&darr;0</span></div></div>
+            <div class="row"><span class="mono" style="width:90px">UPSTREAM</span><span class="mono" style="color:var(--text-soft)">origin/feat/invoices</span></div>
+            <div class="row"><span class="mono" style="width:90px">LAST</span><div><span class="mono accent">a41c9e2</span> <span>add invoice PDF export</span><br><span class="mono">you &middot; 2 hours ago</span></div></div>
+            <div class="row"><span class="mono" style="width:90px">WORKTREES</span><span class="mono" style="color:var(--text-soft)">2 &middot; main, hotfix/rounding</span></div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- 03 Run -->
+    <article class="feature" id="f-run">
+      <div class="feature-copy">
+        <p class="tag">03 &middot; Run</p>
+        <h3>Dev servers you can actually stop.</h3>
+        <p class="summary">Start scripts with a click, watch live output, and stop the whole thing - every child process included.</p>
+        <div class="pf">
+          <div class="problem"><span class="lbl">Problem</span><p>Closing a terminal often leaves orphaned <code>node.exe</code> processes behind, still holding ports and memory. And with several terminals open, you lose track of what runs where.</p></div>
+          <div class="solution"><span class="lbl">How DevDock fixes it</span><p>Each run lives inside a <strong>Windows Job Object</strong>. Stopping it - or quitting DevDock - ends the entire process tree, not just the shell. A single Running screen shows everything DevDock started, across all projects.</p></div>
+        </div>
+        <ul class="details">
+          <li>Lists <code>package.json</code> scripts and runs them with the right package manager - npm, pnpm, yarn or bun - picked from the lockfile.</li>
+          <li>Add your own custom commands per project (e.g. <code>cargo watch -x run</code>, <code>php artisan serve</code>).</li>
+          <li>Live console with stdout and stderr together, a filter, follow-output, and highlighted stderr.</li>
+          <li>Clear states: running, stopped, exited (with code), failed (with code). Detected ports are shown as soon as they listen.</li>
+          <li>The <strong>Running</strong> screen has logs, stop, restart and <strong>Stop everything</strong>. Quitting with active runs asks first.</li>
+        </ul>
+      </div>
+      <div class="feature-visual">
+        <figure class="shot">
+          <a href="screenshots/run.png"><img src="screenshots/run.png" loading="lazy" width="1280" height="900" alt="The Run tab: package.json scripts with run buttons and a live console showing dev server output."></a>
+          <figcaption>Run tab &middot; scripts, custom commands and a live console</figcaption>
+        </figure>
+      </div>
+    </article>
+
+    <!-- 04 Ports -->
+    <article class="feature flip" id="f-ports">
+      <div class="feature-copy">
+        <p class="tag">04 &middot; Ports</p>
+        <h3>"Port 3000 is in use" - now with an answer.</h3>
+        <p class="summary">See every listening port, which process and project holds it, and whether it is safe to end.</p>
+        <div class="pf">
+          <div class="problem"><span class="lbl">Problem</span><p>A server fails with <code>EADDRINUSE</code>. Finding the culprit means <code>netstat -ano</code>, a PID lookup in Task Manager, and a guess about whether killing it will break something else.</p></div>
+          <div class="solution"><span class="lbl">How DevDock fixes it</span><p>DevDock reads the system TCP table, matches each port to its process and project, and labels the owner. Before a launch it checks the ports the command needs, and if one is taken it tells you who holds it and what you can do.</p></div>
+        </div>
+        <ul class="details">
+          <li>Every listening TCP port with PID, process name, matched project and owner: <span class="pill dd">DEVDOCK</span> <span class="pill">EXTERNAL</span> <span class="pill">SYSTEM</span>.</li>
+          <li><strong>Conflict check before launch</strong>: start on another port, inspect the holder, or end it.</li>
+          <li>Ending an external process always asks first and shows its command line, folder, start time and child processes.</li>
+          <li>System processes are never offered for ending. Ownership is never guessed from a port number or executable name alone.</li>
+        </ul>
+      </div>
+      <div class="feature-visual" style="display:grid;gap:16px">
+        <figure class="shot">
+          <a href="screenshots/ports.png"><img src="screenshots/ports.png" loading="lazy" width="1280" height="900" alt="The Ports screen: a table of listening ports with PID, process, project and owner badges."></a>
+          <figcaption>Ports &middot; every listener, labelled by owner</figcaption>
+        </figure>
+        <div class="banner" role="img" aria-label="Mock of a port conflict banner">
+          <strong>Port 3000 is held by node.exe (PID 18244)</strong> - EXTERNAL, started 3h ago in <span class="mono">D:\dev\old-shop</span>.
+          <div class="acts"><span>Start on 3001</span><span>Inspect process</span><span class="danger">End process...</span></div>
+        </div>
+      </div>
+    </article>
+
+    <!-- 05 Agents -->
+    <article class="feature" id="f-agents">
+      <div class="feature-copy">
+        <p class="tag">05 &middot; Agents</p>
+        <h3>Your coding agent, already in the right folder.</h3>
+        <p class="summary">Launch Claude Code, Codex or OpenCode in the project - or a subfolder - in the terminal you prefer.</p>
+        <div class="pf">
+          <div class="problem"><span class="lbl">Problem</span><p>Every agent session starts with the same ritual: open a terminal, <code>cd</code> to the project (or the right package in a monorepo), then type the agent's command. Get the folder wrong and the agent works in the wrong context.</p></div>
+          <div class="solution"><span class="lbl">How DevDock fixes it</span><p>DevDock detects which agent CLIs are installed and opens them in a real terminal at exactly the right path. Bind your favourite launches to keyboard shortcuts and it's one keystroke.</p></div>
+        </div>
+        <ul class="details">
+          <li>Detects <strong>Claude Code</strong> (<code>claude</code>), <strong>Codex</strong> (<code>codex</code>) and <strong>OpenCode</strong> (<code>opencode</code>) on <code>PATH</code> and shows where each was found.</li>
+          <li>Missing agents show an install hint and a <strong>Re-check</strong> button - no restart needed.</li>
+          <li>Launch in <strong>Windows Terminal</strong>, <strong>PowerShell</strong>, <strong>Git Bash</strong> or <strong>Command Prompt</strong>.</li>
+          <li>Choose the project root or any subfolder.</li>
+          <li>Bind up to nine launches to <kbd>Ctrl</kbd> <kbd>Alt</kbd> <kbd>1</kbd>-<kbd>9</kbd>.</li>
+        </ul>
+      </div>
+      <div class="feature-visual">
+        <div class="mock" role="img" aria-label="Mock of the Agents tab with three detected agents">
+          <div class="mock-head">storefront &middot; Agents <span class="pill ok">2 of 3 installed</span></div>
+          <div class="mock-body">
+            <div class="agent-grid">
+              <div class="agent primary"><strong>Claude Code</strong><span class="mono">C:\Users\you\AppData\Roaming\npm\claude.cmd</span><span class="launch">Launch</span></div>
+              <div class="agent"><strong>Codex</strong><span class="mono">C:\Users\you\AppData\Roaming\npm\codex.cmd</span><span class="launch">Launch</span></div>
+              <div class="agent missing"><strong>OpenCode</strong><span class="mono">not found on PATH</span><span class="launch">Re-check</span></div>
+            </div>
+            <div class="row"><span class="mono" style="width:90px">TERMINAL</span><span>Windows Terminal</span><div class="right"><span class="pill">PowerShell</span><span class="pill">Git Bash</span><span class="pill">cmd</span></div></div>
+            <div class="row"><span class="mono" style="width:90px">FOLDER</span><span class="mono" style="color:var(--text-soft)">D:\dev\storefront\apps\web</span></div>
+            <div class="row"><span class="mono" style="width:90px">SHORTCUT</span><span><kbd>Ctrl</kbd> <kbd>Alt</kbd> <kbd>1</kbd></span><div class="right"><span class="mono">Claude Code &middot; storefront</span></div></div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- 06 Workspaces -->
+    <article class="feature flip" id="f-workspaces">
+      <div class="feature-copy">
+        <p class="tag">06 &middot; Workspaces</p>
+        <h3>Bring up the whole stack with one click.</h3>
+        <p class="summary">A named group of services from one or more projects, started as one unit, in order, healthy before the next one begins.</p>
+        <div class="pf">
+          <div class="problem"><span class="lbl">Problem</span><p>Real work rarely means one server. It's a database, then an API that needs the database, then a frontend that needs the API - started by hand, in order, waiting and checking each time. When one crashes, you find out late.</p></div>
+          <div class="solution"><span class="lbl">How DevDock fixes it</span><p>Describe the stack once. DevDock starts each service in order, waits until it is actually healthy, restarts it if it crashes, and shows all logs together - labelled by service.</p></div>
+        </div>
+        <ul class="details">
+          <li>Each service is a project command (optionally in one of its Git worktrees) or a <strong>Docker Compose</strong> service.</li>
+          <li>Start order, optional explicit dependencies, and a port used for conflict checks.</li>
+          <li><strong>Health checks</strong>: TCP (something accepts a connection on the port) or HTTP <code>GET</code> (a specific status, or any 2xx/3xx).</li>
+          <li><strong>Restart policy</strong>: restart on crash, by default up to 3 times in 5 minutes - then stop and tell you.</li>
+          <li>Combined logs with per-service filters.</li>
+          <li><strong>After start</strong> preset: open the editor and/or an agent once everything is up.</li>
+        </ul>
+      </div>
+      <div class="feature-visual">
+        <div class="mock" role="img" aria-label="Mock of a workspace starting three services with combined logs">
+          <div class="mock-head">Space &middot; shop-stack <span class="pill ok">3 / 3 healthy</span></div>
+          <div class="mock-body">
+            <div class="row"><span class="dot"></span><div><strong>postgres</strong><br><span class="mono">compose &middot; infra &middot; :5432</span></div><div class="right"><span class="pill">TCP</span><span class="pill ok">healthy</span></div></div>
+            <div class="row"><span class="dot"></span><div><strong>api</strong><br><span class="mono">pnpm dev &middot; billing-api &middot; :8080</span></div><div class="right"><span class="pill">GET /health</span><span class="pill ok">healthy</span></div></div>
+            <div class="row"><span class="dot"></span><div><strong>web</strong><br><span class="mono">next dev &middot; storefront &middot; :3000</span></div><div class="right"><span class="pill">GET /</span><span class="pill ok">healthy</span></div></div>
+<div class="console"><span class="t">09:14:02</span> <span class="pg">postgres</span> database system is ready to accept connections
+<span class="t">09:14:02</span> <span class="ok">devdock </span> postgres healthy (tcp :5432) - starting api
+<span class="t">09:14:05</span> <span class="api">api     </span> Server listening on http://localhost:8080
+<span class="t">09:14:05</span> <span class="ok">devdock </span> api healthy (GET /health 200) - starting web
+<span class="t">09:14:09</span> <span class="web">web     </span> Ready in 3.1s - Local: http://localhost:3000
+<span class="t">09:14:09</span> <span class="y">devdock </span> all services up - opening VS Code</div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- 07 Palette -->
+    <article class="feature" id="f-palette">
+      <div class="feature-copy">
+        <p class="tag">07 &middot; Command palette</p>
+        <h3>Everything is <kbd>Ctrl</kbd> <kbd>K</kbd> away.</h3>
+        <p class="summary">One fuzzy search across projects, commands, agents, workspaces and ports.</p>
+        <div class="pf">
+          <div class="problem"><span class="lbl">Problem</span><p>Even a good UI costs clicks: pick the screen, find the project, open the tab, press the button. When you know what you want, navigation is overhead.</p></div>
+          <div class="solution"><span class="lbl">How DevDock fixes it</span><p>Type what you mean. The palette understands project names, commands in context and port numbers, and runs the action directly.</p></div>
+        </div>
+        <ul class="details">
+          <li>Jump to a project: type part of its name and press <kbd>Enter</kbd>.</li>
+          <li>Run a command in context: <code>run dev in api</code>.</li>
+          <li>Ask about a port: <code>who's on 8069?</code></li>
+          <li>Start a workspace or an agent launch without leaving the keyboard.</li>
+          <li>Opens and closes from anywhere in the app.</li>
+        </ul>
+      </div>
+      <div class="feature-visual">
+        <figure class="shot">
+          <a href="screenshots/palette.png"><img src="screenshots/palette.png" loading="lazy" width="1280" height="900" alt="The command palette open over the app, showing matched projects and commands."></a>
+          <figcaption>Command palette &middot; projects, commands, agents, workspaces, ports</figcaption>
+        </figure>
+      </div>
+    </article>
+
+    <!-- 08 Settings -->
+    <article class="feature flip" id="f-settings">
+      <div class="feature-copy">
+        <p class="tag">08 &middot; Settings &amp; updates</p>
+        <h3>Your tools, your theme, your data.</h3>
+        <p class="summary">DevDock adapts to the tools you already have and keeps itself up to date safely.</p>
+        <div class="pf">
+          <div class="problem"><span class="lbl">Problem</span><p>Tools that assume one editor or one terminal force you to change your setup. Tools that update silently - or never - are hard to trust.</p></div>
+          <div class="solution"><span class="lbl">How DevDock fixes it</span><p>Settings shows exactly which tools were detected and where, lets you pick defaults, and handles updates with signed, verified packages from GitHub Releases.</p></div>
+        </div>
+        <ul class="details">
+          <li>Pick your editor, terminal and default agent; see every detected tool and its path.</li>
+          <li>Manage scan roots and scan depth.</li>
+          <li>Dark and light themes - follow Windows or choose manually, with a toggle in the title bar. Both meet WCAG AA contrast.</li>
+          <li>Data location, export and import of your whole setup.</li>
+          <li>In-app updates: an <strong>Update x.y.z</strong> pill appears in the title bar when a new version is out. Updates are signed and verified.</li>
+        </ul>
+      </div>
+      <div class="feature-visual">
+        <figure class="shot">
+          <a href="screenshots/settings.png"><img src="screenshots/settings.png" loading="lazy" width="1280" height="900" alt="The Settings screen with editor, terminal and agent choices and detected tools."></a>
+          <figcaption>Settings &middot; detected tools, defaults, appearance, data</figcaption>
+        </figure>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ================= HOW IT WORKS ================= -->
+<section id="how">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">Quick start</p>
+      <h2>From install to a running stack in six steps.</h2>
+    </div>
+    <div class="steps">
+      <div class="step"><h4>Add projects</h4><p>Projects &rarr; add a folder, or Settings &rarr; add a scan root like <code>D:\dev</code> and let DevDock find the rest.</p></div>
+      <div class="step"><h4>Open one</h4><p><kbd>Ctrl</kbd> <kbd>K</kbd>, type part of its name, <kbd>Enter</kbd>. Click <strong>VS Code</strong> (or your editor).</p></div>
+      <div class="step"><h4>Run it</h4><p>Run tab &rarr; start <code>dev</code>. Watch the console; the port appears once it's listening.</p></div>
+      <div class="step"><h4>Fix a port clash</h4><p>If the port is taken, the banner shows who holds it. Pick another port or end the process after reviewing its details.</p></div>
+      <div class="step"><h4>Ask an agent</h4><p>Agents tab &rarr; <strong>Claude Code</strong>. A terminal opens in the project folder, ready to go.</p></div>
+      <div class="step"><h4>Bring up a stack</h4><p>Spaces &rarr; create a workspace, add services (db, api, web) with health checks &rarr; <strong>Start all</strong>.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SAFETY ================= -->
+<section id="safety">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">Safety rules</p>
+      <h2>A tool that can stop processes has to be trustworthy.</h2>
+      <p>These are product invariants, not settings. They are enforced in the Rust core, not left to the UI.</p>
+    </div>
+    <div class="rules">
+      <div class="rule"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3Z"/></svg></span><div><h4>Never ends a process it didn't start - without asking</h4><p>External processes require explicit confirmation that shows the command line, folder, start time and children.</p></div></div>
+      <div class="rule"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m5.6 5.6 12.8 12.8"/></svg></span><div><h4>Never touches system processes</h4><p>They are labelled <code>SYSTEM</code> and are never offered for ending.</p></div></div>
+      <div class="rule"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="8" r="2"/><path d="M6 8v8M18 10a6 6 0 0 1-6 6H8"/></svg></span><div><h4>Never writes to a Git repository</h4><p>Git is read through the CLI for facts only. No commits, checkouts, fetches or stashes.</p></div></div>
+      <div class="rule"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h6l2 2h10v10H3z"/></svg></span><div><h4>Never deletes project folders</h4><p><strong>Remove</strong> only removes the entry from DevDock. Your files stay exactly where they are.</p></div></div>
+      <div class="rule"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v6m0 0L8 13m4-4 4 4M6 21v-4m6 4v-4m6 4v-4"/></svg></span><div><h4>Always stops the whole process tree</h4><p>Runs live in Job Objects. Quitting with active runs asks first, then stops all of them - no orphans.</p></div></div>
+      <div class="rule"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></span><div><h4>Never guesses port ownership</h4><p>Ownership comes from the system TCP table and process details, not from a port number or an executable name.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= DATA ================= -->
+<section id="data">
+  <div class="wrap two">
+    <div>
+      <p class="eyebrow">Your data</p>
+      <h2>Local-first. One JSON file. Nothing leaves your machine.</h2>
+      <p class="muted" style="font-size:17px;margin-top:14px">No accounts, no cloud, no sync, no telemetry. Everything DevDock knows about your setup lives in a single file you can read, back up, move or delete.</p>
+      <p class="muted" style="font-size:15px">Want to try it without touching your real list? Point it at a throwaway folder:</p>
+      <div class="console">$env:DEVDOCK_DATA_DIR = "C:\temp\devdock-demo"</div>
+    </div>
+    <dl class="facts">
+      <div><dt>Location</dt><dd><code>%APPDATA%\DevDock\devdock.json</code>, or <code>DEVDOCK_DATA_DIR</code> if set.</dd></div>
+      <div><dt>Contents</dt><dd>Projects, favourites, custom commands, scan roots, workspaces, agent shortcuts and settings.</dd></div>
+      <div><dt>Saving</dt><dd>Atomic (write, then rename), debounced, with a <code>.bak</code> copy of the previous version.</dd></div>
+      <div><dt>Recovery</dt><dd>A damaged file is renamed to <code>devdock.json.corrupt-&lt;time&gt;</code> - never overwritten - and DevDock falls back to the backup and warns you.</dd></div>
+      <div><dt>Portability</dt><dd>Export and import from Settings &rarr; Data.</dd></div>
+    </dl>
+  </div>
+</section>
+
+<!-- ================= KEYBOARD + TECH ================= -->
+<section id="keyboard">
+  <div class="wrap two">
+    <div>
+      <p class="eyebrow">Keyboard</p>
+      <h2>Built to be driven from the keyboard.</h2>
+      <div class="table-wrap" style="margin-top:28px">
+        <table>
+          <thead><tr><th>Key</th><th>Does</th></tr></thead>
+          <tbody>
+            <tr><td><kbd>Ctrl</kbd> <kbd>K</kbd></td><td>Open / close the command palette</td></tr>
+            <tr><td><kbd>Up</kbd> / <kbd>Down</kbd></td><td>Move through the project or workspace list</td></tr>
+            <tr><td><kbd>Enter</kbd></td><td>Open the selected project, or run the palette hit</td></tr>
+            <tr><td><kbd>Esc</kbd></td><td>Close the palette or a dialog</td></tr>
+            <tr><td><kbd>F5</kbd></td><td>Refresh the current screen</td></tr>
+            <tr><td><kbd>Ctrl</kbd> <kbd>Alt</kbd> <kbd>1</kbd>-<kbd>9</kbd></td><td>Run a bound agent / terminal launch</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div>
+      <p class="eyebrow">Under the hood</p>
+      <h2>Small, native and strict.</h2>
+      <ul class="details" style="margin-top:28px">
+        <li><strong>Rust core</strong> owns all state and all user-facing error text; the Svelte 5 UI only renders and sends commands.</li>
+        <li><strong>Tauri 2</strong> uses the system WebView2 - no bundled browser, a small install.</li>
+        <li>Windows specifics (Job Objects, TCP table, process details) are isolated in one platform crate - the only place <code>unsafe</code> is allowed.</li>
+        <li><code>clippy::unwrap_used</code> is denied workspace-wide; integration tests create real Git repositories.</li>
+        <li>CI runs fmt, clippy, tests, type checks and a WCAG contrast check on every push.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ================= INSTALL ================= -->
+<section id="install">
+  <div class="wrap two">
+    <div class="install-card">
+      <p class="eyebrow">Install</p>
+      <h2 style="font-size:30px">Download, run, done.</h2>
+      <ol>
+        <li>Download <code>DevDock_x.y.z_x64-setup.exe</code> from the latest release.</li>
+        <li>Run it. It installs into <code>C:\Program Files\DevDock</code> (asks for admin once), adds a Start menu entry and registers <code>devdock</code> for <kbd>Win</kbd> <kbd>R</kbd>.</li>
+        <li>WebView2 is installed if missing (it's built into Windows 11).</li>
+        <li>From then on, DevDock updates itself.</li>
+      </ol>
+      <a class="btn primary" href="https://github.com/ezzdin-atef/devdock/releases/latest">Get the latest release</a>
+      <p class="note"><strong class="accent">SmartScreen note:</strong> the installer isn't Authenticode-signed yet, so Windows may show "Windows protected your PC" on first run. Choose <strong>More info &rarr; Run anyway</strong>. In-app updates are signed and verified. To uninstall, use Settings &rarr; Apps; the uninstaller offers to delete DevDock's data too.</p>
+    </div>
+    <div>
+      <p class="eyebrow">Optional tools</p>
+      <h3>Uses what's already on your machine.</h3>
+      <p class="muted" style="margin:10px 0 22px">Nothing here is required up front. Settings shows which tools were detected and where.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Tool</th><th>Used for</th></tr></thead>
+          <tbody>
+            <tr><td><code>git</code></td><td>Git panel</td></tr>
+            <tr><td><code>code</code>, <code>cursor</code>, <code>code-insiders</code>, <code>windsurf</code>, <code>zed</code></td><td>Open in editor</td></tr>
+            <tr><td>Windows Terminal, PowerShell, Git Bash</td><td>Terminal and agent launches (<code>cmd</code> always works)</td></tr>
+            <tr><td><code>claude</code>, <code>codex</code>, <code>opencode</code></td><td>Agents</td></tr>
+            <tr><td>Docker with Compose</td><td>Compose services in workspaces</td></tr>
+            <tr><td>npm, pnpm, yarn, bun</td><td>Running package scripts</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FAQ ================= -->
+<section id="faq">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">FAQ</p>
+      <h2>Questions you might have.</h2>
+    </div>
+    <div class="faq">
+      <details><summary>Is DevDock free?</summary><p>Yes. It's open source under the MIT license, with no paid tier, account or sign-up.</p></details>
+      <details><summary>Does it work on macOS or Linux?</summary><p>Not yet. DevDock is built for Windows 10/11 x64. Platform-specific code is isolated behind traits in its own crate, so the core is portable, but only Windows is supported today.</p></details>
+      <details><summary>Does it send any data anywhere?</summary><p>No. There is no telemetry, no account and no sync; your project list stays in a local JSON file. Installed builds check GitHub Releases for updates.</p></details>
+      <details><summary>Will it change my Git repositories?</summary><p>Never. Git access is read-only by design: DevDock runs read commands through the <code>git</code> CLI to show branch, changes, commits, remotes and worktrees.</p></details>
+      <details><summary>Can it kill something important by accident?</summary><p>No. It only stops processes it started without asking. Ending anything else requires a confirmation that shows the full details, and system processes are never offered at all.</p></details>
+      <details><summary>Does it replace VS Code, my terminal or my Git client?</summary><p>No - it opens them. DevDock is a launcher and dashboard that removes the steps between you and the tools you already use.</p></details>
+      <details><summary>Which project types are detected?</summary><p>Next.js, Node, Rust, PHP and Docker Compose, from their marker files. Any other folder can still be added and given custom commands.</p></details>
+      <details><summary>An agent shows "not installed". What do I do?</summary><p>Install it (for example <code>npm install -g @anthropic-ai/claude-code</code>) so it's on <code>PATH</code>, then click <strong>Re-check</strong> in the Agents tab.</p></details>
+      <details><summary>I can't end a process on the Ports screen.</summary><p>It may need elevation. Run DevDock as administrator. System processes are intentionally never offered.</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CTA ================= -->
+<section class="cta">
+  <div class="wrap">
+    <h2>Stop juggling terminals. Start from one window.</h2>
+    <p>Free, open source and local-first. Install in a minute; keep every tool you already use.</p>
+    <div class="hero-actions">
+      <a class="btn primary" href="https://github.com/ezzdin-atef/devdock/releases/latest">Download for Windows</a>
+      <a class="btn" href="https://github.com/ezzdin-atef/devdock">Star on GitHub</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>DevDock &middot; MIT License</span>
+    <nav aria-label="Footer">
+      <a href="https://github.com/ezzdin-atef/devdock">Source</a>
+      <a href="https://github.com/ezzdin-atef/devdock/releases">Releases</a>
+      <a href="https://github.com/ezzdin-atef/devdock/blob/main/CHANGELOG.md">Changelog</a>
+      <a href="https://github.com/ezzdin-atef/devdock/issues">Issues</a>
+    </nav>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var nav = document.getElementById("nav");
+    var btn = nav.querySelector(".nav-toggle");
+    btn.addEventListener("click", function () {
+      var open = nav.classList.toggle("open");
+      btn.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+    nav.querySelectorAll(".nav-links a").forEach(function (a) {
+      a.addEventListener("click", function () {
+        nav.classList.remove("open");
+        btn.setAttribute("aria-expanded", "false");
+      });
+    });
+  })();
+</script>
+</body>
+</html>
