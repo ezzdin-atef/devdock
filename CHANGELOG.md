@@ -2,6 +2,34 @@
 
 All notable changes to DevDock. Versions follow [semver](https://semver.org).
 
+## [1.0.0] - 2026-11-17
+
+### Added
+
+- Selecting a project clears its "new from scan" dot (e023cc9)
+
+### Changed
+
+- Calmer project list (8ee7827)
+- Neutral light theme and aligned run command rows (f0e1bcb)
+- Improve UI readability and light theme contrast (2414c2d)
+
+### Docs
+
+- Demo-data screenshots with framed README images (6d303ee)
+- Light theme for the landing page (67fe83b)
+- Link the landing page from the README (d12ee49)
+- Add landing page and GitHub Pages deploy (0a672d8)
+- Expand README and add MIT LICENSE (12b746f)
+
+### Maintenance
+
+- Add launch config for previewing the landing page (87aa17e)
+
+### Other
+
+- Initial commit: DevDock 0.3.0 (9cbd210)
+
 ## [0.3.0] - 2026-11-17
 
 ### Added

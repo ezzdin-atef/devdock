@@ -587,7 +587,7 @@ dependencies = [
 
 [[package]]
 name = "devdock"
-version = "0.3.0"
+version = "1.0.0"
 dependencies = [
  "devdock-core",
  "devdock-platform",
@@ -602,7 +602,7 @@ dependencies = [
 
 [[package]]
 name = "devdock-core"
-version = "0.3.0"
+version = "1.0.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -613,7 +613,7 @@ dependencies = [
 
 [[package]]
 name = "devdock-platform"
-version = "0.3.0"
+version = "1.0.0"
 dependencies = [
  "devdock-core",
  "sysinfo",
