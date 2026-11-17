@@ -45,6 +45,7 @@ export const renameProject = (id: ProjectId, name: string) =>
   invoke<void>("rename_project", { id, name });
 export const setFavorite = (id: ProjectId, favorite: boolean) =>
   invoke<void>("set_favorite", { id, favorite });
+export const markSeen = (id: ProjectId) => invoke<boolean>("mark_seen", { id });
 export const relocateProject = (id: ProjectId, path: string) =>
   invoke<ProjectId>("relocate_project", { id, path });
 export const refreshProjects = () => invoke<void>("refresh_projects");

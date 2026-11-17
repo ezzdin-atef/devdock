@@ -120,6 +120,13 @@ pub fn set_favorite(core: State<'_, Core>, id: ProjectId, favorite: bool) -> Cmd
     Ok(())
 }
 
+/// Selecting a project counts as seeing it: drops the "new from scan" dot.
+/// Returns true if the mark was cleared (the list then needs a reload).
+#[tauri::command]
+pub fn mark_seen(core: State<'_, Core>, id: ProjectId) -> bool {
+    lock(&core.state).mark_seen(&id)
+}
+
 /// Returns the project's new id (ids follow the path).
 #[tauri::command]
 pub fn relocate_project(

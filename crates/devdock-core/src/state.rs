@@ -506,6 +506,12 @@ impl AppState {
         Ok(())
     }
 
+    /// Clears the "new from scan" mark once the project has been looked at
+    /// (selected in the list). Returns true if it was marked.
+    pub fn mark_seen(&mut self, id: &ProjectId) -> bool {
+        self.new_ids.remove(id)
+    }
+
     pub fn touch_opened(&mut self, id: &ProjectId, now: u64) -> Result<(), ProjectError> {
         self.get_mut(id)?.last_opened = Some(now);
         self.new_ids.remove(id);
@@ -649,6 +655,23 @@ mod tests {
             s.add(d, 1).unwrap();
         }
         s
+    }
+
+    #[test]
+    fn selecting_a_scanned_project_clears_its_new_mark() {
+        let dir = tempfile::tempdir().unwrap();
+        let mut s = AppState::default();
+        let candidate = crate::scan::Candidate {
+            path: dir.path().to_path_buf(),
+            detected: detect(dir.path()),
+        };
+        assert!(s.add_scanned(candidate, 1));
+        let id = s.projects[0].id.clone();
+        assert!(s.new_ids.contains(&id));
+
+        assert!(s.mark_seen(&id));
+        assert!(!s.new_ids.contains(&id));
+        assert!(!s.mark_seen(&id), "second call is a no-op");
     }
 
     #[test]

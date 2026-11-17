@@ -91,6 +91,7 @@ pub fn run() {
             commands::remove_project,
             commands::rename_project,
             commands::set_favorite,
+            commands::mark_seen,
             commands::relocate_project,
             commands::refresh_projects,
             commands::open_in_explorer,

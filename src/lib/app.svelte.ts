@@ -21,7 +21,6 @@ class AppUi {
   query = $state<Query>({ search: "", library: "all", kind: null, sort: "recent" });
   lib = $state<LibraryView | null>(null);
   selectedId = $state<ProjectId | null>(null);
-  justAddedId = $state<ProjectId | null>(null);
   renamingId = $state<ProjectId | null>(null);
   tools = $state<ToolScan | null>(null);
   error = $state<ErrorDto | null>(null);
@@ -98,8 +97,24 @@ class AppUi {
   async select(id: ProjectId | null) {
     this.selectedId = id;
     if (id === null) return;
+    this.markSeen(id);
     await this.loadGitDetails(id, false);
     this.refreshGit();
+  }
+
+  /** Selecting a project counts as seeing it: its "new from scan" dot goes away. */
+  private markSeen(id: ProjectId) {
+    const p = this.lib?.projects.find((x) => x.id === id);
+    if (!p?.isNew) return;
+    p.isNew = false; // hide the dot now; Rust confirms below
+    if (this.lib && this.lib.counts.new > 0) this.lib.counts.new -= 1;
+    api
+      .markSeen(id)
+      .then((cleared) => {
+        // In the "New from scan" view, keep the row where it is until the next refresh.
+        if (cleared && this.query.library !== "new") this.scheduleReload();
+      })
+      .catch(() => this.reload());
   }
 
   refreshGit() {
@@ -143,7 +158,6 @@ class AppUi {
       const added = await api.addProject(path);
       // Make sure the new project is visible even if a filter would hide it.
       this.clearFilters();
-      this.justAddedId = added.id;
       await this.reload();
       await this.select(added.id);
     });
