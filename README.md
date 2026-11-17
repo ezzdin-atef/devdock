@@ -317,7 +317,7 @@ Platform-specific code is isolated behind traits so the core stays testable and 
 | `crates/devdock-platform` | Windows FFI (Job Objects, TCP table, process details). The only crate allowed `unsafe`. |
 | `src-tauri` | Tauri app: commands, events, window, updater, installer config. |
 | `src` | Svelte 5 (SvelteKit, SPA mode) UI. Screens in `src/lib/screens`, shared components in `src/lib/components`. |
-| `scripts` | Release, changelog and contrast-check scripts. |
+| `scripts` | Release, changelog, contrast-check and screenshot scripts (`scripts/demo` holds the demo backend). |
 | `docs` | Product spec, design system, plan, tasks, decisions, states audit, release guide. |
 | `.github/workflows` | `ci.yml` (checks + unsigned build), `release.yml` (signed release on `v*` tags). |
 
@@ -351,6 +351,7 @@ publishes the installer and the in-app update.
 | `pnpm release 0.5.0` | Exact version |
 | `pnpm release:dry` | Preview the next patch release, change nothing |
 | `pnpm build:installer` | Build an installer locally without publishing |
+| `pnpm screenshots` | Recapture the README images from the UI with demo data, then frame them |
 
 One-time setup (signing key, secrets) and details: [docs/RELEASING.md](docs/RELEASING.md).
 
