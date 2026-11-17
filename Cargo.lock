@@ -655,7 +655,7 @@ dependencies = [
 
 [[package]]
 name = "devdock"
-version = "1.0.0"
+version = "1.1.0"
 dependencies = [
  "devdock-core",
  "devdock-platform",
@@ -671,7 +671,7 @@ dependencies = [
 
 [[package]]
 name = "devdock-core"
-version = "1.0.0"
+version = "1.1.0"
 dependencies = [
  "rcgen",
  "ring",
@@ -685,7 +685,7 @@ dependencies = [
 
 [[package]]
 name = "devdock-platform"
-version = "1.0.0"
+version = "1.1.0"
 dependencies = [
  "devdock-core",
  "sysinfo",

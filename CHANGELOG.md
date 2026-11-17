@@ -2,6 +2,20 @@
 
 All notable changes to DevDock. Versions follow [semver](https://semver.org).
 
+## [1.1.0] - 2026-11-17
+
+### Added
+
+- Local addresses, git actions, packages, logs and a customizable projects page (bc2ee69)
+
+### Fixed
+
+- Drop ineffective dynamic imports flagged by the build (6230ab5)
+
+### Docs
+
+- Add contributing guidelines for DevDock (17e9e82)
+
 ## [1.0.0] - 2026-11-17
 
 ### Added
