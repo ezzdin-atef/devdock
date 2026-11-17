@@ -103,64 +103,64 @@
 }
 
 
-/* Light theme: the same harbor, in daylight. Near-white work surfaces on a soft
-   stone frame: chrome and list columns step down in tone so the three regions read
-   apart without borders doing all the work. Ink is near-black graphite; the accent
-   turns to deep mustard wherever it has to be read rather than filled. */
+/* Light theme: the same harbor, in daylight. Clean neutral greys with a faint cool
+   cast (no cream): white work surfaces on a light grey frame, the chrome and list
+   columns a step darker so the regions read apart. Ink is near-black; yellow stays
+   only for selection and DevDock ownership, as deep mustard wherever it is read. */
 :root[data-theme="light"] {
   color-scheme: light;
 
-  --bg-chrome: #e9e7e1;
-  --bg-sidebar: #f1efea;
-  --bg-app: #f9f8f5;
+  --bg-chrome: #ebedf0;
+  --bg-sidebar: #f3f4f6;
+  --bg-app: #f8f9fa;
   --bg-panel: #ffffff;
-  --bg-raised: #f2f0eb;
-  --bg-hover: #e8e5de;
+  --bg-raised: #f1f3f5;
+  --bg-hover: #e7e9ed;
   --bg-overlay: #ffffff;
-  --bg-console: #f5f4f0;
-  --scrim: rgba(30, 27, 20, 0.34);
+  --bg-console: #f6f7f9;
+  --scrim: rgba(15, 18, 24, 0.34);
 
-  --line: #dedad1;
-  --line-strong: #c7c1b4;
-  --line-overlay: #c2bcaf;
-  --line-badge: #a29c8f;
+  --line: #e1e4e8;
+  --line-strong: #c9cdd3;
+  --line-overlay: #c3c7ce;
+  --line-badge: #9ca2ab;
 
-  --text: #16150f;
-  --text-soft: #34322b;
-  --text-muted: #57544b;
-  --text-faint: #858174;
-  --icon: #45423a;
+  --text: #111317;
+  --text-soft: #2f333a;
+  --text-muted: #535862;
+  --text-faint: #868b94;
+  --icon: #3e434b;
 
   --accent: #ecc94b;
   --accent-fg: #765700;
-  --accent-ink: #16150f;
-  --accent-tint: #f9ecbd;
-  --accent-panel: #fdf6dc;
-  --accent-panel-border: #e7cf7c;
-  --accent-active: #f8eecb;
+  --accent-ink: #111317;
+  --accent-tint: #faefc6;
+  --accent-panel: #fff9e3;
+  --accent-panel-border: #ebd27f;
+  --accent-active: #fbf2d2;
 
   --success: #13683f;
-  --success-pill: #d8eedf;
-  --success-panel: #effaf2;
+  --success-pill: #d8efe1;
+  --success-panel: #effaf3;
   --success-border: #a9d6b9;
   --error: #c4421f;
-  --error-ink: #fffaf7;
+  --error-ink: #ffffff;
   --error-text: #9c3214;
-  --error-pill: #fbe2d9;
-  --error-panel: #fdf0eb;
-  --error-border: #eeb3a0;
-  --error-row: #fdf0ec;
-  --error-log: #fce6df;
-  --warning-panel: #fdf5da;
+  --error-pill: #fce3da;
+  --error-panel: #fdf1ed;
+  --error-border: #efb4a1;
+  --error-row: #fdf1ed;
+  --error-log: #fce7e0;
+  --warning-panel: #fdf6dd;
   --warning-border: #e3c86a;
   --info: #2459c2;
-  --idle: #8b877a;
+  --idle: #8a8f98;
 
   --svc-orange: #a8510f;
   --svc-violet: #6f43b8;
 
-  --shadow-menu: 0 12px 32px rgba(48, 40, 20, 0.14), 0 2px 6px rgba(48, 40, 20, 0.06);
-  --shadow-dialog: 0 24px 64px rgba(48, 40, 20, 0.2), 0 4px 12px rgba(48, 40, 20, 0.08);
+  --shadow-menu: 0 12px 32px rgba(16, 24, 40, 0.12), 0 2px 6px rgba(16, 24, 40, 0.06);
+  --shadow-dialog: 0 24px 64px rgba(16, 24, 40, 0.18), 0 4px 12px rgba(16, 24, 40, 0.08);
 }
 
 @media (prefers-reduced-motion: reduce) {

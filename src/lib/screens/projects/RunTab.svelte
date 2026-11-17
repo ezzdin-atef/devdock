@@ -428,7 +428,7 @@
     overflow-y: auto;
     overscroll-behavior: contain;
     display: grid;
-    grid-template-columns: 8px minmax(80px, max-content) minmax(0, 1fr) auto auto;
+    grid-template-columns: 20px minmax(80px, max-content) minmax(0, 1fr) auto auto;
     align-content: start;
     column-gap: var(--space-6);
     row-gap: 1px;
@@ -440,7 +440,8 @@
     grid-template-columns: subgrid;
     align-items: center;
     min-height: 44px;
-    padding: 0 var(--space-3) 0 var(--space-6);
+    /* Subgrid rows take no side padding: the 20 px first column is the inset. */
+    padding: 0;
     border: 1px solid transparent;
     border-radius: var(--radius-button);
     transition: background var(--t-fast) var(--ease);
@@ -464,6 +465,7 @@
     cursor: pointer;
   }
   .state-dot {
+    justify-self: end;
     width: 8px;
     height: 8px;
     border-radius: 50%;
@@ -524,6 +526,7 @@
   }
   .row-actions {
     position: relative;
+    padding-right: var(--space-3);
     display: flex;
     align-items: center;
     gap: var(--space-2);

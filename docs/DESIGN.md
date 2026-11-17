@@ -71,8 +71,9 @@ Log service prefixes (combined logs): postgres `#8FB8FF`, api `#FFB27A`, web `te
 ---
 
 ### Light theme
-Same harbor in daylight: warm paper surfaces and graphite ink. Every token above has a light value in `src/app.css` under `:root[data-theme="light"]`; components never branch on theme. Two rules carry the difference:
+Same harbor in daylight: neutral light greys with a faint cool cast (no cream), white work surfaces, near-black ink. Chrome `#EBEDF0`, list columns `#F3F4F6`, app `#F8F9FA`, panels `#FFFFFF`. Every token above has a light value in `src/app.css` under `:root[data-theme="light"]`; components never branch on theme. Two rules carry the difference:
 - **`accent` vs `accent.fg`.** `accent` (`#E8C547`) is for fills (primary button, `DEVDOCK` badge, health bars on dark). `accent.fg` is the accent used as text, icon, border or focus ring: the same yellow in dark, deep mustard `#7F5F00` in light, where yellow text would fail contrast.
+- **`icon`** is its own token, a step stronger than `text.muted` (dark `#BCB9B0`, light `#3E434B`), because thin line glyphs read weaker than text of the same colour. Icon-only controls use it.
 - **Status colours darken** (success `#1A7148`, error `#C8492B` / text `#A33A1F`, info `#2C62C9`) and tints become pale washes of the same hue.
 
 Theme preference is System (follow Windows) / Light / Dark, set in Settings > Appearance or flipped from the title bar; stored in `localStorage` and applied before first paint. `pnpm contrast` checks every pair in both themes.
@@ -85,10 +86,10 @@ Theme preference is System (follow Windows) / Light / Dark, set in Settings > Ap
 | Section title | Schibsted Grotesk | 14–15 / 600–700 | Panel headers |
 | Body | Schibsted Grotesk | 13–13.5 / 400–500 | Buttons, rows, prose |
 | Small | Schibsted Grotesk | 12–12.5 / 400 | Helper text |
-| Mono data | Martian Mono | 11–12 / 400–500 | Paths, PIDs, branches, commands |
-| Mono label | Martian Mono | 10 / 400, UPPERCASE, tracking 0.08–0.1em | Section eyebrows, table headers, badges |
-| Big numbers | Martian Mono | 22–34 / 400, line-height 1 | Git counts, port tile |
-| Log | Martian Mono | 11–11.5, line-height 1.9 | Console |
+| Mono data | JetBrains Mono | 11–12 / 400–500 | Paths, PIDs, branches, commands |
+| Mono label | JetBrains Mono | 10 / 400, UPPERCASE, tracking 0.08–0.1em | Section eyebrows, table headers, badges |
+| Big numbers | JetBrains Mono | 22–34 / 400, line-height 1 | Git counts, port tile |
+| Log | JetBrains Mono | 11–11.5, line-height 1.9 | Console |
 
 Fallbacks: `system-ui, sans-serif` and `ui-monospace, monospace`. Both fonts are bundled through the `@fontsource-variable` npm packages (SIL OFL), so the app never loads fonts from the network.
 
