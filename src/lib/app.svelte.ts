@@ -1,7 +1,9 @@
 // UI state shared across the shell. Domain data is a snapshot of Rust state:
 // every change goes through a command, then the list is fetched again.
 
+import { agents } from "./agents.svelte";
 import * as api from "./api";
+import { view } from "./viewPrefs.svelte";
 import type {
   DetailTab,
   ErrorDto,
@@ -16,18 +18,9 @@ import type {
   View,
 } from "./types";
 
-/** The sort chosen on the Projects page last time (see viewPrefs). */
-function savedSort(): Query["sort"] {
-  try {
-    return JSON.parse(localStorage.getItem("devdock.view") ?? "{}").sort ?? "recent";
-  } catch {
-    return "recent";
-  }
-}
-
 class AppUi {
   view = $state<View>("projects");
-  query = $state<Query>({ search: "", library: "all", kind: null, sort: savedSort(), group: null });
+  query = $state<Query>({ search: "", library: "all", kind: null, sort: view.sort, group: null });
   /** A group whose name is being edited in place (just created, or "Rename"). */
   renamingGroup = $state<string | null>(null);
   lib = $state<LibraryView | null>(null);
@@ -168,7 +161,6 @@ class AppUi {
       const id = await api.groupCreate(unique);
       if (projectIds.length) await api.projectsSetGroup(projectIds, id);
       // Making a group means you want to see groups.
-      const { view } = await import("./viewPrefs.svelte");
       if (view.grouping !== "groups") view.set({ grouping: "groups" });
       this.renamingGroup = id;
     });
@@ -220,10 +212,8 @@ class AppUi {
       list.splice(at, 0, ...moved);
     }
     if (this.query.sort !== "manual") {
-      const { view } = await import("./viewPrefs.svelte");
       view.set({ sort: "manual" });
       this.query.sort = "manual";
-      const { agents } = await import("./agents.svelte");
       agents.showToast("Sorted by your own order now", "ok");
     }
     await this.run(() => api.projectsPlace(ids, anchor, after, regroup, group));
