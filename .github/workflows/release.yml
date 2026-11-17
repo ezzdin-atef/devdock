@@ -1,0 +1,90 @@
+name: Release
+
+# Runs when `pnpm release <bump>` pushes a version tag. Builds the per-machine NSIS
+# installer, signs the updater artifacts, and publishes a GitHub Release with
+# latest.json, which installed copies of DevDock poll for updates.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to (re)build, e.g. v0.4.0"
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.event.inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+  TAG: ${{ github.event.inputs.tag || github.ref_name }}
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: pnpm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Install JS dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check the tag matches the version in Cargo.toml
+        shell: bash
+        run: |
+          version=$(sed -n '/^\[workspace.package\]/,/^\[/{s/^version *= *"\(.*\)"/\1/p}' Cargo.toml)
+          if [ "v$version" != "$TAG" ]; then
+            echo "::error::Tag $TAG doesn't match Cargo.toml version $version. Create releases with 'pnpm release <bump>'."
+            exit 1
+          fi
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+          if [[ "$version" == *-* ]]; then echo "PRERELEASE=true" >> "$GITHUB_ENV"; else echo "PRERELEASE=false" >> "$GITHUB_ENV"; fi
+
+      - name: Check signing secrets are present
+        shell: bash
+        env:
+          KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+        run: |
+          if [ -z "$KEY" ]; then
+            echo "::error::Secret TAURI_SIGNING_PRIVATE_KEY is missing. Run 'pnpm release:setup <owner>/<repo>' and follow its steps."
+            exit 1
+          fi
+
+      - name: Release notes from CHANGELOG.md
+        shell: bash
+        run: |
+          {
+            echo "NOTES<<__NOTES__"
+            node scripts/changelog-section.mjs "$VERSION"
+            echo "__NOTES__"
+          } >> "$GITHUB_ENV"
+
+      - name: Build, sign and publish
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          tagName: ${{ env.TAG }}
+          releaseName: DevDock ${{ env.TAG }}
+          releaseBody: ${{ env.NOTES }}
+          releaseDraft: false
+          prerelease: ${{ env.PRERELEASE }}
+          includeUpdaterJson: true
+          updaterJsonPreferNsis: true
+          args: --config src-tauri/tauri.release.conf.json

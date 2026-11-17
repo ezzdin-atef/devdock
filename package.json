@@ -1,0 +1,40 @@
+{
+  "name": "devdock",
+  "version": "0.3.0",
+  "description": "Desktop control panel for local dev projects",
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "vite preview",
+    "prepare": "svelte-kit sync || echo ''",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "tauri": "tauri",
+    "contrast": "node scripts/check-contrast.mjs",
+    "release": "node scripts/release.mjs",
+    "release:dry": "node scripts/release.mjs patch --dry-run",
+    "release:setup": "node scripts/release-setup.mjs",
+    "build:installer": "tauri build"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@fontsource-variable/martian-mono": "^5.3.0",
+    "@fontsource-variable/schibsted-grotesk": "^5.3.0",
+    "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-dialog": "^2.8.4",
+    "@tauri-apps/plugin-process": "^2.4.0",
+    "@tauri-apps/plugin-updater": "^2.14.1"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-static": "^3.0.10",
+    "@sveltejs/kit": "^2.65.1",
+    "@sveltejs/vite-plugin-svelte": "^7.1.2",
+    "@tauri-apps/cli": "^2",
+    "svelte": "^5.56.3",
+    "svelte-check": "^4.6.0",
+    "typescript": "~6.0.3",
+    "vite": "^8.0.16"
+  },
+  "packageManager": "pnpm@11.20.0"
+}

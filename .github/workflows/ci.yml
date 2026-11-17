@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  check:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: pnpm
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - name: Install JS dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Svelte check
+        run: pnpm check
+      - name: Colour contrast (WCAG AA)
+        run: pnpm contrast
+      - name: Rust format
+        run: cargo fmt --all -- --check
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
+      - name: Rust tests (includes real git repos)
+        run: cargo test --workspace
+      - name: Build installer (unsigned, no updater artifacts)
+        run: pnpm tauri build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: devdock-windows
+          path: |
+            target/release/devdock.exe
+            target/release/bundle/nsis/*.exe

@@ -1,0 +1,19 @@
+[package]
+name = "devdock-core"
+description = "DevDock domain logic: projects, storage, scanning, Git. No UI, no Tauri."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+walkdir.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[lints]
+workspace = true
