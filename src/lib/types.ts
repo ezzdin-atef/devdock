@@ -15,6 +15,16 @@ export const KIND_LABEL: Record<Kind, string> = {
   unknown: "FOLDER",
 };
 
+/** Sentence-case type names for quiet places (list rows, menus). */
+export const KIND_NAME: Record<Kind, string> = {
+  nextJs: "Next.js",
+  node: "Node",
+  rust: "Rust",
+  php: "PHP",
+  compose: "Compose",
+  unknown: "Folder",
+};
+
 /** git/status.rs `GitStatus` */
 export interface GitStatus {
   oid: string | null;

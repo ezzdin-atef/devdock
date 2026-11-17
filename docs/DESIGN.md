@@ -168,7 +168,7 @@ Mono 10, padding 3×7, r 4.
 8 px. Running = filled green (with a 3 px tint ring when selected); failed = filled `#FF8A6B`; idle = 1.5 px ring `#6B6A64`; missing = dashed ring `#FF8A6B`.
 
 ### List row (project / workspace)
-Padding 10×12, r 9, transparent border. Contents: dot · name 14/600 · type (mono, right) · one-line mono subline (truncated). Selected = `accent.panel`.
+Padding 8×12, r 9. Two lines only: **name** 14.5/600 (+ filled star if favorite, + 6 px blue dot if new from a scan) with the type in sans 12 `text.muted` on the right (`Next.js`, `Node`, `Folder`); then a quiet line: branch (mono 12 `text.muted`), changed files as a 5 px yellow dot + count, ↑/↓ counts. Folders without Git show a short path instead. A running project replaces the type with a green `● running`. The full path is the row tooltip. Row actions (⋮) appear in place of the type on hover or selection. Selected = `accent.panel`. Above the list: search + icon-only add button, then a single bar with the count on the left and two quiet menus (type filter, sort) on the right.
 Workspace rows replace the dot with a **health bar**: one 18 × 5 bar per service.
 
 ### Panel

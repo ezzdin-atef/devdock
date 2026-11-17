@@ -3,12 +3,15 @@
   import Button from "$lib/components/Button.svelte";
   import Icon from "$lib/components/Icon.svelte";
   import { plural, shortPath } from "$lib/format";
-  import { KIND_LABEL, type Kind, type SortBy } from "$lib/types";
+  import { KIND_NAME, type Kind, type SortBy } from "$lib/types";
   import { runs } from "$lib/runs.svelte";
   import GitBadge from "./GitBadge.svelte";
   import RenameInput from "./RenameInput.svelte";
   import RowMenu from "./RowMenu.svelte";
 
+  // A calm list: one strong line (name), one quiet line (branch and changes).
+  // Everything else (path, type filters, sort) moves to tooltips and two small
+  // menus, so the column reads as a list of names first.
   let menuFor = $state<string | null>(null);
 
   const SORTS: { sort: SortBy; label: string }[] = [
@@ -17,7 +20,7 @@
     { sort: "kind", label: "Type" },
   ];
 
-  const chips = $derived(
+  const kinds = $derived(
     (Object.entries(app.lib?.counts.kinds ?? {}) as [Kind, number][]).filter(([, n]) => n > 0),
   );
   const projects = $derived(app.lib?.projects ?? []);
@@ -47,43 +50,51 @@
       <Icon name="search" size={14} />
       <input
         type="search"
-        placeholder="Search name or path"
+        placeholder="Search projects"
         value={app.query.search}
         oninput={(e) => app.setQuery({ search: e.currentTarget.value })}
         onkeydown={onSearchKey}
         spellcheck="false"
       />
     </label>
-    <Button variant="secondary" onclick={() => app.addProject()} title="Add a project folder">
-      <Icon name="plus" size={14} /> Add
-    </Button>
+    <button class="add" onclick={() => app.addProject()} title="Add a project folder" aria-label="Add a project folder">
+      <Icon name="plus" size={16} />
+    </button>
   </div>
 
-  <div class="controls">
-    <div class="segmented" role="radiogroup" aria-label="Sort">
-      {#each SORTS as s (s.sort)}
-        <button
-          role="radio"
-          aria-checked={app.query.sort === s.sort}
-          class:on={app.query.sort === s.sort}
-          onclick={() => app.setQuery({ sort: s.sort })}>{s.label}</button
+  {#if total > 0}
+    <div class="bar">
+      <span class="count">
+        {filtered ? `${projects.length} of ${total}` : plural(total, "project")}
+      </span>
+      <span class="spacer"></span>
+      {#if kinds.length > 1 || app.query.kind}
+        <label class="pick" class:on={app.query.kind !== null} title="Show one type">
+          <select
+            value={app.query.kind ?? ""}
+            onchange={(e) => app.setQuery({ kind: (e.currentTarget.value || null) as Kind | null })}
+            aria-label="Filter by type"
+          >
+            <option value="">All types</option>
+            {#each kinds as [kind, n] (kind)}
+              <option value={kind}>{KIND_NAME[kind]} ({n})</option>
+            {/each}
+          </select>
+          <Icon name="chevron" size={12} />
+        </label>
+      {/if}
+      <label class="pick" title="Sort order">
+        <select
+          value={app.query.sort}
+          onchange={(e) => app.setQuery({ sort: e.currentTarget.value as SortBy })}
+          aria-label="Sort by"
         >
-      {/each}
-    </div>
-  </div>
-
-  {#if chips.length > 1 || app.query.kind}
-    <div class="chips">
-      {#each chips as [kind, n] (kind)}
-        <button
-          class="chip mono"
-          class:on={app.query.kind === kind}
-          aria-pressed={app.query.kind === kind}
-          onclick={() => app.setQuery({ kind: app.query.kind === kind ? null : kind })}
-        >
-          {KIND_LABEL[kind]} <span class="n">{n}</span>
-        </button>
-      {/each}
+          {#each SORTS as s (s.sort)}
+            <option value={s.sort}>{s.label}</option>
+          {/each}
+        </select>
+        <Icon name="chevron" size={12} />
+      </label>
     </div>
   {/if}
 
@@ -129,11 +140,14 @@
   {:else}
     <ul class="rows">
       {#each projects as project (project.id)}
+        {@const running = runs.activeIn(project.id)}
+        {@const isNew = project.isNew}
         <li class="row-wrap">
           <div
             class="row"
             class:selected={project.id === app.selectedId}
             class:missing={project.missing}
+            title={project.path}
           >
             <button
               class="row-hit"
@@ -141,16 +155,6 @@
               onclick={() => app.select(project.id)}
               ondblclick={() => app.startRename(project.id)}
             ></button>
-            <span
-              class="dot"
-              class:dot-missing={project.missing}
-              class:dot-running={runs.activeIn(project.id) > 0}
-              title={project.missing
-                ? "Folder not found"
-                : runs.activeIn(project.id) > 0
-                  ? `${runs.activeIn(project.id)} running`
-                  : "Idle"}
-            ></span>
             <span class="row-main">
               <span class="row-top">
                 {#if app.renamingId === project.id}
@@ -159,20 +163,24 @@
                   <span class="name">{project.name}</span>
                 {/if}
                 {#if project.favorite}
-                  <span class="fav" title="Favorite"><Icon name="star" size={11} filled /></span>
+                  <span class="fav" title="Favorite"><Icon name="star" size={12} filled /></span>
                 {/if}
-                {#if project.isNew || project.id === app.justAddedId}
-                  <span class="tag-new mono">NEW</span>
+                {#if isNew}
+                  <span class="new" title="New from the last scan" aria-label="New"></span>
                 {/if}
-                <span class="kind mono">{KIND_LABEL[project.kind]}</span>
+                <span class="spacer"></span>
+                {#if running > 0}
+                  <span class="live" title="{running} running"><span class="live-dot"></span>{running > 1 ? `${running} running` : "running"}</span>
+                {:else if !project.missing}
+                  <span class="kind">{KIND_NAME[project.kind]}</span>
+                {/if}
               </span>
               {#if project.missing}
-                <span class="sub mono missing-text">Folder not found</span>
+                <span class="sub missing-text">Folder not found</span>
+              {:else if project.git?.state === "noRepo"}
+                <span class="sub mono">{shortPath(project.path, 2)}</span>
               {:else}
-                <span class="sub-row">
-                  <GitBadge git={project.git} />
-                  <span class="sub mono" title={project.path}>{shortPath(project.path)}</span>
-                </span>
+                <span class="sub"><GitBadge git={project.git} /></span>
               {/if}
             </span>
             <button
@@ -239,55 +247,88 @@
     user-select: text;
   }
   .search input::placeholder {
-    color: var(--icon);
+    color: var(--text-muted);
   }
-  .segmented {
-    display: inline-flex;
-    padding: 3px;
-    background: var(--bg-panel);
+  .add {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
     border: 1px solid var(--line);
-    border-radius: var(--radius-row);
-  }
-  .segmented button {
-    height: 26px;
-    padding: 0 var(--space-6);
-    border: 0;
-    border-radius: var(--radius-button-sm);
-    background: transparent;
-    color: var(--text-muted);
-    font-size: 12.5px;
-    cursor: pointer;
-  }
-  .segmented button.on {
-    background: var(--bg-hover);
+    border-radius: var(--radius-button);
+    background: var(--bg-raised);
     color: var(--text);
-    font-weight: 600;
-  }
-  .chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-3);
-  }
-  .chip {
-    height: 26px;
-    padding: 0 var(--space-5);
-    border: 1px solid var(--line-strong);
-    border-radius: var(--radius-pill);
-    background: transparent;
-    color: var(--text-muted);
-    font-size: 11px;
-    letter-spacing: 0.05em;
     cursor: pointer;
+    transition:
+      background var(--t-fast) var(--ease),
+      border-color var(--t-fast) var(--ease);
   }
-  .chip .n {
-    margin-left: var(--space-2);
-    opacity: 0.8;
+  .add:hover {
+    border-color: var(--line-strong);
+    background: var(--bg-hover);
   }
-  .chip.on {
-    border-color: var(--accent-fg);
+
+  /* Count on the left, two quiet menus on the right: replaces the sort segments
+     and the wrapping row of type chips. */
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 0 var(--space-2) 0 var(--space-4);
+    margin-top: calc(-1 * var(--space-1));
+  }
+  .count {
+    font-size: 12.5px;
+    color: var(--text-muted);
+  }
+  .spacer {
+    flex: 1;
+  }
+  .pick {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    height: 28px;
+    border-radius: var(--radius-button-sm);
+    color: var(--text-soft);
+    transition: background var(--t-fast) var(--ease);
+  }
+  .pick:hover {
+    background: var(--bg-hover);
+  }
+  .pick.on {
     background: var(--accent-tint);
     color: var(--accent-fg);
   }
+  .pick select {
+    appearance: none;
+    height: 100%;
+    padding: 0 22px 0 var(--space-4);
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .pick select:focus-visible {
+    outline: 2px solid var(--accent-fg);
+    outline-offset: 0;
+    border-radius: var(--radius-button-sm);
+  }
+  .pick select option {
+    background: var(--bg-overlay);
+    color: var(--text);
+  }
+  .pick :global(svg) {
+    position: absolute;
+    right: 6px;
+    pointer-events: none;
+    color: var(--icon);
+  }
+
   .scan-banner {
     display: flex;
     align-items: center;
@@ -355,13 +396,14 @@
     padding: var(--space-4) var(--space-6);
     color: var(--text-muted);
   }
+
   .rows {
     list-style: none;
     margin: 0;
     padding: 0;
     display: flex;
     flex-direction: column;
-    gap: var(--space-1);
+    gap: 1px;
   }
   .row-wrap {
     position: relative;
@@ -369,9 +411,9 @@
   .row {
     position: relative;
     display: flex;
-    align-items: flex-start;
-    gap: var(--space-5);
-    padding: var(--space-5) var(--space-4) var(--space-5) var(--space-6);
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-3) var(--space-4) var(--space-6);
     border: 1px solid transparent;
     border-radius: var(--radius-row);
     transition: background var(--t-fast) var(--ease);
@@ -392,29 +434,10 @@
     background: transparent;
     cursor: pointer;
   }
-  .dot {
-    flex-shrink: 0;
-    width: 8px;
-    height: 8px;
-    margin-top: 6px;
-    border-radius: 50%;
-    border: 1.5px solid var(--idle);
-    pointer-events: none;
-  }
-  .dot-running {
-    border: 0;
-    background: var(--success);
-  }
-  .row.selected .dot-running {
-    box-shadow: 0 0 0 3px var(--success-pill);
-  }
-  .dot-missing {
-    border: 1.5px dashed var(--error);
-  }
   .row-main {
     display: flex;
     flex-direction: column;
-    gap: var(--space-1);
+    gap: 1px;
     flex: 1;
     min-width: 0;
     pointer-events: none;
@@ -429,7 +452,7 @@
     min-width: 0;
   }
   .name {
-    font-size: 15px;
+    font-size: 14.5px;
     font-weight: 600;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -437,44 +460,64 @@
   }
   .row.missing .name {
     color: var(--text-muted);
+    text-decoration: line-through;
+    text-decoration-color: var(--text-faint);
   }
   .fav {
-    color: var(--accent-fg);
     display: inline-flex;
-  }
-  .tag-new {
-    font-size: 11px;
+    flex-shrink: 0;
     color: var(--accent-fg);
+  }
+  /* "New from scan": a small blue dot, not a word on every row. Blue keeps it
+     apart from the yellow changed-files dot on the line below. */
+  .new {
+    flex-shrink: 0;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--info);
   }
   .kind {
-    margin-left: auto;
-    padding-left: var(--space-4);
-    font-size: 11px;
+    flex-shrink: 0;
+    font-size: 12px;
     color: var(--text-muted);
     white-space: nowrap;
   }
+  .live {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-shrink: 0;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--success);
+  }
+  .live-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--success);
+    box-shadow: 0 0 0 3px var(--success-pill);
+  }
   .sub {
+    display: flex;
+    min-width: 0;
     font-size: 12px;
     color: var(--text-muted);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  .sub-row {
-    display: flex;
-    align-items: baseline;
-    gap: var(--space-4);
-    min-width: 0;
-  }
-  .sub-row .sub {
-    flex: 1;
-    min-width: 0;
-  }
   .missing-text {
     color: var(--error-text);
   }
+  /* Row actions appear in place of the type label, so a hidden button doesn't
+     reserve an empty strip on every row. */
   .kebab {
-    position: relative;
+    position: absolute;
+    top: 50%;
+    right: var(--space-3);
+    transform: translateY(-50%);
     display: grid;
     place-items: center;
     flex-shrink: 0;
@@ -492,6 +535,13 @@
   .kebab.open,
   .kebab:focus-visible {
     opacity: 1;
+  }
+  .row:hover .kind,
+  .row:hover .live,
+  .row.selected .kind,
+  .row.selected .live,
+  .row:has(.kebab.open) .kind {
+    visibility: hidden;
   }
   .kebab:hover,
   .kebab.open {

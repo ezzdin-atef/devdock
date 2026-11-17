@@ -11,7 +11,9 @@
   <span class="badge mono" title={s.branch ? `Branch ${s.branch}` : "Detached HEAD"}>
     <span class="branch">{s.branch ?? "detached"}</span>
     {#if s.changedFiles > 0}
-      <span class="changes" title="{s.changedFiles} changed files">●{s.changedFiles}</span>
+      <span class="changes" title="{s.changedFiles} changed {s.changedFiles === 1 ? 'file' : 'files'} (staged, modified or untracked)"
+        ><span class="dot" aria-hidden="true"></span>{s.changedFiles}</span
+      >
     {/if}
     {#if s.ahead}
       <span class="ahead" title="{s.ahead} commits to push">↑{s.ahead}</span>
@@ -29,11 +31,11 @@
 <style>
   .badge {
     display: inline-flex;
-    gap: var(--space-3);
-    flex-shrink: 0;
-    max-width: 55%;
+    align-items: center;
+    gap: var(--space-4);
+    min-width: 0;
     font-size: 12px;
-    color: var(--text-soft);
+    color: var(--text-muted);
   }
   .branch {
     overflow: hidden;
@@ -41,7 +43,17 @@
     white-space: nowrap;
   }
   .changes {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
     color: var(--accent-fg);
+  }
+  .dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
   }
   .ahead {
     color: var(--accent-fg);
