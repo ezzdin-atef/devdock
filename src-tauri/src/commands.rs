@@ -43,6 +43,12 @@ pub struct Core {
     pub search: Mutex<Arc<std::sync::atomic::AtomicBool>>,
     /// An editor in the Files tab has unsaved changes (closing asks first).
     pub unsaved: std::sync::atomic::AtomicBool,
+    /// Spawns scanner processes in a Job Object, so Cancel ends the whole tree.
+    pub tree: Arc<dyn devdock_core::run::ProcessTree>,
+    /// Security scans in flight, by project.
+    pub security: crate::security::ActiveScans,
+    /// Scanner installs in flight, by scanner id.
+    pub installs: crate::security::ActiveInstalls,
     /// Workspaces started this session (live or finished), by id.
     pub spaces: Mutex<
         std::collections::HashMap<

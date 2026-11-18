@@ -299,7 +299,7 @@ export interface ErrorDto {
   fix: string | null;
 }
 
-export type DetailTab = "overview" | "git" | "files" | "run" | "logs" | "agents";
+export type DetailTab = "overview" | "git" | "files" | "run" | "logs" | "security" | "agents";
 
 /** files/mod.rs */
 export interface FileEntry {
@@ -603,4 +603,168 @@ export interface PaletteGroup {
   group: string;
   title: string;
   hits: PaletteHit[];
+}
+
+// --- Security scans (security/model.rs) ---------------------------------------
+
+export type Severity = "critical" | "high" | "medium" | "low" | "unknown";
+export type FindingKind = "vulnerability" | "secret" | "misconfiguration" | "code";
+export type ToolStatus = "ran" | "skipped" | "failed" | "cancelled";
+
+export interface Finding {
+  key: string;
+  kind: FindingKind;
+  id: string;
+  aliases: string[];
+  severity: Severity;
+  title: string;
+  package: string | null;
+  version: string | null;
+  ecosystem: string | null;
+  fixedIn: string | null;
+  location: string | null;
+  line: number | null;
+  commit: string | null;
+  url: string | null;
+  cvss: number | null;
+  dev: boolean | null;
+  remediation: string | null;
+  tools: string[];
+  isNew: boolean;
+}
+
+export interface ToolRun {
+  tool: string;
+  name: string;
+  status: ToolStatus;
+  detail: string | null;
+  install: string | null;
+  command: string | null;
+  findings: number;
+  ms: number;
+}
+
+export interface SecurityCounts {
+  critical: number;
+  high: number;
+  medium: number;
+  low: number;
+  unknown: number;
+  secrets: number;
+  /** Of the severity counts: misconfigurations (Trivy) and code issues (Semgrep). */
+  misconfigs: number;
+  code: number;
+}
+
+export interface Upgrade {
+  package: string;
+  version: string | null;
+  ecosystem: string | null;
+  to: string | null;
+  fixes: number;
+  unfixed: number;
+  worst: Severity;
+  ids: string[];
+  dev: boolean;
+}
+
+export interface Resolved {
+  id: string;
+  kind: FindingKind;
+  severity: Severity;
+  title: string;
+  package: string | null;
+  version: string | null;
+}
+
+export interface ScanOptions {
+  history: boolean;
+}
+
+export interface SecurityReport {
+  version: number;
+  projectId: ProjectId;
+  projectName: string;
+  path: string;
+  startedAt: number;
+  finishedAt: number;
+  options: ScanOptions;
+  tools: ToolRun[];
+  findings: Finding[];
+  counts: SecurityCounts;
+  upgrades: Upgrade[];
+  previousAt: number | null;
+  resolved: Resolved[];
+  cancelled: boolean;
+}
+
+export interface SecuritySummary {
+  finishedAt: number;
+  counts: SecurityCounts;
+  new: number;
+}
+
+export interface SecurityProgress {
+  projectId: ProjectId;
+  step: number;
+  total: number;
+  tool: string;
+  name: string;
+  startedAt: number;
+}
+
+export interface SecurityRunning {
+  projectId: ProjectId;
+  startedAt: number;
+  progress: SecurityProgress | null;
+}
+
+export interface SecurityDone {
+  projectId: ProjectId;
+  summary: SecuritySummary | null;
+  error: ErrorDto | null;
+}
+
+export interface ScannerInfo {
+  id: string;
+  name: string;
+  covers: string;
+  install: string;
+  url: string;
+  path: string | null;
+  /** Installed by DevDock, so DevDock can remove it. */
+  managed: boolean;
+  method: "download" | "python" | "cargo";
+  /** Where the Install button gets it from. */
+  source: string;
+  /** Why Install can't work on this machine. */
+  blocked: string | null;
+  version: string | null;
+}
+
+export type InstallState = "running" | "done" | "failed" | "cancelled";
+
+export interface InstallEvent {
+  tool: string;
+  state: InstallState;
+  stage: string;
+  /** 0 to 1 while a download runs; null when the step can't tell. */
+  progress: number | null;
+  /** A new log line, when this event carries one. */
+  line: string | null;
+  error: string | null;
+}
+
+/** The newest install of a scanner this session, with its log. */
+export interface InstallLog {
+  tool: string;
+  name: string;
+  state: InstallState;
+  stage: string;
+  progress: number | null;
+  lines: string[];
+  dropped: number;
+  error: string | null;
+  startedAt: number;
+  finishedAt: number | null;
 }

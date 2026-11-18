@@ -14,6 +14,8 @@ export interface Details {
   status: boolean;
   /** "not installed" / "update packages". */
   packages: boolean;
+  /** Critical/high findings or secrets from the last security scan. */
+  security: boolean;
   /** Next.js, Vite, Rust... */
   kind: boolean;
   /** Folder on disk. */
@@ -26,6 +28,7 @@ export const DETAIL_LABELS: { key: keyof Details; label: string }[] = [
   { key: "status", label: "Running state" },
   { key: "git", label: "Git branch and changes" },
   { key: "packages", label: "Packages status" },
+  { key: "security", label: "Security findings" },
   { key: "kind", label: "Project type" },
   { key: "opened", label: "Last opened" },
   { key: "path", label: "Folder path" },
@@ -47,7 +50,7 @@ const DEFAULTS: Saved = {
   size: "m",
   grouping: "none",
   sort: "recent",
-  details: { git: true, status: true, packages: true, kind: true, path: false, opened: false },
+  details: { git: true, status: true, packages: true, security: true, kind: true, path: false, opened: false },
   favoritesRow: true,
 };
 

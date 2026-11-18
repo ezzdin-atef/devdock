@@ -9,6 +9,7 @@
   import { ports } from "$lib/ports.svelte";
   import Ports from "$lib/screens/Ports.svelte";
   import { runs } from "$lib/runs.svelte";
+  import { security } from "$lib/security.svelte";
   import Spaces from "$lib/screens/Spaces.svelte";
   import Running from "$lib/screens/Running.svelte";
   import Agents from "$lib/screens/Agents.svelte";
@@ -31,6 +32,7 @@
     app.init();
     nav.init();
     runs.init();
+    security.init();
     agents.load();
     spaces.init();
 

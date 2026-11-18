@@ -23,6 +23,7 @@ pub mod run;
 pub mod saver;
 pub mod scan;
 pub mod scan_job;
+pub mod security;
 pub mod state;
 pub mod store;
 pub mod time;

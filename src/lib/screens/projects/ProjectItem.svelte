@@ -5,6 +5,7 @@
   import { drag } from "$lib/drag.svelte";
   import { relativeTime, shortPath } from "$lib/format";
   import { runs } from "$lib/runs.svelte";
+  import { security } from "$lib/security.svelte";
   import { KIND_NAME, type Project } from "$lib/types";
   import type { Details } from "$lib/viewPrefs.svelte";
   import GitBadge from "./GitBadge.svelte";
@@ -42,6 +43,7 @@
       : null,
   );
   const changes = $derived(project.git?.state === "repo" ? project.git.data.changedFiles : 0);
+  const sec = $derived(details.security ? security.badge(project.id) : null);
 
   function onPointerDown(e: PointerEvent) {
     if ((e.target as HTMLElement).closest(".kebab")) return;
@@ -52,7 +54,9 @@
   const line = $derived.by(() => {
     if (details.status && running) return { text: running > 1 ? `${running} running` : "running", tone: "ok" };
     if (project.missing) return { text: "missing", tone: "bad" };
+    if (sec?.tone === "bad") return sec;
     if (details.packages && deps) return { text: deps, tone: "warn" };
+    if (sec) return sec;
     if (details.git && changes) return { text: `${changes} changed`, tone: "muted" };
     if (details.opened && project.lastOpened) return { text: relativeTime(project.lastOpened, runs.now), tone: "muted" };
     if (details.kind) return { text: KIND_NAME[project.kind], tone: "muted" };
@@ -90,6 +94,7 @@
       <span class="name">{project.name}</span>
       {#if project.favorite}<span class="fav"><Icon name="star" size={11} filled /></span>{/if}
       {#if project.isNew}<span class="new" title="New from the last scan"></span>{/if}
+      {#if sec}<span class="pill {sec.tone} sec" title="From the last security scan">{sec.text}</span>{/if}
     </span>
     {#if details.git}
       <span class="cell git">
@@ -132,6 +137,7 @@
         <span class="pill ok"><span class="live-dot"></span>{running > 1 ? `${running} running` : "running"}</span>
       {/if}
       {#if details.packages && deps}<span class="pill warn">{deps}</span>{/if}
+      {#if sec}<span class="pill {sec.tone}" title="From the last security scan">{sec.text}</span>{/if}
       {#if details.kind}<span class="pill">{KIND_NAME[project.kind]}</span>{/if}
       {#if details.opened && project.lastOpened}
         <span class="when">{relativeTime(project.lastOpened, runs.now)}</span>
@@ -295,6 +301,14 @@
   .pill.warn {
     color: var(--accent-fg);
     border-color: var(--warning-border);
+  }
+  .pill.bad {
+    color: var(--error-text);
+    background: var(--error-pill);
+    border-color: var(--error-border);
+  }
+  .pill.sec {
+    margin-left: var(--space-2);
   }
   .skel {
     display: inline-block;

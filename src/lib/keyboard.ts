@@ -7,6 +7,7 @@ import { app } from "./app.svelte";
 import { palette } from "./palette.svelte";
 import { ports } from "./ports.svelte";
 import { runs } from "./runs.svelte";
+import { security } from "./security.svelte";
 import { spaces } from "./spaces.svelte";
 
 function typingIn(target: EventTarget | null): boolean {
@@ -14,7 +15,7 @@ function typingIn(target: EventTarget | null): boolean {
 }
 
 function overlayOpen(): boolean {
-  return palette.open || runs.closeRequested !== null || ports.inspecting !== null;
+  return palette.open || runs.closeRequested !== null || ports.inspecting !== null || security.logOpen !== null;
 }
 
 /** F5: refresh whatever the current screen shows. */

@@ -11,6 +11,8 @@
   import { files } from "$lib/files.svelte";
   import RunTab from "./RunTab.svelte";
   import LogsTab from "./LogsTab.svelte";
+  import SecurityTab from "./SecurityTab.svelte";
+  import { security } from "$lib/security.svelte";
   import Home from "./Home.svelte";
   import RenameInput from "./RenameInput.svelte";
   import Logo from "$lib/components/Logo.svelte";
@@ -98,6 +100,18 @@
       >
       <button
         role="tab"
+        aria-selected={app.tab === "security"}
+        class:active={app.tab === "security"}
+        onclick={() => (app.tab = "security")}
+      >
+        <Icon name="shield" size={14} /> Security
+        {#if security.running[project.id]}<span class="tab-spinner" title="Scanning"></span>{:else if security.badge(project.id)}<span
+            class="tab-count mono bad"
+            title="From the last security scan">{security.badge(project.id)?.text}</span
+          >{/if}
+      </button>
+      <button
+        role="tab"
         aria-selected={app.tab === "agents"}
         class:active={app.tab === "agents"}
         onclick={() => (app.tab = "agents")}><Icon name="terminal" size={14} /> Agents</button
@@ -116,6 +130,8 @@
       <LogsTab {project} />
     {:else if app.tab === "agents"}
       <AgentsTab {project} />
+    {:else if app.tab === "security"}
+      <SecurityTab {project} />
     {:else}
 
     {#if project.missing}
@@ -303,6 +319,23 @@
   .tab-count.ok {
     background: var(--success-pill);
     color: var(--success);
+  }
+  .tab-count.bad {
+    background: var(--error-pill);
+    color: var(--error-text);
+  }
+  .tab-spinner {
+    width: 10px;
+    height: 10px;
+    border: 1.5px solid var(--line-strong);
+    border-top-color: var(--accent-fg);
+    border-radius: 50%;
+    animation: tab-spin 0.8s linear infinite;
+  }
+  @keyframes tab-spin {
+    to {
+      transform: rotate(360deg);
+    }
   }
   .tab-count {
     font-size: 11px;

@@ -6,6 +6,7 @@ mod palette;
 mod ports;
 mod proxy;
 mod runs;
+mod security;
 mod workspaces;
 
 use std::path::PathBuf;
@@ -62,6 +63,9 @@ fn setup(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
         palette: Mutex::default(),
         search: Mutex::default(),
         unsaved: Default::default(),
+        tree: devdock_platform::process_tree(),
+        security: Mutex::default(),
+        installs: Mutex::default(),
         runner,
         state,
         saver,
@@ -175,6 +179,20 @@ pub fn run() {
             files::files_search,
             files::files_search_cancel,
             files::files_set_unsaved,
+            security::security_scanners,
+            security::security_running,
+            security::security_report,
+            security::security_summaries,
+            security::security_cancel,
+            security::security_scan,
+            security::security_export,
+            security::security_open_advisory,
+            security::security_open_file,
+            security::security_installing,
+            security::security_install,
+            security::security_install_cancel,
+            security::security_install_log,
+            security::security_uninstall,
         ])
         .build(tauri::generate_context!());
 

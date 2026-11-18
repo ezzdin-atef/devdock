@@ -45,6 +45,15 @@ import type {
   Listing,
   SearchQuery,
   SearchResult,
+  ScanOptions,
+  InstallEvent,
+  InstallLog,
+  ScannerInfo,
+  SecurityDone,
+  SecurityProgress,
+  SecurityReport,
+  SecurityRunning,
+  SecuritySummary,
 } from "./types";
 
 export const startupNotice = () => invoke<ErrorDto | null>("startup_notice");
@@ -266,4 +275,38 @@ export function toErrorDto(err: unknown): ErrorDto {
     return err as ErrorDto;
   }
   return { kind: "unexpected", message: String(err), fix: null };
+}
+
+// --- Security scans ---
+export const securityScanners = () => invoke<ScannerInfo[]>("security_scanners");
+export const securityRunning = () => invoke<SecurityRunning[]>("security_running");
+export const securityReport = (id: ProjectId) => invoke<SecurityReport | null>("security_report", { id });
+export const securitySummaries = () => invoke<Record<ProjectId, SecuritySummary>>("security_summaries");
+export const securityScan = (id: ProjectId, options: ScanOptions) =>
+  invoke<void>("security_scan", { id, options });
+export const securityCancel = (id: ProjectId) => invoke<void>("security_cancel", { id });
+export const securityExport = (id: ProjectId, path: string) => invoke<void>("security_export", { id, path });
+export const securityOpenAdvisory = (id: ProjectId, key: string) =>
+  invoke<void>("security_open_advisory", { id, key });
+export const securityOpenFile = (path: string) => invoke<void>("security_open_file", { path });
+export const securityInstalling = () => invoke<InstallEvent[]>("security_installing");
+export const securityInstall = (tool: string) => invoke<void>("security_install", { tool });
+export const securityInstallLog = (tool: string) => invoke<InstallLog | null>("security_install_log", { tool });
+export const securityInstallCancel = (tool: string) => invoke<void>("security_install_cancel", { tool });
+export const securityUninstall = (tool: string) => invoke<void>("security_uninstall", { tool });
+export const onSecurityInstall = (cb: (e: InstallEvent) => void): Promise<UnlistenFn> =>
+  listen<InstallEvent>("security:install", (e) => cb(e.payload));
+export const onSecurityProgress = (cb: (p: SecurityProgress) => void): Promise<UnlistenFn> =>
+  listen<SecurityProgress>("security:progress", (e) => cb(e.payload));
+export const onSecurityDone = (cb: (d: SecurityDone) => void): Promise<UnlistenFn> =>
+  listen<SecurityDone>("security:done", (e) => cb(e.payload));
+
+/** Native "save as" for a security report. Resolves to null when cancelled. */
+export async function pickReportFile(defaultName: string): Promise<string | null> {
+  const picked = await save({
+    title: "Export security report",
+    defaultPath: defaultName,
+    filters: [{ name: "HTML report", extensions: ["html"] }],
+  });
+  return picked ?? null;
 }
