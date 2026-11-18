@@ -2,6 +2,20 @@
 
 All notable changes to DevDock. Versions follow [semver](https://semver.org).
 
+## [1.3.0] - 2026-11-18
+
+### Added
+
+- Security tab with scanners, in-app installs and HTML reports (05d6600)
+
+### Changed
+
+- Cargo fmt the files module (ff625d4)
+
+### Docs
+
+- Security tab on the site and README, refreshed screenshots (a2cf6e9)
+
 ## [1.2.0] - 2026-11-18
 
 ### Added
