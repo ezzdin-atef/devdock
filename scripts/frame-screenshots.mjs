@@ -37,6 +37,10 @@ const SHOTS = {
     eyebrow: 'Files',
     title: "Browse, search and edit a project's files without leaving DevDock",
   },
+  security: {
+    eyebrow: 'Security',
+    title: 'Scan for vulnerabilities, secrets and risky settings - with the fix',
+  },
   run: {
     eyebrow: 'Run',
     title: 'Dev servers on saved ports - stop ends the whole process tree',

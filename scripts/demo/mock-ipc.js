@@ -154,6 +154,65 @@
     }));
   };
 
+  // A security scan of "storefront": advisory ids, versions and counts are made up.
+  const securityReport = () => {
+    const V = (id, severity, pkg, version, fixedIn, title, tools, extra = {}) => ({
+      key: `vuln:${pkg}@${version}:${id}`, kind: "vulnerability", id, aliases: [], severity, title, package: pkg, version,
+      ecosystem: "npm", fixedIn, location: "pnpm-lock.yaml", line: null, commit: null, url: `https://github.com/advisories/${id}`,
+      cvss: null, dev: false, remediation: null, tools, isNew: false, ...extra,
+    });
+    const findings = [
+      { key: "secret:stripe-access-token:src/lib/billing.ts:12:", kind: "secret", id: "stripe-access-token", aliases: [], severity: "high",
+        title: "Stripe access token", package: null, version: null, ecosystem: null, fixedIn: null, location: "src/lib/billing.ts", line: 12,
+        commit: null, url: null, cvss: null, dev: null, remediation: null, tools: ["gitleaks", "trivy"], isNew: true },
+      V("GHSA-9w4p-jx7c-q2m5", "high", "next", "15.2.0", "15.2.3", "Authorization bypass in middleware", ["grype", "pnpm"], { cvss: 9.1, aliases: ["CVE-2025-29927"] }),
+      V("GHSA-3h52-269p-cp9r", "high", "path-to-regexp", "6.2.1", "6.3.0", "Backtracking regular expressions cause ReDoS", ["grype", "pnpm"], { cvss: 7.5 }),
+      V("GHSA-qwph-4952-7xr6", "medium", "next", "15.2.0", "15.2.2", "Cache poisoning of pages with a default locale", ["pnpm"], { cvss: 5.3, isNew: true }),
+      V("GHSA-7fh5-64p2-3v2j", "medium", "postcss", "8.4.21", "8.4.31", "Line return parsing error", ["grype"], { cvss: 5.3, dev: true }),
+      V("GHSA-pxg6-pf52-xh8x", "low", "cookie", "0.6.0", "0.7.0", "cookie accepts cookie name, path, and domain with out of bounds characters", ["grype", "pnpm"]),
+      V("GHSA-c2qf-rxjj-qqgw", "low", "semver", "7.5.1", "7.5.2", "Regular expression denial of service", ["grype", "pnpm"], { dev: true }),
+    ];
+    findings.push({ key: "config:AVD-DS-0002:Dockerfile:0", kind: "misconfiguration", id: "AVD-DS-0002", aliases: [], severity: "high",
+      title: "Image user should not be 'root'", package: null, version: null, ecosystem: null, fixedIn: null, location: "Dockerfile", line: null,
+      commit: null, url: "https://avd.aquasec.com/misconfig/ds002", cvss: null, dev: null, remediation: "Add 'USER <non root user name>' line to the Dockerfile",
+      tools: ["trivy"], isNew: true });
+    const counts = { critical: 0, high: 3, medium: 2, low: 2, unknown: 0, secrets: 1, misconfigs: 1, code: 0 };
+    const report = {
+      version: 1, projectId: "p1", projectName: "storefront", path: `${root}\\storefront`, startedAt: now - 2 * hr - 41_000,
+      finishedAt: now - 2 * hr, options: { history: false },
+      tools: [
+        { tool: "grype", name: "Grype", status: "ran", detail: null, install: null, command: "grype dir:. -o json -q", findings: 5, ms: 31_400 },
+        { tool: "pnpm", name: "pnpm audit", status: "ran", detail: null, install: null, command: "pnpm audit --json", findings: 5, ms: 2_100 },
+        { tool: "trivy", name: "Trivy", status: "ran", detail: null, install: null, command: "trivy fs --format json --quiet --scanners vuln,misconfig,secret .", findings: 2, ms: 18_200 },
+        { tool: "gitleaks", name: "Gitleaks", status: "ran", detail: null, install: null, command: "gitleaks dir . --redact", findings: 1, ms: 6_800 },
+      ],
+      findings, counts,
+      upgrades: [
+        { package: "next", version: "15.2.0", ecosystem: "npm", to: "15.2.3", fixes: 2, unfixed: 0, worst: "high", ids: [], dev: false },
+        { package: "path-to-regexp", version: "6.2.1", ecosystem: "npm", to: "6.3.0", fixes: 1, unfixed: 0, worst: "high", ids: [], dev: false },
+        { package: "postcss", version: "8.4.21", ecosystem: "npm", to: "8.4.31", fixes: 1, unfixed: 0, worst: "medium", ids: [], dev: true },
+        { package: "cookie", version: "0.6.0", ecosystem: "npm", to: "0.7.0", fixes: 1, unfixed: 0, worst: "low", ids: [], dev: false },
+        { package: "semver", version: "7.5.1", ecosystem: "npm", to: "7.5.2", fixes: 1, unfixed: 0, worst: "low", ids: [], dev: true },
+      ],
+      previousAt: now - 6 * day,
+      resolved: [{ id: "GHSA-grv7-fg5c-xmjg", kind: "vulnerability", severity: "medium", title: "Uncontrolled resource consumption", package: "braces", version: "3.0.2" }],
+      cancelled: false,
+    };
+    return { report, summary: { finishedAt: report.finishedAt, counts, new: 2 } };
+  };
+
+  const scanner = (id, name, covers, install, method, source, extra = {}) => ({
+    id, name, covers, install, url: "", path: null, managed: false, method, source, blocked: null, version: null, ...extra,
+  });
+  const scanners = [
+    scanner("grype", "Grype", "Known vulnerabilities in lockfiles of every ecosystem (npm, Cargo, Composer, pip, Go, ...)", "choco install grype   or   scoop install grype", "download", "Downloads the latest release from github.com/anchore/grype and checks its SHA-256", { path: "C:\\tools\\grype.exe" }),
+    scanner("trivy", "Trivy", "Vulnerabilities, secrets, and misconfigurations in Dockerfiles, Compose, Kubernetes and Terraform", "choco install trivy   or   scoop install trivy", "download", "Downloads the latest release from github.com/aquasecurity/trivy and checks its SHA-256", { path: "%APPDATA%\\DevDock\\tools\\bin\\trivy.exe", managed: true, version: "v0.60.0" }),
+    scanner("osv-scanner", "OSV-Scanner", "Vulnerabilities from the OSV.dev database, across every lockfile in the project", "scoop install osv-scanner", "download", "Downloads the latest release from github.com/google/osv-scanner and checks its SHA-256"),
+    scanner("gitleaks", "Gitleaks", "API keys, tokens and passwords committed to the code", "choco install gitleaks   or   scoop install gitleaks", "download", "Downloads the latest release from github.com/gitleaks/gitleaks and checks its SHA-256", { path: "%APPDATA%\\DevDock\\tools\\bin\\gitleaks.exe", managed: true, version: "v8.28.0" }),
+    scanner("semgrep", "Semgrep", "Risky patterns in your own code: injection, unsafe eval, weak crypto, ...", "pip install semgrep   (needs Python 3.9+)", "python", "Installs semgrep with pip into a Python environment of its own"),
+    scanner("cargo-audit", "cargo audit", "RustSec advisories for Cargo.lock", "cargo install cargo-audit --locked", "cargo", "Builds cargo-audit with cargo install", { blocked: "Needs Rust's cargo: install Rust from rustup.rs, then check again." }),
+  ];
+
   // Sends an app event (e.g. "git:updated") to whoever listens, like Tauri does.
   const emit = (event, payload) => {
     for (const id of listeners.get(event) || []) callbacks.get(id)?.({ event, id, payload });
@@ -278,6 +337,68 @@
     },
     files_search_cancel: () => null,
     files_set_unsaved: () => null,
+    security_scanners: () => scanners.map((x) => ({ ...x })),
+    security_installing: () => [],
+    security_install: (a) => {
+      const s = scanners.find((x) => x.id === a.tool);
+      const send = (at, e) => setTimeout(() => emit("security:install", { tool: a.tool, state: "running", stage: "", progress: null, line: null, error: null, ...e }), at);
+      let t = 150;
+      const step = (stage) => send((t += 400), { stage, line: `== ${stage}` });
+      const line = (text, stage) => send((t += 120), { stage, line: text });
+      if (s.method === "python") {
+        step("Creating a Python environment");
+        line(`> "C:\\Program Files\\Python313\\py.exe" -m venv "%APPDATA%\\DevDock\\tools\\${s.id}"`, "Creating a Python environment");
+        const st = `Installing ${s.id} with pip (a few minutes)`;
+        step(st);
+        line(`> "%APPDATA%\\DevDock\\tools\\${s.id}\\Scripts\\python.exe" -m pip install --upgrade ${s.id}`, st);
+        ["Collecting semgrep", "  Downloading semgrep-1.140.0-cp39.cp310.cp311.py37.py38.py39.py310.py311-none-win_amd64.whl (48.1 MB)", "Collecting attrs>=21.3", "Collecting boltons~=21.0", "Collecting click-option-group~=0.5", "ERROR: Could not find a version that satisfies the requirement semgrep-core (from semgrep)", "ERROR: No matching distribution found for semgrep-core"].forEach((l) => line(l, st));
+        setTimeout(() => emit("security:install", { tool: a.tool, state: "failed", stage: "Failed", progress: null, line: "== Failed: pip install semgrep failed: ERROR: No matching distribution found for semgrep-core", error: "pip install semgrep failed: ERROR: No matching distribution found for semgrep-core" }), (t += 300));
+        return null;
+      }
+      step("Finding the latest release");
+      line(`> "C:\\WINDOWS\\System32\\curl.exe" -fsSL --retry 2 https://api.github.com/repos/demo/${s.id}/releases/latest`, "Finding the latest release");
+      const dl = `Downloading ${s.name} v1.0.0 (38 MB)`;
+      step(dl);
+      line(`> "C:\\WINDOWS\\System32\\curl.exe" -fL --retry 2 -s -o "${s.id}_1.0.0_windows_amd64.zip" "https://github.com/demo/${s.id}/releases/download/v1.0.0/${s.id}_1.0.0_windows_amd64.zip"`, dl);
+      for (let p = 0; p <= 100; p += 4) send((t += 90), { stage: dl, progress: p / 100 });
+      line(`Downloaded ${s.id}_1.0.0_windows_amd64.zip (39845888 bytes)`, dl);
+      step("Checking the download");
+      line("SHA-256 3f7c1e0b9a64d2c58e17a0f4b6d93c2e85a1f07d4c6b2e9a8d5f3c1b0e7a9d42", "Checking the download");
+      line("expected 3f7c1e0b9a64d2c58e17a0f4b6d93c2e85a1f07d4c6b2e9a8d5f3c1b0e7a9d42", "Checking the download");
+      step("Unpacking");
+      line(`> "C:\\WINDOWS\\System32\\tar.exe" -xf "${s.id}_1.0.0_windows_amd64.zip" -C "x"`, "Unpacking");
+      const path = `%APPDATA%\\DevDock\\tools\\bin\\${s.id}.exe`;
+      line(`Installed ${path}`, "Unpacking");
+      setTimeout(() => {
+        Object.assign(s, { path, managed: true, version: "v1.0.0" });
+        emit("security:install", { tool: a.tool, state: "done", stage: "Installed", progress: null, line: `== Done: ${path}`, error: null });
+      }, (t += 300));
+      return null;
+    },
+    security_install_log: () => null,
+    security_install_cancel: () => null,
+    security_uninstall: (a) => {
+      Object.assign(scanners.find((x) => x.id === a.tool), { path: null, managed: false, version: null });
+      return null;
+    },
+    security_running: () => [],
+    security_summaries: () => ({
+      p1: securityReport().summary,
+      p3: { finishedAt: now - 3 * day, counts: { critical: 1, high: 2, medium: 4, low: 1, unknown: 0, secrets: 0 }, new: 0 },
+    }),
+    security_report: (a) => (a.id === "p1" ? securityReport().report : null),
+    security_scan: (a) => {
+      const steps = ["Grype", "pnpm audit", "Gitleaks"];
+      steps.forEach((name, i) =>
+        setTimeout(() => emit("security:progress", { projectId: a.id, step: i + 1, total: steps.length, tool: name.split(" ")[0].toLowerCase(), name, startedAt: Date.now() }), 300 + i * 1200),
+      );
+      setTimeout(() => emit("security:done", { projectId: a.id, summary: securityReport().summary, error: null }), 300 + steps.length * 1200);
+      return null;
+    },
+    security_cancel: () => null,
+    security_export: () => null,
+    security_open_advisory: () => null,
+    security_open_file: () => null,
     "plugin:app|version": () => "1.1.0",
     "plugin:app|name": () => "DevDock",
     "plugin:updater|check": () => null,

@@ -3,7 +3,7 @@
 // Tauri, no personal data. `pnpm screenshots` runs this and then frames the images.
 //
 // Scenes: overview (Projects by group), cards, palette, project (overview tab), run, logs,
-// git, files (editor + search), ports, settings (local addresses).
+// git, files (editor + search), security (last scan), ports, settings (local addresses).
 //
 //   node scripts/capture-screenshots.mjs
 
@@ -205,6 +205,12 @@ try {
   await sleep(1200);
   await cdp.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 1279, y: 899 });
   await cdp.shot('files');
+
+  // storefront's Security tab: the last scan's summary, upgrades and findings.
+  await cdp.eval(`import('/src/lib/app.svelte.ts').then(async ({ app }) => { app.tab = 'security'; await app.select('p1'); })`);
+  await sleep(1200);
+  await cdp.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 1279, y: 899 });
+  await cdp.shot('security');
 
   await cdp.click('Ports', 'nav.rail');
   await cdp.shot('ports');

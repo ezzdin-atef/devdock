@@ -4,11 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>DevDock - one calm control panel for every project on your machine</title>
-  <meta name="description" content="DevDock is a free, local-first Windows app that organizes your local projects into groups, runs their dev servers on clean .localhost addresses, switches and pulls Git branches, lets you browse, search and edit files, installs packages, explains who holds which port and launches coding agents.">
+  <meta name="description" content="DevDock is a free, local-first Windows app that organizes your local projects into groups, runs their dev servers on clean .localhost addresses, switches and pulls Git branches, lets you browse, search and edit files, installs packages, scans projects for vulnerabilities and leaked secrets, explains who holds which port and launches coding agents.">
   <meta name="theme-color" content="#0e0f11" media="(prefers-color-scheme: dark)">
   <meta name="theme-color" content="#ebedf0" media="(prefers-color-scheme: light)">
   <meta property="og:title" content="DevDock - a control panel for your local projects">
-  <meta property="og:description" content="Find projects, see Git state, run dev servers, resolve port clashes, launch coding agents and start whole workspaces - from one window. Free, open source, Windows.">
+  <meta property="og:description" content="Find projects, see Git state, run dev servers, scan for vulnerabilities, resolve port clashes, launch coding agents and start whole workspaces - from one window. Free, open source, Windows.">
   <meta property="og:type" content="website">
   <meta property="og:image" content="screenshots/overview.png">
   <meta name="twitter:card" content="summary_large_image">
@@ -68,7 +68,7 @@
   <div class="wrap">
     <p class="eyebrow">Windows desktop app &middot; <span data-version>v__VERSION__</span> &middot; free &amp; open source</p>
     <h1>Every project on your machine.<br><span>One calm control panel.</span></h1>
-    <p class="lede">DevDock finds your local projects and lets you sort them into groups, runs their dev servers on clean addresses like <code>shop.localhost</code>, switches and pulls Git branches, installs packages, tells you who is holding port 3000 and opens coding agents in the right folder. All from one window, with no accounts and no cloud.</p>
+    <p class="lede">DevDock finds your local projects and lets you sort them into groups, runs their dev servers on clean addresses like <code>shop.localhost</code>, switches and pulls Git branches, installs packages, scans for vulnerabilities and leaked secrets, tells you who is holding port 3000 and opens coding agents in the right folder. All from one window, with no accounts and no cloud.</p>
     <div class="hero-actions">
       <a class="btn primary" href="https://github.com/ezzdin-atef/devdock/releases/latest" data-download>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 21h16"/></svg>
@@ -98,34 +98,34 @@
   <div class="wrap">
     <div class="section-head">
       <p class="eyebrow">New in <span data-version>v__VERSION__</span></p>
-      <h2>Organize everything, open it on a clean address, ship from one place.</h2>
-      <p>The biggest update yet: a Projects page you shape yourself, real Git actions, package installs, portless local addresses and a full-height log view.</p>
+      <h2>Scan every project for what could hurt it.</h2>
+      <p>A Security tab runs the scanners security teams use, merges what they find into one list, tells you which upgrade fixes it, and writes a report you can share.</p>
     </div>
     <div class="new-grid">
-      <a class="new-card" href="#f-projects">
-        <span class="new-tag">Projects</span>
-        <strong>Groups, cards and drag &amp; drop</strong>
-        <span>Sort projects into coloured groups, choose folders, cards or rows, and drag projects and groups into your own order.</span>
+      <a class="new-card" href="#f-security">
+        <span class="new-tag">Security</span>
+        <strong>One scan, seven scanners</strong>
+        <span>Grype, Trivy, OSV-Scanner, Semgrep, Gitleaks, cargo audit and your package manager's own audit, run with one button on any project.</span>
       </a>
-      <a class="new-card" href="#f-addresses">
-        <span class="new-tag">Addresses</span>
-        <strong>shop.localhost, no port</strong>
-        <span>Every project gets a name like <code>shop.localhost</code>. Ports are picked once and saved, and can hide behind a built-in local proxy, with optional HTTPS.</span>
+      <a class="new-card" href="#f-security">
+        <span class="new-tag">Findings</span>
+        <strong>One list, no duplicates</strong>
+        <span>The same advisory from three scanners shows once, matched by GHSA, CVE and RustSec ids. Each scan shows what's new and what was resolved since the last one.</span>
       </a>
-      <a class="new-card" href="#f-git">
-        <span class="new-tag">Git</span>
-        <strong>Switch, pull and push</strong>
-        <span>Change branches, create one, fetch, pull and push from the Git tab. Pull only fast-forwards, so nothing is ever merged behind your back.</span>
+      <a class="new-card" href="#f-security">
+        <span class="new-tag">Fixes</span>
+        <strong>Which upgrade fixes it</strong>
+        <span>Findings grouped by package, with the version that fixes them, plus risky Dockerfile and Kubernetes settings and risky code patterns, each with how to fix it.</span>
       </a>
-      <a class="new-card" href="#f-packages">
-        <span class="new-tag">Packages</span>
-        <strong>Installed, or not yet?</strong>
-        <span>See which projects need <code>npm</code>, <code>pnpm</code>, <code>yarn</code> or <code>bun install</code>, and run it with one button, log included.</span>
+      <a class="new-card" href="#f-security">
+        <span class="new-tag">Install</span>
+        <strong>Scanners install from the app</strong>
+        <span>A missing scanner is one click away: downloaded from its GitHub release and checked against its SHA-256, with live progress and a full install log.</span>
       </a>
-      <a class="new-card" href="#f-run">
-        <span class="new-tag">Logs</span>
-        <strong>A real log view</strong>
-        <span>A full-height Logs tab with search and filters, plus one-click clearing of logs, finished runs and history.</span>
+      <a class="new-card" href="#f-security">
+        <span class="new-tag">Report</span>
+        <strong>An HTML report to share</strong>
+        <span>Export a self-contained report - summary, upgrades, findings, secrets and coverage - that opens in any browser and prints to PDF.</span>
       </a>
       <a class="new-card" href="#f-files">
         <span class="new-tag">Files</span>
@@ -201,7 +201,7 @@
   <div class="wrap">
     <div class="section-head">
       <p class="eyebrow">Features</p>
-      <h2>Eleven tools in one window, each fixing one specific pain.</h2>
+      <h2>Twelve tools in one window, each fixing one specific pain.</h2>
       <p>Every feature below states the problem it solves, how it solves it, and the details that make it trustworthy in daily use.</p>
     </div>
 
@@ -212,11 +212,12 @@
       <a href="#f-run"><span class="n">04</span><strong>Run &amp; logs</strong><span>Dev servers on saved ports, full-height logs.</span></a>
       <a href="#f-addresses"><span class="n">05</span><strong>Local addresses</strong><span>shop.localhost with no port, optional HTTPS.</span></a>
       <a href="#f-packages"><span class="n">06</span><strong>Packages</strong><span>Installed or not, and one button to install.</span></a>
-      <a href="#f-ports"><span class="n">07</span><strong>Ports</strong><span>Who holds which port, and is it safe to stop.</span></a>
-      <a href="#f-agents"><span class="n">08</span><strong>Agents</strong><span>Claude Code, Codex, OpenCode in the right folder.</span></a>
-      <a href="#f-workspaces"><span class="n">09</span><strong>Workspaces</strong><span>Whole stacks, started in order with health checks.</span></a>
-      <a href="#f-palette"><span class="n">10</span><strong>Command palette</strong><span>Jump to anything with Ctrl K.</span></a>
-      <a href="#f-settings"><span class="n">11</span><strong>Settings &amp; updates</strong><span>Your tools, themes, data and signed updates.</span></a>
+      <a href="#f-security"><span class="n">07</span><strong>Security</strong><span>Vulnerabilities, secrets, risky settings, one report.</span></a>
+      <a href="#f-ports"><span class="n">08</span><strong>Ports</strong><span>Who holds which port, and is it safe to stop.</span></a>
+      <a href="#f-agents"><span class="n">09</span><strong>Agents</strong><span>Claude Code, Codex, OpenCode in the right folder.</span></a>
+      <a href="#f-workspaces"><span class="n">10</span><strong>Workspaces</strong><span>Whole stacks, started in order with health checks.</span></a>
+      <a href="#f-palette"><span class="n">11</span><strong>Command palette</strong><span>Jump to anything with Ctrl K.</span></a>
+      <a href="#f-settings"><span class="n">12</span><strong>Settings &amp; updates</strong><span>Your tools, themes, data and signed updates.</span></a>
     </nav>
 
     <!-- 01 Projects -->
@@ -388,10 +389,37 @@
       </div>
     </article>
 
-    <!-- 07 Ports -->
-    <article class="feature reveal" id="f-ports">
+    <!-- 07 Security -->
+    <article class="feature reveal" id="f-security">
       <div class="feature-copy">
-        <p class="tag">07 &middot; Ports</p>
+        <p class="tag">07 &middot; Security</p>
+        <h3>Know what's vulnerable, what leaked, and what fixes it.</h3>
+        <p class="summary">One button runs the security scanners you'd use anyway, merges what they find, and tells you which upgrade fixes it.</p>
+        <div class="pf">
+          <div class="problem"><span class="lbl">Problem</span><p>Checking a project means remembering five tools, their flags and their output formats. Each reports the same advisory differently, none says what to upgrade, and a leaked key in a config file goes unnoticed.</p></div>
+          <div class="solution"><span class="lbl">How DevDock fixes it</span><p>Each project has a <strong>Security</strong> tab. <strong>Scan project</strong> runs every scanner that applies, folds duplicates into one list, groups them by package with the version that fixes them, and keeps the report so the next scan shows what changed.</p></div>
+        </div>
+        <ul class="details">
+          <li><strong>Seven scanners</strong>: Grype, OSV-Scanner and your package manager's audit (npm, pnpm, yarn or bun) for vulnerable dependencies, cargo audit for Rust, Trivy for Dockerfile, Compose, Kubernetes and Terraform settings, Gitleaks and Trivy for secrets, and Semgrep for risky code.</li>
+          <li><strong>One finding per problem</strong>: the same advisory from several scanners is matched by its GHSA, CVE and RustSec ids, keeps the highest severity, and lists every scanner that saw it.</li>
+          <li><strong>Recommended upgrades</strong> per package, worst first, with dev-only packages marked. Misconfigurations and code issues show how to fix them and open at the right line in the Files tab.</li>
+          <li><strong>Install from the app</strong>: a missing scanner installs with one click - from its GitHub release, checked against its published SHA-256, into DevDock's own folder with no admin rights - or with pip or cargo. Progress and a live log show every step.</li>
+          <li><strong>Secrets stay secret</strong>: only the rule, file and line are kept, never the value. Git history is scanned when you ask.</li>
+          <li><strong>Export report</strong> writes a self-contained HTML file with the summary, upgrades, findings and which scanners ran - ready to share or print to PDF. The project card flags critical findings and secrets.</li>
+        </ul>
+      </div>
+      <div class="feature-visual">
+        <figure class="shot">
+          <a href="screenshots/security.png"><img src="screenshots/security.png" loading="lazy" width="1280" height="900" alt="The Security tab for storefront: the last scan found 1 possible secret, 3 high, 2 medium and 2 low issues and 1 misconfiguration, with recommended upgrades such as next 15.2.0 to 15.2.3."></a>
+          <figcaption>Security tab &middot; merged findings, upgrades and an HTML report</figcaption>
+        </figure>
+      </div>
+    </article>
+
+    <!-- 08 Ports -->
+    <article class="feature flip reveal" id="f-ports">
+      <div class="feature-copy">
+        <p class="tag">08 &middot; Ports</p>
         <h3>"Port 3000 is in use" - now with an answer.</h3>
         <p class="summary">See every listening port, which process and project holds it, and whether it is safe to end.</p>
         <div class="pf">
@@ -417,10 +445,10 @@
       </div>
     </article>
 
-    <!-- 08 Agents -->
-    <article class="feature flip reveal" id="f-agents">
+    <!-- 09 Agents -->
+    <article class="feature reveal" id="f-agents">
       <div class="feature-copy">
-        <p class="tag">08 &middot; Agents</p>
+        <p class="tag">09 &middot; Agents</p>
         <h3>Your coding agent, already in the right folder.</h3>
         <p class="summary">Launch Claude Code, Codex or OpenCode in the project - or a subfolder - in the terminal you prefer.</p>
         <div class="pf">
@@ -452,10 +480,10 @@
       </div>
     </article>
 
-    <!-- 09 Workspaces -->
-    <article class="feature reveal" id="f-workspaces">
+    <!-- 10 Workspaces -->
+    <article class="feature flip reveal" id="f-workspaces">
       <div class="feature-copy">
-        <p class="tag">09 &middot; Workspaces</p>
+        <p class="tag">10 &middot; Workspaces</p>
         <h3>Bring up the whole stack with one click.</h3>
         <p class="summary">A named group of services from one or more projects, started as one unit, in order, healthy before the next one begins.</p>
         <div class="pf">
@@ -489,10 +517,10 @@
       </div>
     </article>
 
-    <!-- 10 Palette -->
-    <article class="feature flip reveal" id="f-palette">
+    <!-- 11 Palette -->
+    <article class="feature reveal" id="f-palette">
       <div class="feature-copy">
-        <p class="tag">10 &middot; Command palette</p>
+        <p class="tag">11 &middot; Command palette</p>
         <h3>Everything is <kbd>Ctrl</kbd> <kbd>K</kbd> away.</h3>
         <p class="summary">One fuzzy search across projects, commands, agents, workspaces and ports.</p>
         <div class="pf">
@@ -515,10 +543,10 @@
       </div>
     </article>
 
-    <!-- 11 Settings -->
-    <article class="feature reveal" id="f-settings">
+    <!-- 12 Settings -->
+    <article class="feature flip reveal" id="f-settings">
       <div class="feature-copy">
-        <p class="tag">11 &middot; Settings &amp; updates</p>
+        <p class="tag">12 &middot; Settings &amp; updates</p>
         <h3>Your tools, your theme, your data.</h3>
         <p class="summary">DevDock adapts to the tools you already have and keeps itself up to date safely.</p>
         <div class="pf">
@@ -579,6 +607,8 @@
       <div class="rule"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></span><div><h4>Never guesses port ownership</h4><p>Ownership comes from the system TCP table and process details, not from a port number or an executable name.</p></div></div>
       <div class="rule"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span><div><h4>Asks Windows before changing Windows</h4><p>Writing the hosts file needs your OK in the Windows permission prompt, and trusting the certificate shows Windows' own dialog. Nothing changes without it.</p></div></div>
       <div class="rule"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></span><div><h4>Local addresses stay local</h4><p>The proxy listens only on this computer, and DevDock's certificate authority can only sign <code>.localhost</code> and <code>.test</code> names - never a real website.</p></div></div>
+      <div class="rule"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-4-4m4 4 4-4"/><path d="m8 19 2.5 2L16 16"/></svg></span><div><h4>Installs only what it can verify</h4><p>Scanners come from their own project's GitHub releases and are checked against the SHA-256 the project publishes; a mismatch is deleted. They go in DevDock's own folder, with no admin rights, and <strong>Remove</strong> deletes them.</p></div></div>
+      <div class="rule"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="m10.8 12.2 8.2-8.2M17 6l2 2M15 8l2 2"/></svg></span><div><h4>Never keeps a secret it finds</h4><p>A security scan records the rule, file and line of a possible secret - never its value - so neither the saved scan nor the exported report can leak it again.</p></div></div>
     </div>
   </div>
 </section>
@@ -598,6 +628,7 @@
       <div><dt>Contents</dt><dd>Projects and their order, groups, favourites, custom commands and port choices, addresses, scan roots, workspaces, agent shortcuts and settings.</dd></div>
       <div><dt>Saving</dt><dd>Atomic (write, then rename), debounced, with a <code>.bak</code> copy of the previous version.</dd></div>
       <div><dt>Recovery</dt><dd>A damaged file is renamed to <code>devdock.json.corrupt-&lt;time&gt;</code> - never overwritten - and DevDock falls back to the backup and warns you.</dd></div>
+      <div><dt>Security</dt><dd>The last ten scans of each project in <code>security\</code>, and scanners DevDock installed in <code>tools\</code>, next to the data file.</dd></div>
       <div><dt>Portability</dt><dd>Export and import from Settings &rarr; Data.</dd></div>
     </dl>
   </div>
@@ -687,7 +718,8 @@
     <div class="faq">
       <details><summary>Is DevDock free?</summary><p>Yes. It's open source under the MIT license, with no paid tier, account or sign-up.</p></details>
       <details><summary>Does it work on macOS or Linux?</summary><p>Not yet. DevDock is built for Windows 10/11 x64. Platform-specific code is isolated behind traits in its own crate, so the core is portable, but only Windows is supported today.</p></details>
-      <details><summary>Does it send any data anywhere?</summary><p>No. There is no telemetry, no account and no sync; your project list stays in a local JSON file. Installed builds check GitHub Releases for updates, and Git's fetch, pull and push talk to your own remotes when you click them.</p></details>
+      <details><summary>Does it send any data anywhere?</summary><p>No. There is no telemetry, no account and no sync; your project list stays in a local JSON file. Installed builds check GitHub Releases for updates, and Git's fetch, pull and push talk to your own remotes when you click them. A security scan you start runs scanners that look up advisories: package audits and OSV-Scanner send your dependency list to their databases, Grype and Trivy download theirs, and Semgrep downloads its rules (with its metrics off). Your code is never uploaded.</p></details>
+      <details><summary>Do I need to install the security scanners myself?</summary><p>No. The Security tab lists each scanner and installs a missing one with one click - from its GitHub release, checked against its SHA-256, into DevDock's own folder. Semgrep needs Python and cargo audit needs Rust; scanners already on your <code>PATH</code> are used as they are.</p></details>
       <details><summary>Will it change my Git repositories?</summary><p>Only when you click a button. Showing status never writes anything. Switch, new branch, fetch, pull and push run when you ask, pull only fast-forwards, and DevDock never merges, rebases, commits, resets or stashes. If a pull would need a merge, it tells you and leaves the repository alone.</p></details>
       <details><summary>How does <code>shop.localhost</code> work without any setup?</summary><p>Browsers already send every <code>*.localhost</code> name to your own computer. DevDock gives each project a name and runs a small proxy on this computer that forwards it to the project's running server, so you don't need the port. Nothing is reachable from other machines.</p></details>
       <details><summary>Can it kill something important by accident?</summary><p>No. It only stops processes it started without asking. Ending anything else requires a confirmation that shows the full details, and system processes are never offered at all.</p></details>

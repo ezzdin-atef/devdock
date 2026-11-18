@@ -7,8 +7,9 @@
 **A local-first Windows control panel for every project on your machine.**
 
 Organize projects into groups, run dev servers on clean addresses like `shop.localhost`,
-switch and pull Git branches, browse, search and edit files, install packages, see who holds
-which port, start coding agents, and bring up whole stacks in order - all from one window.
+switch and pull Git branches, browse, search and edit files, install packages, scan for
+vulnerabilities and leaked secrets, see who holds which port, start coding agents, and bring up
+whole stacks in order - all from one window.
 
 [![Latest release](https://img.shields.io/github/v/release/ezzdin-atef/devdock?label=release&color=2f81f7)](https://github.com/ezzdin-atef/devdock/releases/latest)
 [![CI](https://img.shields.io/github/actions/workflow/status/ezzdin-atef/devdock/ci.yml?branch=main&label=CI)](https://github.com/ezzdin-atef/devdock/actions/workflows/ci.yml)
@@ -19,7 +20,7 @@ which port, start coding agents, and bring up whole stacks in order - all from o
 
 [**Download**](https://github.com/ezzdin-atef/devdock/releases/latest) &middot;
 [Website](https://ezzdin-atef.github.io/devdock/) &middot;
-[What's new](#whats-new-in-11) &middot;
+[What's new](#whats-new-in-13) &middot;
 [Features](#features) &middot;
 [Quick start](#quick-start) &middot;
 [Changelog](CHANGELOG.md) &middot;
@@ -44,6 +45,7 @@ A normal day across several local projects costs small amounts of time, over and
 - Running a project after a `git pull` and finding its packages are missing or out of date.
 - "Port 3000 is already in use" - with no quick way to see who holds it or whether it's safe to stop.
 - Opening a whole editor just to check a config value or fix one line in `.env`.
+- Not knowing which dependencies have known vulnerabilities, or whether a key slipped into the code.
 - Opening Claude Code or Codex, then `cd`-ing into the right folder first.
 - Starting a database, API and frontend by hand, in the right order, every time.
 
@@ -55,17 +57,19 @@ DevDock turns each of these into one or two actions.
 > terminal, an agent CLI) opened in the right folder. The Files tab is for quick looks and quick
 > fixes; your editor stays one click away for real work. No accounts, no cloud, no telemetry.
 
-## What's new in 1.1
+## What's new in 1.3
 
 | | |
 |---|---|
-| **Projects page you shape** | Folders, cards or rows in three sizes; pick the details; group by your groups, folder or type. |
-| **Groups and drag & drop** | Colour-coded groups (18 colours or any custom one); drag projects into groups, into your own order, and drag groups to reorder. |
-| **Local addresses** | `shop.localhost` for every project, ports picked once and saved, the port hidden by a local proxy, optional HTTPS. |
-| **Git actions** | Switch and create branches, fetch, pull (fast-forward only) and push, with git's own output. |
-| **Packages** | See which projects need `npm` / `pnpm` / `yarn` / `bun install`, and install with one button. |
-| **Logs and history** | A full-height Logs tab with search; clear logs, finished runs and history. |
-| **Back and forward** | Mouse back / forward buttons and `Alt` + arrows step through where you've been. |
+| **Security tab** | One button scans a project with Grype, Trivy, OSV-Scanner, Semgrep, Gitleaks, cargo audit and your package manager's audit. |
+| **One list of findings** | The same advisory from several scanners shows once (matched by GHSA, CVE and RustSec ids), with what's new and what's resolved since the last scan. |
+| **Recommended upgrades** | Findings grouped by package with the version that fixes them; risky Dockerfile / Kubernetes settings and code patterns with how to fix them. |
+| **Install scanners from the app** | One click: downloaded from the scanner's GitHub release and checked against its SHA-256, with live progress and an install log. |
+| **HTML report** | Export a self-contained report to share or print to PDF. |
+| **Badges** | Project cards flag critical findings and leaked secrets from the last scan. |
+
+Also new since 1.1: the **Files** tab (1.2) to browse, search and edit files. See the
+[changelog](CHANGELOG.md) for everything.
 
 ## Highlights
 
@@ -77,6 +81,7 @@ DevDock turns each of these into one or two actions.
 | **Run & logs** | Package scripts and custom commands on saved ports, with full-height logs; stopping ends the whole process tree. |
 | **Local addresses** | `name.localhost` for every project, with the port hidden and optional HTTPS. |
 | **Packages** | Install status for every project and a one-click install. |
+| **Security** | One-click scan with Grype, Trivy, OSV-Scanner, Semgrep, Gitleaks and your package manager's audit; scanners install from inside the app; merged findings, upgrade advice and an HTML report. |
 | **Ports** | Every listening port, who owns it, and conflict checks before launch. |
 | **Agents** | Launch Claude Code, Codex or OpenCode in the right folder and terminal. |
 | **Workspaces** | Start multi-service stacks in order, with health checks and restart policies. |
@@ -130,8 +135,10 @@ where.
 5. **Pull the latest** - Git tab -> **Pull**. Switch branches from the branch picker.
 6. **Fix a file** - Files tab -> pick a file, edit, <kbd>Ctrl</kbd> + <kbd>S</kbd>. Or
    <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>F</kbd> to search every file.
-7. **Ask an agent** - Agents tab -> **Claude Code**. A terminal opens in the project folder.
-8. **Bring up a stack** - Spaces -> create a workspace, add services (e.g. db, api, web) with
+7. **Check it's safe** - Security tab -> **Install** any scanner you're missing, then
+   **Scan project**. **Export report** saves it as HTML.
+8. **Ask an agent** - Agents tab -> **Claude Code**. A terminal opens in the project folder.
+9. **Bring up a stack** - Spaces -> create a workspace, add services (e.g. db, api, web) with
    health checks -> **Start all**.
 
 ## Features
@@ -255,6 +262,40 @@ where.
 - The project card shows it, and the project's Overview has an **Install** / **Update** button
   that streams the log right there. The install also shows under Run, Logs and Running.
 
+### Security
+
+<img src="docs/screenshots/security.png" alt="Security tab for storefront: severity counts, a possible secret, a misconfiguration and recommended upgrades" width="900">
+
+- The **Security** tab scans a project with the scanners installed on your machine and merges
+  what they report into one list:
+  - **Grype** - known vulnerabilities in the lockfiles of every ecosystem (npm, Cargo, Composer,
+    pip, Go, ...).
+  - **Trivy** - vulnerabilities, secrets, and misconfigurations in Dockerfiles, Compose,
+    Kubernetes and Terraform files.
+  - **OSV-Scanner** - vulnerabilities from the OSV.dev database, across every lockfile.
+  - **npm / pnpm / yarn / bun audit** - the package manager's own advisories, for Node projects
+    with a lockfile.
+  - **cargo audit** - RustSec advisories, for projects with a `Cargo.lock`.
+  - **Gitleaks** - API keys, tokens and passwords in the files, and optionally in the git history.
+  - **Semgrep** - risky patterns in your own code (injection, unsafe eval, weak crypto, ...), with
+    the public `p/default` rules and metrics off.
+- The same advisory reported by several scanners (matched by GHSA, CVE and RustSec ids) shows
+  once, with every scanner that found it and the highest severity.
+- **Recommended upgrades** groups the findings by package and names the version that fixes them.
+- Each scan is saved, so the next one shows what's **new** and what was **resolved**. The project
+  card shows critical findings and secrets from the last scan.
+- **Export report** writes a self-contained HTML report (summary, upgrades, findings, secrets,
+  and which scanners ran) you can share or print to PDF.
+- **Install from the app**: each missing scanner has an Install button. Grype, Trivy, OSV-Scanner
+  and Gitleaks come from the project's latest GitHub release, checked against its published
+  SHA-256 and kept in `%APPDATA%\DevDock\tools` (no admin rights, nothing system-wide; **Remove**
+  deletes them). Semgrep is installed with pip into a Python environment of its own there
+  (needs Python), and cargo audit with `cargo install` (needs Rust). Scanners already on PATH are
+  used as they are.
+- A missing scanner is listed as skipped, with its install command; DevDock scans nothing
+  itself. Secret values are never stored: only the rule, file and line. The same secret found by
+  Gitleaks and Trivy shows once.
+
 ### Ports
 
 <img src="docs/screenshots/ports.png" alt="Ports screen showing port owners" width="900">
@@ -338,6 +379,9 @@ These are product invariants, not settings. DevDock will:
   permission prompt, and trusting the certificate shows Windows' own dialog.
 - **Keep local addresses local**: the proxy listens only on this computer, and DevDock's
   certificate authority can only sign `.localhost` and `.test` names.
+- **Only install what it can verify**: scanners come from their own GitHub releases and must
+  match the SHA-256 the project publishes, or they're deleted. They live in DevDock's own folder.
+- **Never keep a secret it finds**: a scan records the rule, file and line, never the value.
 
 ## Data and privacy
 
@@ -355,7 +399,10 @@ Everything stays on your machine. All state lives in one JSON file, `devdock.jso
 
 Apart from the workspace health checks you configure, DevDock only goes online for the update
 check against GitHub Releases and for the Git fetch, pull and push you click (to your own
-remotes). The local-address proxy listens only on this computer.
+remotes). A security scan you start runs scanners that go online themselves: package audits and
+OSV-Scanner send your dependency list to their advisory databases, Grype, Trivy and cargo audit
+update their databases, and Semgrep downloads its rules. Installing a scanner downloads it from
+GitHub or PyPI. Scan reports are kept in `%APPDATA%\DevDock\security`. The local-address proxy listens only on this computer.
 
 | Environment variable | Effect |
 |---|---|
@@ -394,6 +441,7 @@ DevDock version (Settings) and what you expected to happen.
 | Shell | [Tauri 2](https://tauri.app) with NSIS installer and signed updater |
 | UI | [Svelte 5](https://svelte.dev) (SvelteKit, SPA mode) + TypeScript |
 | Files | [CodeMirror 6](https://codemirror.net) editor; search with ripgrep's `grep` and `ignore` crates |
+| Security | Runs Grype, Trivy, OSV-Scanner, Semgrep, Gitleaks, cargo audit and package audits; downloads verified with `ring` SHA-256 |
 
 See [CONTRIBUTING.md](CONTRIBUTING.md#architecture) for the full architecture.
 
