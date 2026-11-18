@@ -7,8 +7,8 @@
 **A local-first Windows control panel for every project on your machine.**
 
 Organize projects into groups, run dev servers on clean addresses like `shop.localhost`,
-switch and pull Git branches, install packages, see who holds which port, start coding agents,
-and bring up whole stacks in order - all from one window.
+switch and pull Git branches, browse, search and edit files, install packages, see who holds
+which port, start coding agents, and bring up whole stacks in order - all from one window.
 
 [![Latest release](https://img.shields.io/github/v/release/ezzdin-atef/devdock?label=release&color=2f81f7)](https://github.com/ezzdin-atef/devdock/releases/latest)
 [![CI](https://img.shields.io/github/actions/workflow/status/ezzdin-atef/devdock/ci.yml?branch=main&label=CI)](https://github.com/ezzdin-atef/devdock/actions/workflows/ci.yml)
@@ -43,6 +43,7 @@ A normal day across several local projects costs small amounts of time, over and
 - Every project fighting over `localhost:3000`, sharing cookies and breaking bookmarks.
 - Running a project after a `git pull` and finding its packages are missing or out of date.
 - "Port 3000 is already in use" - with no quick way to see who holds it or whether it's safe to stop.
+- Opening a whole editor just to check a config value or fix one line in `.env`.
 - Opening Claude Code or Codex, then `cd`-ing into the right folder first.
 - Starting a database, API and frontend by hand, in the right order, every time.
 
@@ -51,7 +52,8 @@ DevDock turns each of these into one or two actions.
 > [!NOTE]
 > DevDock **organizes your tools instead of replacing them**. It is not an IDE, a Git client, a
 > terminal or an AI chat app - every action ends in a real tool (Explorer, your editor, a
-> terminal, an agent CLI) opened in the right folder. No accounts, no cloud, no telemetry.
+> terminal, an agent CLI) opened in the right folder. The Files tab is for quick looks and quick
+> fixes; your editor stays one click away for real work. No accounts, no cloud, no telemetry.
 
 ## What's new in 1.1
 
@@ -71,6 +73,7 @@ DevDock turns each of these into one or two actions.
 |---|---|
 | **Projects** | Groups, layouts, drag & drop and your own order; auto-detects Next.js, Node, Rust, PHP and Docker Compose. |
 | **Git** | Branch, ahead/behind, changes, last commit, worktrees - and switch, fetch, pull and push when you click. |
+| **Files** | Browse, search across and edit a project's files, with syntax highlighting and autocomplete. |
 | **Run & logs** | Package scripts and custom commands on saved ports, with full-height logs; stopping ends the whole process tree. |
 | **Local addresses** | `name.localhost` for every project, with the port hidden and optional HTTPS. |
 | **Packages** | Install status for every project and a one-click install. |
@@ -125,8 +128,10 @@ where.
 4. **Install and run** - if the project shows **not installed**, click **Install** in its
    Overview. Then Run tab -> start `dev` and open its address, like `storefront.localhost`.
 5. **Pull the latest** - Git tab -> **Pull**. Switch branches from the branch picker.
-6. **Ask an agent** - Agents tab -> **Claude Code**. A terminal opens in the project folder.
-7. **Bring up a stack** - Spaces -> create a workspace, add services (e.g. db, api, web) with
+6. **Fix a file** - Files tab -> pick a file, edit, <kbd>Ctrl</kbd> + <kbd>S</kbd>. Or
+   <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>F</kbd> to search every file.
+7. **Ask an agent** - Agents tab -> **Claude Code**. A terminal opens in the project folder.
+8. **Bring up a stack** - Spaces -> create a workspace, add services (e.g. db, api, web) with
    health checks -> **Start all**.
 
 ## Features
@@ -177,6 +182,31 @@ where.
   and changes nothing; merge or rebase in a terminal. It never merges, rebases, commits, resets
   or stashes on its own.
 - Works for projects inside a shared repository (monorepos) and for Git worktrees.
+
+### Files
+
+<img src="docs/screenshots/files.png" alt="Files tab searching every file for formatPrice, with a match open in the editor" width="900">
+
+- **Browse** a project in a file tree that loads folders as you open them. Gitignored entries
+  such as `node_modules` are dimmed; hidden ones (dotfiles, `.git`, the Windows Hidden
+  attribute) are dimmed too, and the eye button hides them. The choice is remembered.
+- **Edit** in a [CodeMirror](https://codemirror.net) editor with syntax highlighting for dozens
+  of languages (loaded only when a file needs them), line numbers, folding, bracket matching
+  and in-file find (<kbd>Ctrl</kbd> + <kbd>F</kbd>). Colours follow the light or dark theme.
+- **Autocomplete** suggests names from the language and words already in the file. No language
+  servers run in the background.
+- **Save** with <kbd>Ctrl</kbd> + <kbd>S</kbd>. Line endings (CRLF or LF) and a UTF-8 BOM are
+  kept, so a save never turns into a whole-file diff. Files are written through a temporary file
+  and renamed, so a crash can't leave half a file.
+- **Search across files** with <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>F</kbd>, powered by
+  ripgrep's libraries: respects `.gitignore`, skips binary files, and supports match case,
+  whole word, regular expressions and include / exclude patterns like `src/**, !*.test.ts`.
+  Click a result to open the file with the match selected.
+- **Your edits are safe**: unsaved changes survive switching tabs and projects (a dot marks the
+  Files tab), opening another file asks first, and so does quitting DevDock. If a file changes
+  on disk while it's open, an untouched one reloads quietly; with your edits in it, you choose
+  to reload or overwrite.
+- Opens text files up to 2 MB. Binary files and paths outside the project folder never open.
 
 ### Run and logs
 
@@ -286,6 +316,9 @@ launches, workspaces and ports ("who's on 8069?").
 | Mouse back / forward, <kbd>Alt</kbd> + <kbd>Left</kbd> / <kbd>Right</kbd> | Go back and forward through projects, groups, tabs and screens |
 | <kbd>F5</kbd> | Refresh the current screen |
 | <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>1</kbd>-<kbd>9</kbd> | Run a bound agent / terminal launch |
+| <kbd>Ctrl</kbd> + <kbd>S</kbd> | Save the open file (Files tab) |
+| <kbd>Ctrl</kbd> + <kbd>F</kbd> | Find in the open file (Files tab) |
+| <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>F</kbd> | Search across the project's files (Files tab) |
 
 ## Safety rules
 
@@ -296,6 +329,8 @@ These are product invariants, not settings. DevDock will:
 - **Never** change a Git repository unless you click an action. Pull only fast-forwards; DevDock
   never merges, rebases, commits, resets or stashes.
 - **Never** delete project folders - **Remove** only removes the entry from DevDock.
+- **Never** write a file you didn't save, or overwrite one that changed on disk without asking.
+  The Files tab can't open anything outside the project folder.
 - **Always** stop the whole process tree of processes it owns. Quitting while runs are active
   asks first and then stops them all.
 - **Never** guess port ownership from a port number or executable name alone.
@@ -312,7 +347,7 @@ Everything stays on your machine. All state lives in one JSON file, `devdock.jso
 - Projects and their order, groups, favourites, custom commands and port choices, addresses,
   scan roots, workspaces, agent shortcuts and settings.
 - HTTPS uses `devdock-ca.pem` and its key in the same folder. View preferences (layout, size,
-  details) are kept by the app window itself.
+  details, showing hidden files) are kept by the app window itself.
 - Saved atomically (write then rename), debounced, with a `.bak` copy of the previous version.
 - If the file is damaged, DevDock renames it to `devdock.json.corrupt-<time>` (never
   overwrites it), falls back to the `.bak`, and warns you.
@@ -358,6 +393,7 @@ DevDock version (Settings) and what you expected to happen.
 | Platform | Windows FFI - Job Objects, TCP table, process details |
 | Shell | [Tauri 2](https://tauri.app) with NSIS installer and signed updater |
 | UI | [Svelte 5](https://svelte.dev) (SvelteKit, SPA mode) + TypeScript |
+| Files | [CodeMirror 6](https://codemirror.net) editor; search with ripgrep's `grep` and `ignore` crates |
 
 See [CONTRIBUTING.md](CONTRIBUTING.md#architecture) for the full architecture.
 
@@ -375,7 +411,7 @@ pnpm tauri dev
 ```
 
 The screenshots in this README are captured from the real UI with made-up demo data
-(`scripts/screenshots/demo-bridge.js`). To refresh and frame them:
+(`scripts/demo/mock-ipc.js`). To refresh and frame them:
 
 ```bash
 pnpm screenshots

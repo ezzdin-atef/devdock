@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>DevDock - one calm control panel for every project on your machine</title>
-  <meta name="description" content="DevDock is a free, local-first Windows app that organizes your local projects into groups, runs their dev servers on clean .localhost addresses, switches and pulls Git branches, installs packages, explains who holds which port and launches coding agents.">
+  <meta name="description" content="DevDock is a free, local-first Windows app that organizes your local projects into groups, runs their dev servers on clean .localhost addresses, switches and pulls Git branches, lets you browse, search and edit files, installs packages, explains who holds which port and launches coding agents.">
   <meta name="theme-color" content="#0e0f11" media="(prefers-color-scheme: dark)">
   <meta name="theme-color" content="#ebedf0" media="(prefers-color-scheme: light)">
   <meta property="og:title" content="DevDock - a control panel for your local projects">
@@ -127,10 +127,10 @@
         <strong>A real log view</strong>
         <span>A full-height Logs tab with search and filters, plus one-click clearing of logs, finished runs and history.</span>
       </a>
-      <a class="new-card" href="#keyboard">
-        <span class="new-tag">Everywhere</span>
-        <strong>Back and forward, like a browser</strong>
-        <span>Your mouse's back and forward buttons (and <kbd>Alt</kbd> <kbd>&larr;</kbd>/<kbd>&rarr;</kbd>) step through projects, groups, tabs and screens.</span>
+      <a class="new-card" href="#f-files">
+        <span class="new-tag">Files</span>
+        <strong>Browse, search and edit files</strong>
+        <span>A file tree, a real editor with syntax highlighting and autocomplete, and search across every file with <kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>F</kbd>.</span>
       </a>
     </div>
   </div>
@@ -182,10 +182,10 @@
       <div>
         <p class="eyebrow">The approach</p>
         <h3>It organizes your tools instead of replacing them.</h3>
-        <p class="muted" style="margin:12px 0 0">DevDock is not another IDE, Git client, terminal or AI chat window. Every action ends in a real tool you already use - Explorer, your editor, Windows Terminal, an agent CLI - opened in the right folder. You keep your workflow; DevDock removes the steps between you and it.</p>
+        <p class="muted" style="margin:12px 0 0">DevDock is not another IDE, Git client, terminal or AI chat window. Every action ends in a real tool you already use - Explorer, your editor, Windows Terminal, an agent CLI - opened in the right folder. The Files tab covers quick looks and quick fixes; your editor stays one click away for real work. You keep your workflow; DevDock removes the steps between you and it.</p>
       </div>
       <ul aria-label="What DevDock is and isn't">
-        <li><s>An IDE</s><b>opens yours</b></li>
+        <li><s>An IDE</s><b>quick edits, opens yours</b></li>
         <li><s>A Git client</s><b>reads Git</b></li>
         <li><s>A terminal</s><b>opens one</b></li>
         <li><s>An AI chat app</s><b>launches agents</b></li>
@@ -201,21 +201,22 @@
   <div class="wrap">
     <div class="section-head">
       <p class="eyebrow">Features</p>
-      <h2>Ten tools in one window, each fixing one specific pain.</h2>
+      <h2>Eleven tools in one window, each fixing one specific pain.</h2>
       <p>Every feature below states the problem it solves, how it solves it, and the details that make it trustworthy in daily use.</p>
     </div>
 
     <nav class="feature-index" aria-label="Feature index">
       <a href="#f-projects"><span class="n">01</span><strong>Projects</strong><span>Groups, cards, drag &amp; drop, your own order.</span></a>
       <a href="#f-git"><span class="n">02</span><strong>Git</strong><span>Branch state at a glance; switch, pull and push.</span></a>
-      <a href="#f-run"><span class="n">03</span><strong>Run &amp; logs</strong><span>Dev servers on saved ports, full-height logs.</span></a>
-      <a href="#f-addresses"><span class="n">04</span><strong>Local addresses</strong><span>shop.localhost with no port, optional HTTPS.</span></a>
-      <a href="#f-packages"><span class="n">05</span><strong>Packages</strong><span>Installed or not, and one button to install.</span></a>
-      <a href="#f-ports"><span class="n">06</span><strong>Ports</strong><span>Who holds which port, and is it safe to stop.</span></a>
-      <a href="#f-agents"><span class="n">07</span><strong>Agents</strong><span>Claude Code, Codex, OpenCode in the right folder.</span></a>
-      <a href="#f-workspaces"><span class="n">08</span><strong>Workspaces</strong><span>Whole stacks, started in order with health checks.</span></a>
-      <a href="#f-palette"><span class="n">09</span><strong>Command palette</strong><span>Jump to anything with Ctrl K.</span></a>
-      <a href="#f-settings"><span class="n">10</span><strong>Settings &amp; updates</strong><span>Your tools, themes, data and signed updates.</span></a>
+      <a href="#f-files"><span class="n">03</span><strong>Files</strong><span>Browse, search across and edit files.</span></a>
+      <a href="#f-run"><span class="n">04</span><strong>Run &amp; logs</strong><span>Dev servers on saved ports, full-height logs.</span></a>
+      <a href="#f-addresses"><span class="n">05</span><strong>Local addresses</strong><span>shop.localhost with no port, optional HTTPS.</span></a>
+      <a href="#f-packages"><span class="n">06</span><strong>Packages</strong><span>Installed or not, and one button to install.</span></a>
+      <a href="#f-ports"><span class="n">07</span><strong>Ports</strong><span>Who holds which port, and is it safe to stop.</span></a>
+      <a href="#f-agents"><span class="n">08</span><strong>Agents</strong><span>Claude Code, Codex, OpenCode in the right folder.</span></a>
+      <a href="#f-workspaces"><span class="n">09</span><strong>Workspaces</strong><span>Whole stacks, started in order with health checks.</span></a>
+      <a href="#f-palette"><span class="n">10</span><strong>Command palette</strong><span>Jump to anything with Ctrl K.</span></a>
+      <a href="#f-settings"><span class="n">11</span><strong>Settings &amp; updates</strong><span>Your tools, themes, data and signed updates.</span></a>
     </nav>
 
     <!-- 01 Projects -->
@@ -271,10 +272,37 @@
       </div>
     </article>
 
-    <!-- 03 Run -->
-    <article class="feature reveal" id="f-run">
+    <!-- 03 Files -->
+    <article class="feature reveal" id="f-files">
       <div class="feature-copy">
-        <p class="tag">03 &middot; Run &amp; logs</p>
+        <p class="tag">03 &middot; Files</p>
+        <h3>Check a file, fix a line, find a name - right here.</h3>
+        <p class="summary">A file tree, an editor and search across every file, inside the project you already have open.</p>
+        <div class="pf">
+          <div class="problem"><span class="lbl">Problem</span><p>Checking one value in <code>.env</code> or fixing a single line means waiting for a whole editor to open. Finding where a function is used means another window and another search box.</p></div>
+          <div class="solution"><span class="lbl">How DevDock fixes it</span><p>Each project has a <strong>Files</strong> tab: open a file from the tree, edit it in a CodeMirror editor, save with <kbd>Ctrl</kbd> <kbd>S</kbd>. <kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>F</kbd> searches every file with ripgrep's own libraries.</p></div>
+        </div>
+        <ul class="details">
+          <li><strong>Syntax highlighting</strong> for dozens of languages, loaded only when a file needs them, with folding, bracket matching and in-file find. Colours follow the light or dark theme.</li>
+          <li><strong>Autocomplete</strong> from the language and from words already in the file - no language servers running in the background.</li>
+          <li><strong>Search</strong> respects <code>.gitignore</code> and skips binaries, with match case, whole word, regex and include / exclude patterns. A result opens the file with the match selected.</li>
+          <li>Saves keep <strong>CRLF or LF and the BOM</strong>, so a save never becomes a whole-file diff, and go through a temporary file so a crash can't leave half a file.</li>
+          <li><strong>Edits are safe</strong>: unsaved changes survive switching tabs and projects, and opening another file or quitting asks first. If the file changes on disk, you choose what wins.</li>
+          <li>Dotfiles and <code>.git</code> show dimmed, and the eye button hides them. Nothing outside the project folder can be opened.</li>
+        </ul>
+      </div>
+      <div class="feature-visual">
+        <figure class="shot">
+          <a href="screenshots/files.png"><img src="screenshots/files.png" loading="lazy" width="1280" height="900" alt="The Files tab: a search for formatPrice listing matches in three files, and ProductCard.tsx open in the editor with the match selected and syntax highlighted."></a>
+          <figcaption>Files tab &middot; search every file, edit with highlighting, save with Ctrl S</figcaption>
+        </figure>
+      </div>
+    </article>
+
+    <!-- 04 Run -->
+    <article class="feature flip reveal" id="f-run">
+      <div class="feature-copy">
+        <p class="tag">04 &middot; Run &amp; logs</p>
         <h3>Dev servers you can actually stop.</h3>
         <p class="summary">Start scripts with a click, give them ports that never clash, read their output full height, and stop the whole thing.</p>
         <div class="pf">
@@ -301,10 +329,10 @@
       </div>
     </article>
 
-    <!-- 04 Local addresses -->
-    <article class="feature flip reveal" id="f-addresses">
+    <!-- 05 Local addresses -->
+    <article class="feature reveal" id="f-addresses">
       <div class="feature-copy">
-        <p class="tag">04 &middot; Local addresses</p>
+        <p class="tag">05 &middot; Local addresses</p>
         <h3>Open <code>shop.localhost</code>, not <code>localhost:3000</code>.</h3>
         <p class="summary">Every project gets a stable, readable address, with the port hidden and HTTPS when you want it.</p>
         <div class="pf">
@@ -327,10 +355,10 @@
       </div>
     </article>
 
-    <!-- 05 Packages -->
-    <article class="feature reveal" id="f-packages">
+    <!-- 06 Packages -->
+    <article class="feature flip reveal" id="f-packages">
       <div class="feature-copy">
-        <p class="tag">05 &middot; Packages</p>
+        <p class="tag">06 &middot; Packages</p>
         <h3>Installed, out of date, or not yet?</h3>
         <p class="summary">Know before you run it whether a project's packages are there, and install them with one button.</p>
         <div class="pf">
@@ -360,10 +388,10 @@
       </div>
     </article>
 
-    <!-- 06 Ports -->
-    <article class="feature flip reveal" id="f-ports">
+    <!-- 07 Ports -->
+    <article class="feature reveal" id="f-ports">
       <div class="feature-copy">
-        <p class="tag">06 &middot; Ports</p>
+        <p class="tag">07 &middot; Ports</p>
         <h3>"Port 3000 is in use" - now with an answer.</h3>
         <p class="summary">See every listening port, which process and project holds it, and whether it is safe to end.</p>
         <div class="pf">
@@ -389,10 +417,10 @@
       </div>
     </article>
 
-    <!-- 07 Agents -->
-    <article class="feature reveal" id="f-agents">
+    <!-- 08 Agents -->
+    <article class="feature flip reveal" id="f-agents">
       <div class="feature-copy">
-        <p class="tag">07 &middot; Agents</p>
+        <p class="tag">08 &middot; Agents</p>
         <h3>Your coding agent, already in the right folder.</h3>
         <p class="summary">Launch Claude Code, Codex or OpenCode in the project - or a subfolder - in the terminal you prefer.</p>
         <div class="pf">
@@ -424,10 +452,10 @@
       </div>
     </article>
 
-    <!-- 08 Workspaces -->
-    <article class="feature flip reveal" id="f-workspaces">
+    <!-- 09 Workspaces -->
+    <article class="feature reveal" id="f-workspaces">
       <div class="feature-copy">
-        <p class="tag">08 &middot; Workspaces</p>
+        <p class="tag">09 &middot; Workspaces</p>
         <h3>Bring up the whole stack with one click.</h3>
         <p class="summary">A named group of services from one or more projects, started as one unit, in order, healthy before the next one begins.</p>
         <div class="pf">
@@ -461,10 +489,10 @@
       </div>
     </article>
 
-    <!-- 09 Palette -->
-    <article class="feature reveal" id="f-palette">
+    <!-- 10 Palette -->
+    <article class="feature flip reveal" id="f-palette">
       <div class="feature-copy">
-        <p class="tag">09 &middot; Command palette</p>
+        <p class="tag">10 &middot; Command palette</p>
         <h3>Everything is <kbd>Ctrl</kbd> <kbd>K</kbd> away.</h3>
         <p class="summary">One fuzzy search across projects, commands, agents, workspaces and ports.</p>
         <div class="pf">
@@ -487,10 +515,10 @@
       </div>
     </article>
 
-    <!-- 10 Settings -->
-    <article class="feature flip reveal" id="f-settings">
+    <!-- 11 Settings -->
+    <article class="feature reveal" id="f-settings">
       <div class="feature-copy">
-        <p class="tag">10 &middot; Settings &amp; updates</p>
+        <p class="tag">11 &middot; Settings &amp; updates</p>
         <h3>Your tools, your theme, your data.</h3>
         <p class="summary">DevDock adapts to the tools you already have and keeps itself up to date safely.</p>
         <div class="pf">
@@ -546,7 +574,7 @@
       <div class="rule"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3Z"/></svg></span><div><h4>Never ends a process it didn't start - without asking</h4><p>External processes require explicit confirmation that shows the command line, folder, start time and children.</p></div></div>
       <div class="rule"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m5.6 5.6 12.8 12.8"/></svg></span><div><h4>Never touches system processes</h4><p>They are labelled <code>SYSTEM</code> and are never offered for ending.</p></div></div>
       <div class="rule"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="8" r="2"/><path d="M6 8v8M18 10a6 6 0 0 1-6 6H8"/></svg></span><div><h4>Changes a repository only when you click</h4><p>Reading Git never writes anything. Switch, pull and push run only from their buttons, pull only fast-forwards, and DevDock never merges, rebases, commits, resets or stashes.</p></div></div>
-      <div class="rule"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h6l2 2h10v10H3z"/></svg></span><div><h4>Never deletes project folders</h4><p><strong>Remove</strong> only removes the entry from DevDock. Your files stay exactly where they are.</p></div></div>
+      <div class="rule"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h6l2 2h10v10H3z"/></svg></span><div><h4>Never deletes folders, and writes only what you save</h4><p><strong>Remove</strong> only removes the entry from DevDock. The Files tab writes a file only when you save it, never overwrites one that changed on disk without asking, and can't open anything outside the project.</p></div></div>
       <div class="rule"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v6m0 0L8 13m4-4 4 4M6 21v-4m6 4v-4m6 4v-4"/></svg></span><div><h4>Always stops the whole process tree</h4><p>Runs live in Job Objects. Quitting with active runs asks first, then stops all of them - no orphans.</p></div></div>
       <div class="rule"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></span><div><h4>Never guesses port ownership</h4><p>Ownership comes from the system TCP table and process details, not from a port number or an executable name.</p></div></div>
       <div class="rule"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span><div><h4>Asks Windows before changing Windows</h4><p>Writing the hosts file needs your OK in the Windows permission prompt, and trusting the certificate shows Windows' own dialog. Nothing changes without it.</p></div></div>
@@ -592,6 +620,8 @@
             <tr><td>Mouse back / forward, <kbd>Alt</kbd> <kbd>&larr;</kbd> / <kbd>&rarr;</kbd></td><td>Go back and forward through projects, groups, tabs and screens</td></tr>
             <tr><td><kbd>F5</kbd></td><td>Refresh the current screen</td></tr>
             <tr><td><kbd>Ctrl</kbd> <kbd>Alt</kbd> <kbd>1</kbd>-<kbd>9</kbd></td><td>Run a bound agent / terminal launch</td></tr>
+            <tr><td><kbd>Ctrl</kbd> <kbd>S</kbd> / <kbd>Ctrl</kbd> <kbd>F</kbd></td><td>Save / find in the open file (Files tab)</td></tr>
+            <tr><td><kbd>Ctrl</kbd> <kbd>Shift</kbd> <kbd>F</kbd></td><td>Search across the project's files</td></tr>
           </tbody>
         </table>
       </div>

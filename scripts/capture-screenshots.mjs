@@ -3,7 +3,7 @@
 // Tauri, no personal data. `pnpm screenshots` runs this and then frames the images.
 //
 // Scenes: overview (Projects by group), cards, palette, project (overview tab), run, logs,
-// git, ports, settings (local addresses).
+// git, files (editor + search), ports, settings (local addresses).
 //
 //   node scripts/capture-screenshots.mjs
 
@@ -194,6 +194,18 @@ try {
   await sleep(800);
   await cdp.shot('git');
 
+  // storefront's Files tab: search across files, with a hit open in the editor.
+  await cdp.eval(`import('/src/lib/app.svelte.ts').then(async ({ app }) => { app.tab = 'files'; await app.select('p1'); })`);
+  await sleep(1000);
+  await cdp.eval(`[...document.querySelectorAll('.switch button')].find((b) => b.textContent.includes('Search'))?.click()`);
+  await sleep(400);
+  await cdp.send('Input.insertText', { text: 'formatPrice' });
+  await sleep(1000);
+  await cdp.eval(`[...document.querySelectorAll('.hit')].find((h) => h.textContent.includes('price ??'))?.click()`);
+  await sleep(1200);
+  await cdp.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 1279, y: 899 });
+  await cdp.shot('files');
+
   await cdp.click('Ports', 'nav.rail');
   await cdp.shot('ports');
 
@@ -211,5 +223,5 @@ try {
   browser.kill();
   vite.kill();
   await sleep(500);
-  rmSync(work, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+  rmSync(work, { recursive: true, force: true, maxRetries: 15, retryDelay: 400 });
 }

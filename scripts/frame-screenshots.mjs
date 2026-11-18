@@ -7,7 +7,7 @@
 // Raw captures are expected at 1280x900 (the app window at 100% scale).
 
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -32,6 +32,10 @@ const SHOTS = {
   git: {
     eyebrow: 'Git',
     title: 'Switch branches, fetch, pull and push - pull only fast-forwards',
+  },
+  files: {
+    eyebrow: 'Files',
+    title: "Browse, search and edit a project's files without leaving DevDock",
   },
   run: {
     eyebrow: 'Run',
@@ -157,6 +161,7 @@ try {
     const page = join(work, `${name}.html`);
     writeFileSync(page, html(shot, pathToFileURL(raw).href, logoSvg));
     const out = join(outDir, `${name}.png`);
+    const before = existsSync(out) ? statSync(out).mtimeMs : 0;
     execFileSync(browser, [
       '--headless=new',
       '--disable-gpu',
@@ -170,8 +175,17 @@ try {
       `--screenshot=${out}`,
       pathToFileURL(page).href,
     ], { stdio: 'ignore' });
+    // On some machines msedge.exe hands off to a background process and returns at
+    // once; wait for the image so the page isn't deleted before it's rendered.
+    const deadline = Date.now() + 20_000;
+    while (!(existsSync(out) && statSync(out).mtimeMs > before)) {
+      if (Date.now() > deadline) throw new Error(`Timed out waiting for ${out}`);
+      await new Promise((r) => setTimeout(r, 200));
+    }
+    await new Promise((r) => setTimeout(r, 300)); // let the write finish
     console.log(`framed ${name} -> ${out}`);
   }
 } finally {
-  rmSync(work, { recursive: true, force: true });
+  // The background browser can hold its profile for a moment after the last shot.
+  rmSync(work, { recursive: true, force: true, maxRetries: 10, retryDelay: 300 });
 }
