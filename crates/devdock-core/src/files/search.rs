@@ -86,7 +86,9 @@ impl From<SearchError> for ErrorDto {
             SearchError::BadPattern(detail) => ErrorDto {
                 kind: "badPattern",
                 message: format!("That isn't a valid regular expression: {detail}"),
-                fix: Some("Fix the pattern, or turn off .* to search for the text as typed.".into()),
+                fix: Some(
+                    "Fix the pattern, or turn off .* to search for the text as typed.".into(),
+                ),
             },
             SearchError::BadGlob(detail) => ErrorDto {
                 kind: "badGlob",
@@ -306,15 +308,17 @@ mod tests {
     #[test]
     fn hidden_files_are_searched_only_when_asked() {
         let dir = project();
-        fs::write(dir.path().join(".env"), "foo=1
-").unwrap();
+        fs::write(dir.path().join(".env"), "foo=1\n").unwrap();
         fs::create_dir_all(dir.path().join(".git")).unwrap();
-        fs::write(dir.path().join(".git/config"), "foo
-").unwrap();
+        fs::write(dir.path().join(".git/config"), "foo\n").unwrap();
         let paths = |hidden| -> Vec<String> {
             let mut query = q("foo");
             query.hidden = hidden;
-            run(dir.path(), query).files.into_iter().map(|f| f.path).collect()
+            run(dir.path(), query)
+                .files
+                .into_iter()
+                .map(|f| f.path)
+                .collect()
         };
         assert!(!paths(false).contains(&".env".to_owned()));
         let with_hidden = paths(true);

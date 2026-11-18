@@ -68,7 +68,10 @@ impl From<FilesError> for ErrorDto {
         };
         let message = match &err {
             FilesError::TooLarge { path, size } => {
-                format!("{path} is {} MB, too large to open here.", size / (1024 * 1024))
+                format!(
+                    "{path} is {} MB, too large to open here.",
+                    size / (1024 * 1024)
+                )
             }
             other => {
                 let text = other.to_string();
@@ -413,7 +416,10 @@ mod tests {
         let dir = project();
         let listing = list(dir.path(), "", true).unwrap();
         let names: Vec<_> = listing.entries.iter().map(|e| e.name.as_str()).collect();
-        assert_eq!(names, [".git", "node_modules", "src", ".gitignore", "README.md"]);
+        assert_eq!(
+            names,
+            [".git", "node_modules", "src", ".gitignore", "README.md"]
+        );
         let hidden: Vec<_> = listing.entries.iter().map(|e| e.hidden).collect();
         assert_eq!(hidden, [true, false, false, true, false]);
     }
@@ -455,7 +461,15 @@ mod tests {
                 bom: true
             }
         );
-        write(dir.path(), "w.txt", "a\nb\nc\n", file.format, file.mtime, false).unwrap();
+        write(
+            dir.path(),
+            "w.txt",
+            "a\nb\nc\n",
+            file.format,
+            file.mtime,
+            false,
+        )
+        .unwrap();
         assert_eq!(
             fs::read(dir.path().join("w.txt")).unwrap(),
             b"\xEF\xBB\xBFa\r\nb\r\nc\r\n"
@@ -467,16 +481,37 @@ mod tests {
     fn refuses_to_overwrite_a_file_changed_on_disk() {
         let dir = project();
         let file = read(dir.path(), "README.md").unwrap();
-        let err = write(dir.path(), "README.md", "x", file.format, file.mtime + 1, false);
+        let err = write(
+            dir.path(),
+            "README.md",
+            "x",
+            file.format,
+            file.mtime + 1,
+            false,
+        );
         assert!(matches!(err, Err(FilesError::Changed(_))));
-        write(dir.path(), "README.md", "x", file.format, file.mtime + 1, true).unwrap();
-        assert_eq!(fs::read_to_string(dir.path().join("README.md")).unwrap(), "x");
+        write(
+            dir.path(),
+            "README.md",
+            "x",
+            file.format,
+            file.mtime + 1,
+            true,
+        )
+        .unwrap();
+        assert_eq!(
+            fs::read_to_string(dir.path().join("README.md")).unwrap(),
+            "x"
+        );
     }
 
     #[test]
     fn binary_files_dont_open() {
         let dir = project();
         fs::write(dir.path().join("a.bin"), [1u8, 0, 2]).unwrap();
-        assert!(matches!(read(dir.path(), "a.bin"), Err(FilesError::Binary(_))));
+        assert!(matches!(
+            read(dir.path(), "a.bin"),
+            Err(FilesError::Binary(_))
+        ));
     }
 }
