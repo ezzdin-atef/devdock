@@ -2,6 +2,21 @@
 
 All notable changes to DevDock. Versions follow [semver](https://semver.org).
 
+## [1.2.0] - 2026-11-18
+
+### Added
+
+- Files tab with editor, search across files and file icons (572d3b6)
+
+### Fixed
+
+- Open a project at the top of its page (b757dbf)
+
+### Docs
+
+- Files tab on the site and README, refreshed screenshots (656e6d1)
+- V1.1 features on the site and README, demo screenshots, live releases (5ee4e39)
+
 ## [1.1.0] - 2026-11-17
 
 ### Added
