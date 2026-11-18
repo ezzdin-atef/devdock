@@ -1,10 +1,15 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { app } from "$lib/app.svelte";
+  import { files } from "$lib/files.svelte";
   import { runs } from "$lib/runs.svelte";
   import Button from "./Button.svelte";
 
   // DESIGN.md "Dialog": eyebrow, title, one-line explanation, details, actions (T4.8).
   let cancelBtn: HTMLDivElement;
+  const running = $derived(runs.active.length > 0);
+  const unsaved = $derived(files.unsaved);
+  const nameOf = (id: string) => app.lib?.projects.find((p) => p.id === id)?.name ?? "";
 
   onMount(() => {
     cancelBtn.querySelector("button")?.focus();
@@ -18,26 +23,41 @@
 
 <div class="scrim">
   <div class="dialog" role="alertdialog" aria-modal="true" aria-labelledby="close-title">
-    <div class="eyebrow">Processes running</div>
+    <div class="eyebrow">{running ? "Processes running" : "Unsaved changes"}</div>
     <h2 id="close-title">Quit DevDock?</h2>
-    <p>
-      DevDock started {runs.active.length === 1 ? "this process" : "these processes"}. Quitting stops
-      {runs.active.length === 1 ? "it" : "them"}, including any child processes.
-    </p>
-    <ul class="details">
-      {#each runs.active as r (r.projectId + r.commandId)}
-        <li>
-          <span>{r.projectName}</span>
-          <span class="mono">{r.commandLine}</span>
-          {#if r.portHint}<span class="mono port">:{r.portHint}</span>{/if}
-        </li>
-      {/each}
-    </ul>
+    {#if running}
+      <p>
+        DevDock started {runs.active.length === 1 ? "this process" : "these processes"}. Quitting stops
+        {runs.active.length === 1 ? "it" : "them"}, including any child processes.
+      </p>
+      <ul class="details">
+        {#each runs.active as r (r.projectId + r.commandId)}
+          <li>
+            <span>{r.projectName}</span>
+            <span class="mono">{r.commandLine}</span>
+            {#if r.portHint}<span class="mono port">:{r.portHint}</span>{/if}
+          </li>
+        {/each}
+      </ul>
+    {/if}
+    {#if unsaved.length > 0}
+      <p>{unsaved.length === 1 ? "This file has" : "These files have"} unsaved edits that quitting throws away.</p>
+      <ul class="details">
+        {#each unsaved as u (u.id)}
+          <li>
+            <span>{nameOf(u.id)}</span>
+            <span class="mono">{u.path}</span>
+          </li>
+        {/each}
+      </ul>
+    {/if}
     <div class="actions">
       <div bind:this={cancelBtn}>
         <Button variant="secondary" onclick={() => (runs.closeRequested = null)}>Cancel</Button>
       </div>
-      <button class="confirm" onclick={() => runs.quit()}>Stop all and quit</button>
+      <button class="confirm" onclick={() => runs.quit()}>
+        {running && unsaved.length ? "Stop all, discard and quit" : running ? "Stop all and quit" : "Discard and quit"}
+      </button>
     </div>
   </div>
 </div>

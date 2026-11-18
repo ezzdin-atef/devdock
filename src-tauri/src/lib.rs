@@ -1,6 +1,7 @@
 mod agents;
 mod commands;
 mod data;
+mod files;
 mod palette;
 mod ports;
 mod proxy;
@@ -59,6 +60,8 @@ fn setup(app: &mut App) -> Result<(), Box<dyn std::error::Error>> {
         spaces: Mutex::default(),
         proxy: Mutex::default(),
         palette: Mutex::default(),
+        search: Mutex::default(),
+        unsaved: Default::default(),
         runner,
         state,
         saver,
@@ -80,8 +83,10 @@ pub fn run() {
         // calls `quit_app`, which stops them and exits.
         .on_window_event(|window, event| {
             if let WindowEvent::CloseRequested { api, .. } = event {
-                let active = window.state::<Core>().runner.active_count();
-                if active > 0 {
+                let core = window.state::<Core>();
+                let active = core.runner.active_count();
+                let unsaved = core.unsaved.load(std::sync::atomic::Ordering::Relaxed);
+                if active > 0 || unsaved {
                     api.prevent_close();
                     let _ = window.emit("app:close-requested", active);
                 }
@@ -163,6 +168,13 @@ pub fn run() {
             data::export_data,
             data::import_preview,
             data::import_data,
+            files::files_list,
+            files::file_read,
+            files::file_stat,
+            files::file_write,
+            files::files_search,
+            files::files_search_cancel,
+            files::files_set_unsaved,
         ])
         .build(tauri::generate_context!());
 

@@ -299,7 +299,61 @@ export interface ErrorDto {
   fix: string | null;
 }
 
-export type DetailTab = "overview" | "git" | "run" | "logs" | "agents";
+export type DetailTab = "overview" | "git" | "files" | "run" | "logs" | "agents";
+
+/** files/mod.rs */
+export interface FileEntry {
+  name: string;
+  /** Relative to the project, with `/`. */
+  path: string;
+  dir: boolean;
+  /** Matched by .gitignore: shown dimmed. */
+  ignored: boolean;
+  /** Dotfile, `.git` or Windows-hidden: shown dimmed, only with "show hidden". */
+  hidden: boolean;
+}
+export interface Listing {
+  entries: FileEntry[];
+  hidden: number;
+}
+export interface FileFormat {
+  eol: "lf" | "crlf";
+  bom: boolean;
+}
+export interface FileText {
+  text: string;
+  format: FileFormat;
+  mtime: number;
+}
+
+/** files/search.rs */
+export interface SearchQuery {
+  text: string;
+  regex: boolean;
+  matchCase: boolean;
+  wholeWord: boolean;
+  include: string;
+  exclude: string;
+  /** Also search dotfiles and Windows-hidden files (never `.git`). */
+  hidden: boolean;
+}
+export interface LineMatch {
+  line: number;
+  text: string;
+  /** UTF-16 units cut from the front of the line. */
+  offset: number;
+  ranges: [number, number][];
+}
+export interface FileMatches {
+  path: string;
+  matches: LineMatch[];
+}
+export interface SearchResult {
+  files: FileMatches[];
+  total: number;
+  truncated: boolean;
+  cancelled: boolean;
+}
 
 /** run/spec.rs */
 export type CommandId = string;

@@ -6,6 +6,7 @@ pub mod agents;
 pub mod deps;
 pub mod detect;
 pub mod error;
+pub mod files;
 pub mod git;
 pub mod git_job;
 pub mod groups;

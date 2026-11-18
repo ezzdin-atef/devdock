@@ -7,6 +7,8 @@
   import AgentsTab from "./AgentsTab.svelte";
   import OverviewTab from "./OverviewTab.svelte";
   import GitTab from "./GitTab.svelte";
+  import FilesTab from "./FilesTab.svelte";
+  import { files } from "$lib/files.svelte";
   import RunTab from "./RunTab.svelte";
   import LogsTab from "./LogsTab.svelte";
   import Home from "./Home.svelte";
@@ -19,8 +21,8 @@
 
 <section
   class="detail"
-  class:fill={app.selected && (app.tab === "run" || app.tab === "logs") && !app.selected.missing}
-  class:wide={!app.selected || app.tab === "logs"}
+  class:fill={app.selected && (app.tab === "run" || app.tab === "logs" || app.tab === "files") && !app.selected.missing}
+  class:wide={!app.selected || app.tab === "logs" || app.tab === "files"}
 >
   {#if app.selected}
     {@const project = app.selected}
@@ -57,7 +59,7 @@
         role="tab"
         aria-selected={app.tab === "overview"}
         class:active={app.tab === "overview"}
-        onclick={() => (app.tab = "overview")}>Overview</button
+        onclick={() => (app.tab = "overview")}><Icon name="grid" size={14} /> Overview</button
       >
       <button
         role="tab"
@@ -65,8 +67,17 @@
         class:active={app.tab === "git"}
         onclick={() => (app.tab = "git")}
       >
-        Git
+        <Icon name="branch" size={14} /> Git
         {#if changes > 0}<span class="tab-count mono" title="{changes} changed files">{changes}</span>{/if}
+      </button>
+      <button
+        role="tab"
+        aria-selected={app.tab === "files"}
+        class:active={app.tab === "files"}
+        onclick={() => (app.tab = "files")}
+      >
+        <Icon name="file" size={14} /> Files
+        {#if files.byProject[project.id]?.open?.dirty}<span class="tab-dot" title="Unsaved changes"></span>{/if}
       </button>
       <button
         role="tab"
@@ -74,7 +85,7 @@
         class:active={app.tab === "run"}
         onclick={() => (app.tab = "run")}
       >
-        Run
+        <Icon name="play" size={12} /> Run
         {#if runs.activeIn(project.id) > 0}<span class="tab-count mono ok" title="running"
             >{runs.activeIn(project.id)}</span
           >{/if}
@@ -83,13 +94,13 @@
         role="tab"
         aria-selected={app.tab === "logs"}
         class:active={app.tab === "logs"}
-        onclick={() => (app.tab = "logs")}>Logs</button
+        onclick={() => (app.tab = "logs")}><Icon name="lines" size={14} /> Logs</button
       >
       <button
         role="tab"
         aria-selected={app.tab === "agents"}
         class:active={app.tab === "agents"}
-        onclick={() => (app.tab = "agents")}>Agents</button
+        onclick={() => (app.tab = "agents")}><Icon name="terminal" size={14} /> Agents</button
       >
     </div>
 
@@ -97,6 +108,8 @@
     <div class="tab-body">
     {#if app.tab === "git"}
       <GitTab {project} />
+    {:else if app.tab === "files" && !project.missing}
+      <FilesTab {project} />
     {:else if app.tab === "run"}
       <RunTab {project} />
     {:else if app.tab === "logs"}
@@ -263,10 +276,29 @@
   .tabs button:hover {
     color: var(--text);
   }
+  .tabs button :global(svg) {
+    flex-shrink: 0;
+    color: var(--icon);
+    opacity: 0.8;
+    transition: color var(--t-fast) var(--ease), opacity var(--t-fast) var(--ease);
+  }
+  .tabs button:hover :global(svg) {
+    opacity: 1;
+  }
+  .tabs button.active :global(svg) {
+    color: var(--accent-fg);
+    opacity: 1;
+  }
   .tabs button.active {
     color: var(--text);
     font-weight: 600;
     border-bottom-color: var(--accent-fg);
+  }
+  .tab-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent-fg);
   }
   .tab-count.ok {
     background: var(--success-pill);

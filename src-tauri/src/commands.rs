@@ -39,6 +39,10 @@ pub struct Core {
     pub notice: Mutex<Option<ErrorDto>>,
     /// Command palette items, built when the palette opens.
     pub palette: Mutex<Vec<devdock_core::palette::PaletteItem>>,
+    /// Cancel flag of the running Files search; a new search sets it and replaces it.
+    pub search: Mutex<Arc<std::sync::atomic::AtomicBool>>,
+    /// An editor in the Files tab has unsaved changes (closing asks first).
+    pub unsaved: std::sync::atomic::AtomicBool,
     /// Workspaces started this session (live or finished), by id.
     pub spaces: Mutex<
         std::collections::HashMap<

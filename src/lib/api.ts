@@ -40,6 +40,11 @@ import type {
   TerminalKind,
   PortMode,
   ProxyStatus,
+  FileFormat,
+  FileText,
+  Listing,
+  SearchQuery,
+  SearchResult,
 } from "./types";
 
 export const startupNotice = () => invoke<ErrorDto | null>("startup_notice");
@@ -166,6 +171,26 @@ export const addCommand = (
 export const removeCommand = (projectId: ProjectId, commandId: CommandId) =>
   invoke<void>("remove_command", { projectId, commandId });
 export const quitApp = () => invoke<void>("quit_app");
+
+export const filesList = (id: ProjectId, dir: string, showHidden: boolean) =>
+  invoke<Listing>("files_list", { id, dir, showHidden });
+export const fileRead = (id: ProjectId, path: string) => invoke<FileText>("file_read", { id, path });
+/** Last-modified time, or null if the file is gone. */
+export const fileStat = (id: ProjectId, path: string) => invoke<number | null>("file_stat", { id, path });
+/** Returns the new last-modified time. Rejects with kind "fileChanged" unless `force`. */
+export const fileWrite = (
+  id: ProjectId,
+  path: string,
+  text: string,
+  format: FileFormat,
+  expectedMtime: number,
+  force: boolean,
+) => invoke<number>("file_write", { id, path, text, format, expectedMtime, force });
+/** Starting a search cancels the previous one (it resolves with `cancelled`). */
+export const filesSearch = (id: ProjectId, query: SearchQuery) =>
+  invoke<SearchResult>("files_search", { id, query });
+export const filesSearchCancel = () => invoke<void>("files_search_cancel");
+export const filesSetUnsaved = (unsaved: boolean) => invoke<void>("files_set_unsaved", { unsaved });
 
 export const onRunChanged = (cb: (c: RunChanged) => void): Promise<UnlistenFn> =>
   listen<RunChanged>("run:changed", (e) => cb(e.payload));

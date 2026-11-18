@@ -230,9 +230,68 @@
     tools_recheck: () => handlers.tools_scan(),
     mark_seen: () => false,
     workspace_logs: () => ({ lines: [], cursors: {} }),
+    // Files tab: the same small made-up tree for every project.
+    files_list: (a) => {
+      const dir = a.dir ? `${a.dir}/` : "";
+      const names = new Map();
+      for (const p of [...Object.keys(demoFiles), ...demoDirs]) {
+        if (!p.startsWith(dir)) continue;
+        const rest = p.slice(dir.length);
+        const name = rest.split("/")[0];
+        if (!name) continue;
+        const isDir = rest.includes("/") || demoDirs.includes(p);
+        names.set(name, (names.get(name) ?? false) || isDir);
+      }
+      if (!a.showHidden) for (const n of [...names.keys()]) if (n.startsWith(".")) names.delete(n);
+      const entries = [...names].map(([name, isDir]) => ({ name, path: dir + name, dir: isDir, ignored: name === "node_modules" || name === ".env.local", hidden: name.startsWith(".") }));
+      entries.sort((x, y) => Number(y.dir) - Number(x.dir) || x.name.toLowerCase().localeCompare(y.name.toLowerCase()));
+      return { entries, hidden: 0 };
+    },
+    file_read: (a) => {
+      if (!(a.path in demoFiles)) throw { kind: "fileBinary", message: `${a.path} isn't a text file.`, fix: "Images, archives and other binary files open in their own programs." };
+      return { text: demoFiles[a.path], format: { eol: "lf", bom: false }, mtime: fileTimes[a.path] ?? now };
+    },
+    file_stat: (a) => (a.path in demoFiles ? (fileTimes[a.path] ?? now) : null),
+    file_write: (a) => {
+      demoFiles[a.path] = a.text;
+      fileTimes[a.path] = Date.now();
+      return fileTimes[a.path];
+    },
+    files_search: (a) => {
+      const q = a.query;
+      if (!q.text) return { files: [], total: 0, truncated: false, cancelled: false };
+      let src = q.regex ? q.text : q.text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      if (q.wholeWord) src = `\\b${src}\\b`;
+      const re = new RegExp(src, q.matchCase ? "g" : "gi");
+      const files = [];
+      let total = 0;
+      for (const [path, text] of Object.entries(demoFiles)) {
+        const matches = [];
+        text.split("\n").forEach((line, i) => {
+          const ranges = [...line.matchAll(re)].map((m) => [m.index, m.index + m[0].length]);
+          if (ranges.length) matches.push({ line: i + 1, text: line, offset: 0, ranges });
+        });
+        if (matches.length) files.push({ path, matches });
+        total += matches.length;
+      }
+      return { files, total, truncated: false, cancelled: false };
+    },
+    files_search_cancel: () => null,
+    files_set_unsaved: () => null,
     "plugin:app|version": () => "1.1.0",
     "plugin:app|name": () => "DevDock",
     "plugin:updater|check": () => null,
+  };
+
+  const demoDirs = ["node_modules", "public"];
+  const fileTimes = {};
+  const demoFiles = {
+    "package.json": `{\n  "name": "storefront",\n  "private": true,\n  "scripts": {\n    "dev": "next dev",\n    "build": "next build",\n    "test": "vitest"\n  },\n  "dependencies": {\n    "next": "15.2.0",\n    "react": "19.0.0"\n  }\n}\n`,
+    "README.md": `# storefront\n\nThe shop front end. Run \`pnpm dev\` and open http://storefront.localhost.\n\n## Checkout\n\nThe cart lives in \`src/lib/cart.ts\`.\n`,
+    ".env.local": `NEXT_PUBLIC_API_URL=http://billing-api.localhost\n`,
+    "src/app/page.tsx": `import { formatPrice } from "../lib/cart";\nimport { ProductCard } from "../components/ProductCard";\n\nexport default async function Home() {\n  const products = await fetch("/api/products").then((r) => r.json());\n  return (\n    <main className="grid">\n      {products.map((p) => (\n        <ProductCard key={p.id} product={p} price={formatPrice(p.cents)} />\n      ))}\n    </main>\n  );\n}\n`,
+    "src/lib/cart.ts": `export interface CartItem {\n  id: string;\n  quantity: number;\n  cents: number;\n}\n\n/** Total in cents, before tax. */\nexport function cartTotal(items: CartItem[]): number {\n  return items.reduce((sum, item) => sum + item.cents * item.quantity, 0);\n}\n\nexport function formatPrice(cents: number): string {\n  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(cents / 100);\n}\n`,
+    "src/components/ProductCard.tsx": `import { formatPrice } from "../lib/cart";\n\nexport function ProductCard({ product, price }) {\n  return (\n    <article className="card">\n      <h2>{product.name}</h2>\n      <p>{price ?? formatPrice(product.cents)}</p>\n    </article>\n  );\n}\n`,
   };
 
   const callbacks = new Map();
